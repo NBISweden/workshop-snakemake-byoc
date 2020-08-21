@@ -1,4 +1,4 @@
-title: "Snakemake bring-your-own-code (BYOC) workshop"
+title: "NBIS snakemake bring-your-own-code (BYOC) workshop"
 baseurl: /workshop-snakemake-byoc
 
 # where things are
@@ -16,7 +16,7 @@ defaults:
 
 menu:
   - title: Overview
-    url:
+    url: index
   - title: Schedule
     url: schedule
   - title: Pre-course information

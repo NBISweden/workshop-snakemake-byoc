@@ -3,7 +3,7 @@ layout: default
 title:  'NBIS Snakemake bring-your-own-code (BYOC) workshop'
 ---
 
-# Snakemake BYOC workshop
+# NBIS Snakemake bring-your-own-code (BYOC) workshop
 
 **Date and location**
 

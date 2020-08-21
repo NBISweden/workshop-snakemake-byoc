@@ -7,9 +7,9 @@ title:  'Snakemake bring-your-own-code (BYOC) workshop'
 
 **This website is currently under construction and subject to change.**
 
-Workshop open for PhD students (prioritized), postdocs, researchers and others who have previously participated in the NBIS Tools for reproducible research workshop (https://nbis-reproducible-research.readthedocs.io/en/latest/).
+Workshop open for PhD students (prioritized), postdocs, researchers and others who have previously participated in the [NBIS Tools for reproducible research workshop](https://nbis-reproducible-research.readthedocs.io/en/latest/).
 
-This workshop is organized by NBIS (https://nbis.se/).
+This workshop is organized by [NBIS](https://nbis.se/).
 
 Instructors:
 * Verena Kutschera

@@ -1,1 +1,1 @@
-# workshop-snakemake-byoc
+# NBIS Snakemake bring-your-own-code (BYOC) workshop

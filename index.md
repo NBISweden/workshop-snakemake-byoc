@@ -37,7 +37,7 @@ This snakemake BYOC (bring-your-own-code) workshop provides a follow up to that 
 
 - Previous participation in the [NBIS Tools for reproducible research workshop](https://nbis-reproducible-research.readthedocs.io/en/latest/)
 - Your own bioinformatics analysis scripts in any programming language that you would like to convert into snakemake OR your own snakemake workflow that you would like to improve
-- A computer with a webcam running Linux or Mac OS (if you run Windows and are interested in participating, please contact the course leaders by email, see above, before applying). You will be asked to install the video conferencing software [zoom](https://zoom.us/) to be able to participate in the workshop.
+- A computer with a webcam running Linux or Mac OS (if you run Windows and are interested in participating, please contact the course leaders by email, see above, before applying). You will be asked to install the video conferencing software [zoom](https://zoom.us/) to be able to participate in the workshop (see [Pre-course information](https://nbisweden.github.io/workshop-snakemake-byoc/precourse)).
  
 
 ## Where to apply

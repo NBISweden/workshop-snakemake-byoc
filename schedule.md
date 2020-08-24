@@ -13,7 +13,7 @@ Day 1                 |
 09.00 - 09.10         | Introduction
 09.10 - 09.50         | Lectures
 09.50 - 09.55         | *Short break*
-09.55 - 10.30         | Breakout rooms: ice breaker & feedback session
+09.55 - 10.30         | Breakout rooms: ice-breaker & feedback session
 ca. 10.30             | *Break*
 10.50 - 12.20         | Breakout rooms: feedback session
 12.20                 | Wrap-up day 1

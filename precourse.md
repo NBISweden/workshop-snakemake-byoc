@@ -18,7 +18,7 @@ the Snakemake tutorial (link to the [latest version](https://nbis-reproducible-r
 The participants are expected to work on computers with Linux or Mac installed
 (if you run Windows and are interested in participating, please inform the
 workshop organizers by email). If you haven't used Snakemake on this computer
-yet, please make sure you have installed [snakemake](https://snakemake.readthedocs.io/en/stable/getting_started/installation.html)
+yet, please make sure you have installed [Snakemake](https://snakemake.readthedocs.io/en/stable/getting_started/installation.html)
 before the workshop.
 
 The workshop is held entirely online and we will work with the following tools:

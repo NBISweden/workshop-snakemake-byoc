@@ -12,7 +12,7 @@ who have previously participated in the [NBIS Tools for reproducible research wo
 
 This workshop is organized by [NBIS](https://nbis.se/).
 
-Instructors:
+Teachers:
 * Verena Kutschera
 * Erik Fasterius
 * John Sundh
@@ -51,7 +51,7 @@ techniques to their existing Snakemake workflows.
   would like to convert into Snakemake *OR* your own Snakemake workflow that you
   would like to improve
 - A computer with a webcam running Linux or Mac OS (if you run Windows and are
-  interested in participating please contact the course leaders by email, see
+  interested in participating please contact the workshop organizers by email, see
   above, before applying). You will be asked to install the video conferencing
   software [Zoom](https://zoom.us/) to be able to participate in the workshop
   (see the [pre-course information](https://nbisweden.github.io/workshop-snakemake-byoc/precourse)).

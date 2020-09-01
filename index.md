@@ -22,7 +22,7 @@ Contact information: edu.byoc-snakemake@nbis.se
 
 The workshop is held online on 5-7 October 2020.
 
-## Course description
+## Workshop description
 
 As data analysis projects grow and change over time it gets increasingly
 difficult to keep track of how the different parts of the data analysis fit
@@ -52,7 +52,7 @@ techniques to their existing Snakemake workflows.
   interested in participating please contact the workshop organizers by email, see
   above, before applying). You will be asked to install the video conferencing
   software [Zoom](https://zoom.us/) to be able to participate in the workshop
-  (see the [pre-course information](https://nbisweden.github.io/workshop-snakemake-byoc/precourse)).
+  (see the [pre-workshop information](https://nbisweden.github.io/workshop-snakemake-byoc/precourse)).
 
 ## Where to apply
 

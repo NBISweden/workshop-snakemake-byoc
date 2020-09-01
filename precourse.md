@@ -1,9 +1,9 @@
 ---
 layout: default
-title:  'Pre-course information'
+title:  'Pre-workshop information'
 ---
 
-# Pre-course information
+# Pre-workshop information
 
 The Snakemake BYOC (bring-your-own-code) workshop is a follow-up on the [NBIS
 Tools for reproducible research workshop](https://nbis-reproducible-research.readthedocs.io/en/latest/)

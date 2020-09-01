@@ -5,7 +5,7 @@ title:  'Pre-course information'
 
 # Pre-course information
 
-The Snakemake BYOC (bring-your-own-code) workshop is a follow up on the [NBIS
+The Snakemake BYOC (bring-your-own-code) workshop is a follow-up on the [NBIS
 Tools for reproducible research workshop](https://nbis-reproducible-research.readthedocs.io/en/latest/)
 and we therefore expect the participants to be familiar with the material from
 the Snakemake tutorial (link to the [latest version](https://nbis-reproducible-research.readthedocs.io/en/latest/snakemake/)).
@@ -30,15 +30,19 @@ The workshop is held entirely online and we will work with the following tools:
   a [Slack](https://slack.com/) workspace for the workshop. You can choose to
   download and install the app or to run it in your browser.
 
-## Feedback sessions
+## Workshop structure
 
 We will work in small groups during the workshop that will each have their own
-teacher. During the first feedback session, you will receive feedback from your
-group to make sure you have a good starting point to work on your project during
-the workshop.
+teacher. The workshop is split into short lectures, feedback sessions and coding
+sessions. During the coding sessions, you will have time to work on your workflow.
+A teacher and maximum three other participants will be online with you for questions 
+during these coding sessions.
 
--  Please prepare a brief presentation of your "bring-your-own-code" project so
-   that you can present the project to your group for the feedback session. Each
+During the feedback session on the first day, you will be asked to present your 
+project so that you can receive feedback from your group to make sure you have 
+a good starting point to work on your project during the workshop.
+
+-  Please prepare a brief presentation of your "bring-your-own-code" project. Each
    participant will get in total 30 minutes for the presentation and for
    questions and feedback.
 

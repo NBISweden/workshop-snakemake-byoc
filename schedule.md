@@ -18,6 +18,7 @@ ca. 10.30             | *Break* |
 10.50 - 12.20         | Breakout rooms: feedback session |
 12.20                 | Wrap-up day 1 |
 ca. 12.45             | End of day 1 |
+| ------------------- | ---------------------------------------------- |
 Day 2                 | |
 09.00 - 09.20         | Lecture |
 09.20 - 09.25         | *Short break* |
@@ -27,6 +28,7 @@ ca. 10.30             | *Break* |
 10.50 - 12.00         | Breakout rooms: coding session |
 12.00                 | Feedback session for open questions & wrap-up day 2 |
 ca. 12.30             | End of day 2 |
+| ------------------- | ---------------------------------------------- |
 Day 3 | |
 09.00 - 09.20         | Lecture |
 09.20 - 09.25         | *Short break* |

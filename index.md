@@ -57,3 +57,6 @@ techniques to their existing Snakemake workflows.
 ## Where to apply
 
 [Apply here](https://forms.gle/cCr88xus9fLwYRnSA)
+
+- Application deadline: 18 September 2020
+- Confirmation to accepted participants: 25 September 2020

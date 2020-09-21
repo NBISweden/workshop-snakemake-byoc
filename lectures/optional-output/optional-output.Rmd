@@ -144,7 +144,7 @@ taxonomy:
 
 # How to choose output
 
-**Step 2**: Use [functions](https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#functions-as-input-files) to figure set rule input/output
+**Step 2**: Use [functions](https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#functions-as-input-files) to set rule input/output
 
 ```python
 rule annotate:
@@ -232,3 +232,8 @@ Job counts:
         4       write_featurefile
         141
 ```
+
+---
+
+class: center, middle
+# Questions?

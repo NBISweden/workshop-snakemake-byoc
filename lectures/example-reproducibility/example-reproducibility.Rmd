@@ -1,5 +1,5 @@
 ---
-title: "Inspiration from existing Snakemake workflows"
+title: "An Example Snakemake Workflow & Applying Tools for Reproducible Research in Snakemake"
 subtitle: "Snakemake BYOC NBIS course"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
@@ -19,7 +19,7 @@ layout: true
 
 class: center, middle
 
-.HUGE[Inspiration from existing Snakemake workflows]
+.HUGE[An Example Snakemake Workflow & Applying Tools for Reproducible Research in Snakemake]
 
 ```{r Setup, echo = FALSE, message = FALSE}
 # Knitr setup
@@ -30,6 +30,19 @@ knitr::opts_chunk$set(message = FALSE,
 library("dplyr")
 library("kableExtra")
 ```
+
+---
+
+# Lecture topics
+
+* Overview of a Snakemake workflow
+    * Without too much detail --> most topics will be covered more in detail in other lectures
+
+--
+
+* Examples how tools for reproducible research can be used in Snakemake
+    * Conda
+    * Singularity & Docker containers
 
 ---
 
@@ -69,7 +82,7 @@ library("kableExtra")
 
 ---
 
-# Analysis tracks of the workflow
+# Analysis Tracks of the Workflow
 
 * .green[Data processing track]
     * Repeat element identification
@@ -87,7 +100,7 @@ library("kableExtra")
 
 ---
 
-# Analysis tracks of the workflow
+# Analysis Tracks of the Workflow
 
 * .green[BAM file track]
     * mlRho
@@ -108,17 +121,16 @@ library("kableExtra")
 
 ---
 
-# The workflow structure
+# The Workflow Structure
 
-* Snakefile
-    * Python code
-        * Sample lists and readgroup IDs (from metadata tables and config file)
-        * ”include” of rule files
-        * ”all” rule
+* Rules with the actual analyses in separate snakefiles
 
 --
 
-* Rules in separate Snakefiles
+* Snakefile
+    * Python code to create sample and readgroup ID lists & dictionaries (from metadata tables and config file)
+    * ”include” of rule snakefiles
+    * ”all” rule collecting output files produced by the different snakefiles
 
 --
 
@@ -136,6 +148,8 @@ _More about these topics later in the workshop_
 * Metadata files (to be created by users)
     * Sample Ids, readgroup IDs, sequencing technology, paths to fastq files
     * Separate files for modern and historical samples
+
+--
 
 * Example `historical_samples.txt` file:
 
@@ -160,62 +174,23 @@ metadata <- data.frame(samplename_index_lane    = c("VK01_01_L2","VK01_02_L2"),
 create_table(metadata)
 ```
 
----
+* The metadata tables are parsed with Python code (in the main Snakefile) to generate sample lists for the workflow
 
+--
 
-# The workflow structure
-
-* Metadata files (to be created by users)
-    * Sample Ids, readgroup IDs, sequencing technology, paths to fastq files
-    * Separate files for modern and historical samples
-
-* Python code from the Snakefile to generate a sample list from the metadata table
-
-```{python code sample list, eval = FALSE}
-# Convert the table into a list of lines
-def line_list_func(lines):
-  line_list=[] 
-  for line in lines:
-    if not line.strip():
-      continue
-    else:
-      line_list.append([x for x in line.split()])
-  return line_list
-
-# Create sample list
-# Sample list for each fastq-file ("samplename_index_lane")
-def samplename_index_lane_list_func(line_list):
-  samplename_index_lane=[x[0] for x in line_list] # create a list from the first column
-  sm_idx_ln=list(sorted(set(samplename_index_lane))) # keep only unique entries and sort the lists
-  return sm_idx_ln
-
-# sample list ("samplename")
-def samplename_list_func(sm_idx_ln):
-  char="_"
-  samplename=[]
-  for i in sm_idx_ln:
-    sm=i.split(char)[0] # split the string by "_" and take the first element to get the sample name
-    samplename.append(sm) # add the sample name to the list of sample names
-  sm=list(sorted(set(samplename))) # keep only unique entries and sort the lists
-  return sm
-
-# Apply the functions to the metadata table
-if os.path.exists(config["historical_samples"]):
-  with open(config["historical_samples"], "r") as file:
-    hist_readlines=file.readlines()[1:]
-    hist_line_list=line_list_func(hist_readlines)
-    hist_sm_idx_ln=samplename_index_lane_list_func(hist_line_list)
-    hist_sm=samplename_list_func(hist_sm_idx_ln)
-```
+_Other examples for metadata tables, including the corresponding Python code, will be shown later in the workshop_
 
 ---
 
 # The workflow structure
 
 * Config file (to be edited by users)
-    * Set different steps (rule files) to True or False (”include” in Snakefile)
+    * Set different workflow steps to True or False 
+        * The corresponding rules snakefiles are attached to the workflow using ”include” in the main Snakefile
     * Lists with samples for optional analyses
     * Parameters for different rules
+
+--
 
 ```{python config file one, eval = FALSE}
 #################################################################
@@ -241,9 +216,6 @@ modern_samples: "" # leave empty ("") if not run for modern samples.
 # The workflow structure
 
 * Config file (to be edited by users)
-    * Set different steps (rule files) to True or False (”include” in Snakefile)
-    * Lists with samples for optional analyses
-    * Parameters for different rules
 
 ```{python config file two, eval = FALSE}
 #################################################################
@@ -283,125 +255,169 @@ mod_readlength: "30"
 #####
 ```
 
----
-
-# Example for an optional step
-
-## Base quality rescaling for historical or ancient samples
-
-* Done by running mapDamage2 on BAM files
-* Rescales base quality scores for DNA bases that are damaged due to the age of the sample
+_More examples will be shown later in the workshop_
 
 ---
 
-# Example for an optional step
+# Tools for Reproducible Research Available in Snakemake
 
-## Base quality rescaling for historical or ancient samples
+## Reproducibility is rarer than you think
 
-* Code extract from the snakefile "3.2_historical_bam_mapDamage.smk":
+The results of only 26% out of 204 randomly selected papers in the journal
+*Science* could be reproduced.<sup>1</sup>
 
-```{python snakefile bam mapDamage, eval = FALSE}
-# Code collecting output files from this part of the workflow
-import os
-if os.path.exists(config["historical_samples"]):
-    if len(HIST_RESCALED_SAMPLES) > 0:
-        historical_bams_mapDamage="results/historical/mapping/stats/bams_rescaled/multiqc/multiqc_report.html"
-        all_outputs.append(historical_bams_mapDamage)
+.tiny[<sup>1</sup> Stodden et. al (2018). "An empirical analysis of journal policy effectiveness for computational reproducibility". PNAS. 115 (11): 2584-2589]
+
+--
+
+> Many journals are revising author guidelines to include data and code
+> availability.
+
+--
+
+> (...) an improvement over no policy, but currently insufficient for
+> reproducibility.
 
 
-# snakemake rules
-rule rescale_historical:
-    """Rescale base quality scores of likely damaged positions"""
+---
+
+# Implementing Tools for Reproducible Research in Snakemake
+
+.center[<img src="../common-figures/reproducibility-overview.png" width=60%/>]
+
+--
+
+* One aspect of reproducibility is to make sure all code is available that was used in a data analysis
+
+--
+
+* Track your Snakemake code with Git and make it publicly available on a GitHub or BitBucket repository to ensure that your analysis is reproducible
+
+--
+
+* Combining Snakemake with Conda and/or containers (such as Docker & Singularity) can make every aspect of the analysis reproducible
+
+---
+
+# Conda
+
+* Is a a package, dependency, and environment manager
+    - .green[packages]: any type of program (*e.g.* bowtie2, snakemake etc.)
+    - .green[dependency]: other software required by a package
+    - .green[environment]: a distinct collection of packages
+
+* Keeps track of the dependencies between packages in each environment
+
+---
+
+# Conda
+
+## Running a Snakemake rule with a conda environment
+
+* Find your conda package on anaconda.org
+
+* Create a conda environment file ("tePSI.yaml)
+
+```{python conda env one, eval = FALSE}
+name: tePSI
+channels:
+  - nanjiang
+  - bioconda
+dependencies:
+  - transposonpsi=1.0.0
+```
+
+--
+
+* Add the path to the conda environment file to your rule with the "conda:" directive
+    * A good location can be a directory for environments within your main Snakemake directory
+
+```{python conda rule, eval = FALSE}
+rule transposonPSI:
+    """Identify transposons in the UniProt/Swissprot protein dataset"""
     input:
-        bam = "results/historical/mapping/{sample}.merged.rmdup.merged.realn.bam",
-        ref = config["ref_path"]
+        chunk = PROT_DIR + "split_result/" + PROT_NAME + "_chunk{nr}.fa"
     output:
-        outdir = directory("results/historical/mapping/stats/bams_rescaled/{sample}.merged.rmdup.merged.realn.bam.mapDamage/"),
-        tmp = temp("results/historical/mapping/stats/bams_rescaled/{sample}.merged.rmdup.merged.realn.bam.mapDamage/{sample}.merged.rmdup.merged.realn.rescaled.bam"),
-        rescaled = "results/historical/mapping/{sample}.merged.rmdup.merged.realn.rescaled.bam"
-    threads: 4
-    singularity: "docker://biocontainers/mapdamage:v2.0.9dfsg-1-deb_cv1"
+        allHits = temp(PROT_DIR + "split_result/" + PROT_NAME + "_chunk{nr}.fa.TPSI.allHits"),
+        topHits = temp(PROT_DIR + "split_result/" + PROT_NAME + "_chunk{nr}.fa.TPSI.topHits")
     params:
-        dir = "results/historical/mapping/stats/bams_rescaled/{sample}.merged.rmdup.merged.realn.bam.mapDamage/"
+        dir = PROT_DIR + "split_result/"
+    conda: "envs/tePSI.yaml"
     shell:
         """
-        mapDamage -i {input.bam} -r {input.ref} -d {params.dir} --merge-reference-sequences --rescale &&
-        cp {output.tmp} {output.rescaled}
+        cd {params.dir}
+        transposonPSI.pl {input.chunk} prot
         """
 ```
 
+* This doesn't work if you use the `run` directive instead of the `shell` (or other) directives
+
+--
+
+* Run your workflow from the command line with the parameter `--use-conda`
+
 ---
 
-Add slides on connecting the sample list to the snakefile
-* Code for QualiMap & MultiQC
-* Code from Snakefile to append the step
+# Conda
 
----
+## Using a conda environment for the entire workflow
 
-# Example for an optional step
+* Write a conda environment file that includes all tools used by the workflow (e.g. `gew.yaml`)
+    * For example, if you use the `run` directive and want to specify tools & versions used by these rules
 
-## Base quality rescaling for historical or ancient samples
-
-* Snakefile
-
-```{python Snakefile one, eval = FALSE}
-# List of samples for base quality rescaling
-HIST_RESCALED_SAMPLES=list(set(hist_sm) & set(config["historical_rescaled_samplenames"]))
+```{python conda env big, eval=FALSE}
+name: gew
+channels:
+  - bioconda
+  - conda-forge
+dependencies:
+  - python=3.7.6
+  - snakemake=5.22.1
+  - biopython=1.76
+  - matplotlib=3.2.1
+  - pandas=1.0.3
+  - numpy=1.18.4
 ```
 
----
+--
 
-# Example for an optional step
+* Create the environment & activate it
 
-## Base quality rescaling for historical or ancient samples
-
-* Config file
-
-```{python config file three, eval = FALSE}
-#####
-# OPTIONAL: 
-# Run mapDamage2 on historical samples specified in the list "historical_rescaled_samplenames" below.
-# Will rescale base qualities at potentially damaged sites and calculate statistics on ancient DNA damage patterns in realigned bam files.
-historical_bam_mapDamage: False
-
-# List of historical samples on which mapDamage2 should be run. 
-# Sample names without lane or index number in quotation marks, separated by commas (e.g. ["VK01", "VK02", "VK03"]).
-# List has to be left empty ([]) if mapDamage2 is not run.
-# Keep the list of sample names for the entire workflow run if rescaled BAM files should be used in downstream analyses.
-historical_rescaled_samplenames: []
-#####
+```{bash conda create, eval=FALSE}
+conda env create -f gew.yml
 ```
 
----
-
-# Example for an optional step
-
-## Base quality rescaling for historical or ancient samples
-
-* Config file
-
-```{python config file four, eval = FALSE}
-#####
-# OPTIONAL: 
-# Run mapDamage2 on historical samples specified in the list "historical_rescaled_samplenames" below.
-# Will rescale base qualities at potentially damaged sites and calculate statistics on ancient DNA damage patterns in realigned bam files.
-historical_bam_mapDamage: True
-
-# List of historical samples on which mapDamage2 should be run. 
-# Sample names without lane or index number in quotation marks, separated by commas (e.g. ["VK01", "VK02", "VK03"]).
-# List has to be left empty ([]) if mapDamage2 is not run.
-# Keep the list of sample names for the entire workflow run if rescaled BAM files should be used in downstream analyses.
-historical_rescaled_samplenames: ["VK01", "VK02"]
-#####
+```{bash conda activate, eval=FALSE}
+conda activate gew
 ```
 
+--
+
+* Start your Snakemake workflow from the command line with the activated environment
+    * It is recommended to activate the environment and run the workflow in the background, using tmux or screen
+
 ---
 
-# Running rules with conda
+# Docker & Singularity
 
+* Let you run applications securely isolated in a container, packaged with all dependencies and libraries
+
+* Can be used
+    - As advanced environment managers
+    - To package your code with the environment it needs
+    - To package a whole workflow (*e.g.* to accompany a manuscript)
+    - And much more
 
 ---
 
-# Running rules with singularity
+# Docker & Singularity
+
+* Running rules with singularity containers
+
+---
+
+# Docker & Singularity
+
+* Packaging your workflow in a Docker container
 
 ---

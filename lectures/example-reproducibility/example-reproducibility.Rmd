@@ -19,7 +19,9 @@ layout: true
 
 class: center, middle
 
-.HUGE[An Example Snakemake Workflow & Applying Tools for Reproducible Research in Snakemake]
+.HUGE[An Example Snakemake Workflow &]
+<br>
+.HUGE[Applying Tools for Reproducible Research in Snakemake]
 
 ```{r Setup, echo = FALSE, message = FALSE}
 # Knitr setup
@@ -35,8 +37,8 @@ library("kableExtra")
 
 # Lecture topics
 
-* Overview of a Snakemake workflow
-    * Without too much detail --> most topics will be covered more in detail in other lectures
+* Overview & structure of a more complex example of a Snakemake workflow
+    * Most topics I'll touch upon will be covered more in detail in other lectures and/or during the group sessions
 
 --
 
@@ -46,39 +48,39 @@ library("kableExtra")
 
 ---
 
-# The Genome Erosion Workflow
+class: center, middle
 
-* Compares population genomics statistics from historical and modern samples of endangered populations
+.HUGE[The Genome Erosion Workflow]
 
 ---
 
 # The Genome Erosion Workflow
 
+* Developed in a LTS project with Love Dalén's lab (Centre for Palaeogenetics, SU & NRM)
+
+--
+
 * Compares population genomics statistics from historical and modern samples of endangered populations
+
+.center[<img src="sumatran_rhino_3_2016-07-13.jpg" width=40%/>]
+.center[.tiny[Sumatran rhinoceros (_Dicerorhinus sumatrensis_), critically endangered]]
+--
 
 * Data processing from fastq files to BAM & VCF files plus downstream population genomics analyses
 
 ---
 
 # The Genome Erosion Workflow
-
-* Compares population genomics statistics from historical and modern samples of endangered populations
-
-* Data processing from fastq files to BAM & VCF files plus downstream population genomics analyses
 
 * Historical and modern samples are processed in parallel
 
----
+--
 
-# The Genome Erosion Workflow
+* Whole-genome resequencing data from historical/ancient samples needs special processing as DNA degrades over time
 
-* Compares population genomics statistics from historical and modern samples of endangered populations
+--
 
-* Data processing from fastq files to BAM & VCF files plus downstream population genomics analyses
-
-* Historical and modern samples are processed in parallel
-
-* Whole-genome resequencing data from historical/ancient samples needs special processing, so some analyses or filtering steps are done separately for modern and historical samples
+* Some analyses or filtering steps are run separately for modern and historical samples, or only for historical samples
 
 ---
 
@@ -86,14 +88,14 @@ library("kableExtra")
 
 * .green[Data processing track]
     * Repeat element identification
-    * Fastq file processing\*
-    * Optional: mapping to mitochondrial genomes\*
-    * Mapping to reference genome\*
-    * BAM file processing\*
-    * Optional: base quality rescaling for historical samples\*
-    * Optional: subsampling to target depth\*
+    * Fastq file processing \*
+    * _Optional:_ mapping to mitochondrial genomes \*
+    * Mapping to reference genome \*
+    * BAM file processing \*
+    * _Optional:_ base quality rescaling for historical samples \*
+    * _Optional:_ subsampling to target depth \*
     * Genotyping
-    * Optional: CpG site identification
+    * _Optional:_ CpG site identification
 
 
 \*_Steps of the workflow with different treatment of modern and historical samples_
@@ -104,19 +106,17 @@ library("kableExtra")
 
 * .green[BAM file track]
     * mlRho
-        * Optional: analyze sex chromosomes separately
-        * Optional: remove CpG sites
+        * _Optional:_ analyze sex chromosomes separately
+        * _Optional:_ remove CpG sites
 
---
 
 * .green[VCF file track]
-    * Optional: CpG filtering
+    * _Optional:_ CpG filtering
     * VCF file processing & merging per dataset
-    * Optional: PCA, Runs of homozygosity (ROH), snpEff
+    * _Optional:_ PCA, Runs of homozygosity (ROH), snpEff
 
---
 
-* .green[GERP++ score track (optional)]
+* .green[GERP++ score track]
     * GERP++ score calculation from reference genome and genomes of outgroup species
 
 ---
@@ -128,25 +128,21 @@ library("kableExtra")
 --
 
 * Snakefile
-    * Python code to create sample and readgroup ID lists & dictionaries (from metadata tables and config file)
+    * Python code to create sample and readgroup ID dictionaries & lists 
+        * From metadata tables and a config file
     * ”include” of rule snakefiles
     * ”all” rule collecting output files produced by the different snakefiles
 
 --
 
-* UPPMAX / slurm system: cluster.yaml file (! deprecated !)
-
---
-
-
-_More about these topics later in the workshop_
+* UPPMAX / slurm system: cluster.yaml file (_! deprecated !_)
 
 ---
 
-# The workflow structure
+# The Workflow Structure
 
 * Metadata files (to be created by users)
-    * Sample Ids, readgroup IDs, sequencing technology, paths to fastq files
+    * Sample IDs, readgroup IDs, sequencing technology, paths to fastq files
     * Separate files for modern and historical samples
 
 --
@@ -174,15 +170,13 @@ metadata <- data.frame(samplename_index_lane    = c("VK01_01_L2","VK01_02_L2"),
 create_table(metadata)
 ```
 
-* The metadata tables are parsed with Python code (in the main Snakefile) to generate sample lists for the workflow
-
 --
 
-_Other examples for metadata tables, including the corresponding Python code, will be shown later in the workshop_
+* The metadata tables are parsed with Python code (in the main Snakefile) to generate sample lists for the workflow
 
 ---
 
-# The workflow structure
+# The Workflow Structure
 
 * Config file (to be edited by users)
     * Set different workflow steps to True or False 
@@ -192,14 +186,18 @@ _Other examples for metadata tables, including the corresponding Python code, wi
 
 --
 
-```{python config file one, eval = FALSE}
+```{python config file data, eval = FALSE}
 #################################################################
-# Configuration settings for the genome erosion workflow v2.3   #
+# Configuration settings for the genome erosion workflow v3.0   #
 # for ancient or historical samples, and modern samples         #
+#################################################################
 
 #################################################################
-# 1) Full path to reference genome assembly:
-ref_path: "" # reference genome has to be checked for short and concise fasta headers without special characters. File name extension can be ".fasta" or ".fa".
+# 1) Full path to reference genome assembly.
+# Reference genome has to be checked for short and concise fasta 
+# headers without special characters. 
+# File name extension can be ".fasta" or ".fa".
+ref_path: ""
 #################################################################
 
 
@@ -213,49 +211,33 @@ modern_samples: "" # leave empty ("") if not run for modern samples.
 
 ---
 
-# The workflow structure
+# The Workflow Structure
 
 * Config file (to be edited by users)
 
-```{python config file two, eval = FALSE}
-#################################################################
-# 3) Workflow steps to be run and related parameters. 
-# If a step is set to True, all previous steps it depends on will be loaded automatically.
-# Only one step should be set to True at a time, results and reports should be double checked before continuing.
-
-#################################################################
-# Rules for data processing (required for downstream analyses)  #
-#################################################################
-
+```{python config file mapDamage, eval = FALSE}
 #####
-# Repeat element de novo prediction and repeat masking of the reference genome.
-# Generates BED files of repeats and repeat-masked regions for the reference genome.
-# Output files will be placed into the same directory as the reference genome fasta file (as specified above).
-# That way, this step is run only once for a given reference genome.
-reference_repeat_identification: False
-#####
+# OPTIONAL: 
+# Run mapDamage2 on historical samples specified in the list "historical_rescaled_samplenames" below.
+# Will rescale base qualities at potentially damaged sites and 
+# calculate statistics on ancient DNA damage patterns in realigned bam files.
+historical_bam_mapDamage: False
 
-
-#####
-# FastQC on raw reads, adapter trimming, read merging (historical samples), FastQC on trimmed reads.
-fastq_processing: False
-
-# Adapter sequences for trimming of historical samples using SeqPrep v1.1 (modified source code) (currently inserted adapter sequences from Meyer & Kircher 2010).
-hist_F_adapter: "AGATCGGAAGAGCACACGTCTGAACTCCAGTCACNNNNNNNATCTCGTATGCCGTCTTCTGCTTG" # Forward read primer/adapter sequence to trim historical samples in SeqPrep v1.1 (parameter "-A")
-hist_R_adapter: "AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGTAGATCTCGGTGGTCGCCGTATCATTT" # Reverse read primer/adapter sequence to trim historical samples in SeqPrep v1.1 (parameter "-B"). With double indices, include full adapter length (replacing the index by "N").
-hist_F_adapter_fragment: "AGATCGGAAGAGCACACGTC" # Fragment of forward adapter sequence used to count occurrence in the first 1 million reads of fastq-files of historical samples
-hist_R_adapter_fragment: "AGATCGGAAGAGCGTCGTGT" # Fragment of reverse adapter sequence used to count occurrence in the first 1 million reads of fastq-files of historical samples
-
-# Minimum read length allowed after trimming.
-# historical samples (SeqPrep v1.1 with modified source code)
-hist_readlength: "30" # default setting: 30 bp
-
-# modern samples (trim-galore)
-mod_readlength: "30"
+# List of historical samples on which mapDamage2 should be run. 
+# Sample names without lane or index number in quotation marks, 
+# separated by commas (e.g. ["VK01", "VK02", "VK03"]).
+# List has to be left empty ([]) if mapDamage2 is not run.
+# Keep the list of sample names for the entire workflow run 
+# if rescaled BAM files should be used in downstream analyses.
+historical_rescaled_samplenames: []
 #####
 ```
 
-_More examples will be shown later in the workshop_
+---
+
+class: center, middle
+
+.HUGE[Tools for Reproducible Research Available in Snakemake]
 
 ---
 
@@ -283,28 +265,28 @@ The results of only 26% out of 204 randomly selected papers in the journal
 
 # Implementing Tools for Reproducible Research in Snakemake
 
-.center[<img src="../common-figures/reproducibility-overview.png" width=60%/>]
+.center[<img src="../common-figures/reproducibility-overview.png" width=40%/>]
 
 --
 
-* One aspect of reproducibility is to make sure all code is available that was used in a data analysis
+* Track your Snakemake code with Git and push it to a GitHub or BitBucket repository to ensure that your code is available
 
 --
 
-* Track your Snakemake code with Git and make it publicly available on a GitHub or BitBucket repository to ensure that your analysis is reproducible
-
---
-
-* Combining Snakemake with Conda and/or containers (such as Docker & Singularity) can make every aspect of the analysis reproducible
+* Combining Snakemake with Conda and/or containers can make the compute environment and the code reproducible
 
 ---
 
 # Conda
 
-* Is a a package, dependency, and environment manager
-    - .green[packages]: any type of program (*e.g.* bowtie2, snakemake etc.)
-    - .green[dependency]: other software required by a package
-    - .green[environment]: a distinct collection of packages
+--
+
+* Is a package, dependency, and environment manager
+    > packages: any type of program (_e.g._ bowtie2, snakemake etc.)
+
+    > dependency: other software required by a package
+
+    > environment: a distinct collection of packages
 
 * Keeps track of the dependencies between packages in each environment
 
@@ -314,9 +296,17 @@ The results of only 26% out of 204 randomly selected papers in the journal
 
 ## Running a Snakemake rule with a conda environment
 
-* Find your conda package on anaconda.org
+--
 
-* Create a conda environment file ("tePSI.yaml)
+* Make sure you have Conda installed (Miniconda or Anaconda)
+
+--
+
+* Find your conda package on http://anaconda.org
+
+--
+
+* Create a conda environment file (`tePSI.yaml`)
 
 ```{python conda env one, eval = FALSE}
 name: tePSI
@@ -329,8 +319,20 @@ dependencies:
 
 --
 
-* Add the path to the conda environment file to your rule with the "conda:" directive
-    * A good location can be a directory for environments within your main Snakemake directory
+* A good location for the `yaml` file can be a directory for environments within your main Snakemake directory
+
+--
+
+* For reproducibility, it is important to keep track of software versions --> include package versions in your environment file
+
+
+---
+
+# Conda
+
+## Running a Snakemake rule with a conda environment
+
+* Add the path to the conda environment `yaml` file to your rule with the `conda` directive
 
 ```{python conda rule, eval = FALSE}
 rule transposonPSI:
@@ -350,11 +352,17 @@ rule transposonPSI:
         """
 ```
 
-* This doesn't work if you use the `run` directive instead of the `shell` (or other) directives
+--
+
+* Start your workflow on the command line with `--use-conda`
+
+```{bash snakemake use conda, eval=FALSE}
+$ snakemake --use-conda
+```
 
 --
 
-* Run your workflow from the command line with the parameter `--use-conda`
+* This doesn't work if you use `run` instead of `shell` (or other directives)
 
 ---
 
@@ -362,8 +370,9 @@ rule transposonPSI:
 
 ## Using a conda environment for the entire workflow
 
-* Write a conda environment file that includes all tools used by the workflow (e.g. `gew.yaml`)
-    * For example, if you use the `run` directive and want to specify tools & versions used by these rules
+--
+
+* Write a conda environment file that includes all tools used by the workflow, or those used by rules with `run` directives (e.g. `gew.yaml`)
 
 ```{python conda env big, eval=FALSE}
 name: gew
@@ -379,45 +388,186 @@ dependencies:
   - numpy=1.18.4
 ```
 
---
+---
+
+# Conda
+
+## Using a conda environment for the entire workflow
 
 * Create the environment & activate it
 
+--
+
 ```{bash conda create, eval=FALSE}
-conda env create -f gew.yml
+$ conda env create -f gew.yml
 ```
 
 ```{bash conda activate, eval=FALSE}
-conda activate gew
+$ conda activate gew
 ```
 
 --
 
-* Start your Snakemake workflow from the command line with the activated environment
-    * It is recommended to activate the environment and run the workflow in the background, using tmux or screen
+* Start your Snakemake workflow on the command line with the activated environment
+    * Use a terminal multiplexer to run the workflow in a shell instance in the background, _e.g._ tmux or screen
+
+```{bash snakemake conda env, eval=FALSE}
+(gew) [...] $ snakemake
+```
 
 ---
 
 # Docker & Singularity
 
-* Let you run applications securely isolated in a container, packaged with all dependencies and libraries
+--
 
-* Can be used
-    - As advanced environment managers
-    - To package your code with the environment it needs
-    - To package a whole workflow (*e.g.* to accompany a manuscript)
-    - And much more
+## What can I use Docker for?
+
+* Run applications securely isolated in a container, packaged with all dependencies and libraries
+
+--
+
+* As advanced environment manager
+
+--
+
+* To package your code with the environment it needs
+
+--
+
+* To package a whole workflow (*e.g.* to accompany a manuscript)
+
+--
+
+* And much more
+
+--
+
+## Singularity 
+
+* Is an open source container platform suitable for HPC clusters
 
 ---
 
 # Docker & Singularity
 
-* Running rules with singularity containers
+## Docker nomenclature
+
+--
+
+* A Docker .green[file] is a recipe used to build a Docker .green[image]
+
+--
+
+* A Docker .green[image] is a standalone executable package of software
+
+--
+
+* A Docker .green[container] is a standard unit of software run on the Docker Engine
+
+--
+
+* .green[DockerHub] is an online service for sharing docker images
 
 ---
 
 # Docker & Singularity
 
-* Packaging your workflow in a Docker container
+## Running Snakemake rules with Singularity
+
+--
+
+* Snakemake can run a rule isolated in a container, using Singularity
+
+--
+
+* Singularity can also run Docker images
+
+--
+
+* Each conda package is also available as Docker and Singularity image (_e.g._ check http://biocontainers.pro for conda packages from the bioconda channel)
+
+--
+
+* Many other Docker images are also available on DockerHub (https://hub.docker.com/)
+    * But be aware that Docker images in free accounts are automatically deleted after a certain time of inactivity
+
+---
+
+# Docker & Singularity
+
+## Running Snakemake rules with Singularity
+
+--
+
+* Make sure your system has Singularity installed
+
+--
+
+* Find your Docker or Singularity image, _e.g._ on http://biocontainers.pro
+
+--
+
+* Add the link to the container image to your rule with the `singularity` directive
+
+```{python singularity rule, eval = FALSE}
+rule transposonPSI:
+    """Identify transposons in the UniProt/Swissprot protein dataset"""
+    input:
+        chunk = PROT_DIR + "split_result/" + PROT_NAME + "_chunk{nr}.fa"
+    output:
+        allHits = temp(PROT_DIR + "split_result/" + PROT_NAME + "_chunk{nr}.fa.TPSI.allHits"),
+        topHits = temp(PROT_DIR + "split_result/" + PROT_NAME + "_chunk{nr}.fa.TPSI.topHits")
+    params:
+        dir = PROT_DIR + "split_result/"
+    singularity: "docker://quay.io/biocontainers/transposonpsi:1.0.0--pl526_0"
+    shell:
+        """
+        cd {params.dir}
+        transposonPSI.pl {input.chunk} prot
+        """
+```
+
+--
+
+* Start your workflow on the command line with `--use-singularity`
+
+```{bash snakemake use singularity, eval=FALSE}
+$ snakemake --use-singularity
+```
+
+---
+
+# Docker & Singularity
+
+## Packaging your Snakemake workflow in a Docker container
+
+--
+
+* Write a Docker file, _e.g._
+
+    * Start with the official Miniconda `base` image
+    * Install the core packages of the workflow (_e.g._ Snakemake and dependencies such as pandas)
+    * Include all rule-specific environments as separate conda files (running your rules with conda)
+
+--
+
+* Create a Docker image from your Docker file (_e.g._ called `my_workflow`)
+
+```{bash docker image, eval=FALSE}
+$ docker build -t my_workflow .
+```
+
+--
+
+* Run your container
+
+```{bash docker run, eval=FALSE}
+$ docker run --name my_first_workflow_instance -i -t my_workflow
+```
+
+--
+
+* Share your container on GitHub or BitBucket
 
 ---

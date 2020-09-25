@@ -544,13 +544,33 @@ $ snakemake --use-singularity
 
 --
 
-* Write a Docker file, _e.g._
+* Write a Docker file (`my_workflow`), _e.g._
 
     * Start with the official Miniconda `base` image
+
+--
+
     * Install the core packages of the workflow (_e.g._ Snakemake and dependencies such as pandas)
+
+--
+
     * Include all rule-specific environments as separate conda files (running your rules with conda)
 
 --
+
+    * Include your workflow with `COPY <local-src> <container-destination>` into the Docker file
+
+--
+
+    * Include the required input data, _e.g._
+        * Mount the path with the data inside the container
+        * Mount a sample list, specifying their data paths
+
+---
+
+# Docker & Singularity
+
+## Packaging your Snakemake workflow in a Docker container
 
 * Create a Docker image from your Docker file (_e.g._ called `my_workflow`)
 

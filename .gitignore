@@ -3,3 +3,7 @@
 
 # Xaringan build files
 *_files
+lectures/scatter-gather/scatter-gather.html
+lectures/example-reproducibility/example-reproducibility.html
+lectures/.DS_Store
+.DS_Store

@@ -20,7 +20,11 @@ class: center, middle
 
 .HUGE[Welcome to the]
 <br>
-.HUGE[Snakemake "bring-your-own-code" Workshop]
+.HUGE[Snakemake]
+<br>
+.HUGE[_bring-your-own-code_]
+<br>
+.HUGE[Workshop]
 
 ```{r Setup, echo = FALSE, message = FALSE}
 # Knitr setup
@@ -60,20 +64,15 @@ library("kableExtra")
 
 # Zoom etiquette
 
-* Please keep your webcam on, unless you have problems with your internet connection
-
---
+* Please keep your .green[webcam] on, unless you have problems with your internet connection
 
 
-* Lectures
+* .green[Lectures]
     * Please stay muted
     * If you have a question, use the raise-your-hand function (via "Participants") or write in the zoom chat
 
 
---
-
-
-* Break-out rooms
+* .green[Break-out rooms]
     * Feel free to stay unmuted, unless there is a lot of background noise
 
 
@@ -88,6 +87,8 @@ library("kableExtra")
 * You can ask snakemake questions in the #.green[snakemake-issues] channel
 
 * If you are kicked out of zoom or have other zoom-related issues, contact us in the #.green[zoom-issues] channel
+
+.center[<img src="slack.png", width=60%/>]
 
 ---
 
@@ -124,35 +125,41 @@ Group 3:
 
 # Breakout room feedback session (today)
 
-* You will be in a breakout room with your group (incl. instructor)
+* You will be in a .green[breakout room] with your group (incl. instructor)
 
-* Each of you presents their project to your group
+* Each of you .green[presents] their project to your group
 
-* You have 30 minutes, incl. questions and feedback from your group
+* You have .green[30 minutes], incl. questions and feedback from your group
 
-* This will hopefully help you to find a starting point to work on your project
+* This will hopefully help you to find a .green[starting point] to work on your project
+
+.center[<img src="windows-p74ndnYWRY4-unsplash.jpg" width=50%/>]
 
 ---
 
 # Breakout room coding sessions (days 2 and 3)
 
-* You will be in a breakout room with your group (incl. instructor)
+* You will be in a .green[breakout room] with your group (incl. instructor)
 
-* There, you will each work individually on your project
+* There, you will each .green[work individually] on your project
 
-* You can ask questions whenever you need help
+* You can .green[ask questions] whenever you need help
 
-* Your instructor will try to help, but all participants are encouraged to help each other
+* Your instructor will try to .green[help], but all participants are encouraged to help each other
+
+.center[<img src="john-schnobrich-FlPc9_VocJ4-unsplash.jpg" width=50%/>]
 
 ---
 
-# Feedback sessions for open questions (days 2 and 3)
+# Feedback sessions (days 2 and 3)
 
 * At the end of each day, after the coding sessions
 
 * In the main zoom room
 
-* Time to discuss questions that were difficult to solve in the groups
+* Time to .green[discuss open questions] that were difficult to solve in the groups
+
+.center[<img src="cx-insight-YloghyfD7e8-unsplash.jpg" width=50%/>]
 
 ---
 

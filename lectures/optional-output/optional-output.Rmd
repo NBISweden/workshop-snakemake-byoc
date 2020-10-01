@@ -144,52 +144,68 @@ taxonomy:
 
 # How to choose output
 
-**Step 2**: Use [functions](https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#functions-as-input-files) to set rule input/output
+**Step 2**: Use [functions](https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#functions-as-input-files) to figure out what the workflow will do.
 
 ```python
-rule annotate:
-    input:
-        annotation_input(config, assemblies)
+##### master target rule #####
+rule all:
+    input: all_input
 ```
+--
+```python
+def all_input(wildcards):
+    from scripts.common import classify_input, annotation_input, binning_input
+    """
+    Function defining all requested inputs for the rule all (below).
+    """
+    wanted_input = []
+
+    if config["run_preprocessing"] or config["preprocessing"]["fastqc"]:
+        wanted_input.append(opj(config["paths"]["results"], "report",
+                                "samples_report.html"))
+
+    if config["run_assembly"]:
+        # add assembly stats
+        wanted_input.append(opj(config["paths"]["results"], "report",
+                                "assembly", "assembly_stats.pdf"))
+        # get annotation input
+        wanted_input += annotation_input(config, assemblies)
+        # get binning input
+        wanted_input += binning_input(config)
+
+    wanted_input += classify_input(config)
+
+    return wanted_input
+```
+
+.small[
+Here, the function `all_input` uses a couple of `if` statements and the functions `classify_input`, `annotation_input` and `binning_input` to generate a list of files that the workflow will produce.
+]
+
+---
+
+# How to choose output
+
+**Step 2**: Use [functions](https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#functions-as-input-files) to figure out what the workflow will do.
 
 ```python
 def annotation_input(config, assemblies):
     input = []
     if not config["assembly"]["megahit"] and not config["assembly"]["metaspades"]:
         return input
-    for group in assemblies.keys():
-        # Add orfcalling results
-        input.append(opj(config["paths"]["results"], "annotation", group,
-                         "final_contigs.gff"))
-        if config["annotation"]["infernal"]:
-            input.append(opj(config["paths"]["results"], "annotation", group,
-                             "final_contigs.cmscan"))
-        if config["annotation"]["tRNAscan"]:
-            input.append(opj(config["paths"]["results"], "annotation", group,
-                             "tRNA.out"))
-        # Add EGGNOG annotation
-        if config["annotation"]["eggnog"]:
-            input += expand(opj(config["paths"]["results"], "annotation", group,
-                                "{db}.parsed.{fc}.tsv"),
-                            db=["enzymes", "pathways", "kos", "modules"],
-                            fc=["raw", "tpm"])
-        # Add PFAM annotation
-        if config["annotation"]["pfam"]:
-            input += expand(opj(config["paths"]["results"], "annotation", group,
-                                "pfam.parsed.{fc}.tsv"), fc=["tpm", "raw"])
-        # Add taxonomic annotation
-        if config["annotation"]["taxonomy"]:
-            input += expand(
-                opj(config["paths"]["results"], "annotation", group, "taxonomy",
-                    "tax.{fc}.tsv"), fc=["tpm", "raw"])
+        # --- MORE CODE HERE --- #
     return input
 ```
+
+.small[
+The functions may return empty lists, *e.g.* if the configuration does not specify downstream dependencies.
+]
 
 ---
 
 # How to choose output
 
-**Step 3**: Use target rules with proper naming to aid user experience
+**Step 3 (optional)**: Use target rules with proper naming to aid user experience
 
 ```python
 rule annotate:

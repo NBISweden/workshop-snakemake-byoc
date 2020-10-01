@@ -265,7 +265,7 @@ The results of only 26% out of 204 randomly selected papers in the journal
 
 # Implementing Tools for Reproducible Research in Snakemake
 
-.center[<img src="../common-figures/reproducibility-overview.png" width=40%/>]
+.center[<img src="reproducibility-overview.png" width=40%/>]
 
 --
 
@@ -394,7 +394,7 @@ dependencies:
 
 ## Using a conda environment for the entire workflow
 
-* Create the environment & activate it
+* Create the environment
 
 --
 
@@ -402,14 +402,21 @@ dependencies:
 $ conda env create -f gew.yml
 ```
 
+--
+
+* Use a terminal multiplexer to run the workflow in a shell instance in the background, _e.g._ tmux or screen
+
+--
+
+* Activate your conda environment in the tmux or screen session
+
 ```{bash conda activate, eval=FALSE}
 $ conda activate gew
 ```
 
 --
 
-* Start your Snakemake workflow on the command line with the activated environment
-    * Use a terminal multiplexer to run the workflow in a shell instance in the background, _e.g._ tmux or screen
+* Start your Snakemake workflow
 
 ```{bash snakemake conda env, eval=FALSE}
 (gew) [...] $ snakemake
@@ -469,6 +476,10 @@ $ conda activate gew
 
 * .green[DockerHub] is an online service for sharing docker images
 
+--
+
+* Docker images can be converted into Singularity images
+
 ---
 
 # Docker & Singularity
@@ -478,10 +489,6 @@ $ conda activate gew
 --
 
 * Snakemake can run a rule isolated in a container, using Singularity
-
---
-
-* Singularity can also run Docker images
 
 --
 

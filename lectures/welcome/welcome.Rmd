@@ -1,0 +1,163 @@
+---
+title: "Snakemake 'bring-your-own-code' workshop"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+    xaringan::moon_reader:
+        self-contained: true
+        seal: false
+        css: ["default", "../template.css"]
+        nature:
+            slideNumberFormat: ""
+---
+
+layout: true
+<div class="scilife-logo"></div>
+<div class="nbis-logo"></div>
+
+---
+
+class: center, middle
+
+.HUGE[Welcome to the]
+<br>
+.HUGE[Snakemake "bring-your-own-code" Workshop]
+
+```{r Setup, echo = FALSE, message = FALSE}
+# Knitr setup
+knitr::opts_chunk$set(message = FALSE,
+                      warning = FALSE)
+
+# Load packages
+library("dplyr")
+library("kableExtra")
+```
+
+---
+
+# Your Instructors
+
+.pull-left[
+<img src="john-sundh.jpg" width=50%/>
+<br>
+.small[John: instructor (group 1)]
+
+<img src="per-unneberg.jpg" width=40%/>
+<br>
+.small[Per: instructor (group 2)]
+]
+
+.pull-right[
+<img src="erik-fasterius.jpg" width=50%/>
+<br>
+.small[Erik: instructor (group 3)]
+
+<img src="verena-kutschera.jpg" width=50%/>
+<br>
+.small[Verena: instructor & main organizer]
+]
+
+---
+
+# Zoom etiquette
+
+* Please keep your webcam on, unless you have problems with your internet connection
+
+--
+
+
+* Lectures
+    * Please stay muted
+    * If you have a question, use the raise-your-hand function (via "Participants") or write in the zoom chat
+
+
+--
+
+
+* Break-out rooms
+    * Feel free to stay unmuted, unless there is a lot of background noise
+
+
+---
+
+# Slack
+
+* Please join the Slack workspace (.green[nbissnakemakebyoc.slack.com], link in the email)
+
+* Here we will post announcements and lecture slides (#.green[general] channel)
+
+* You can ask snakemake questions in the #.green[snakemake-issues] channel
+
+* If you are kicked out of zoom or have other zoom-related issues, contact us in the #.green[zoom-issues] channel
+
+---
+
+# Schedule
+
+.center[<img src="day1.png", width=80%/>]
+
+---
+
+# Schedule
+
+.center[<img src="day2.png", width=80%/>]
+
+---
+
+# Schedule
+
+.center[<img src="day3.png", width=80%/>]
+
+---
+
+# Breakout room groups
+
+Group 1:
+* .green[John], Margherita, Jonas, Rashmi
+
+Group 2:
+* .green[Per], Prasoon, George, Valentina
+
+Group 3:
+* .green[Erik], Daniel, Johan, Julie
+
+---
+
+# Breakout room feedback session (today)
+
+* You will be in a breakout room with your group (incl. instructor)
+
+* Each of you presents their project to your group
+
+* You have 30 minutes, incl. questions and feedback from your group
+
+* This will hopefully help you to find a starting point to work on your project
+
+---
+
+# Breakout room coding sessions (days 2 and 3)
+
+* You will be in a breakout room with your group (incl. instructor)
+
+* There, you will each work individually on your project
+
+* You can ask questions whenever you need help
+
+* Your instructor will try to help, but all participants are encouraged to help each other
+
+---
+
+# Feedback sessions for open questions (days 2 and 3)
+
+* At the end of each day, after the coding sessions
+
+* In the main zoom room
+
+* Time to discuss questions that were difficult to solve in the groups
+
+---
+
+class: center, middle
+
+.HUGE[Questions?]
+
+---

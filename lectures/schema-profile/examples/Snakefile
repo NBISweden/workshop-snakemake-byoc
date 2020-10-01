@@ -1,0 +1,2 @@
+rule clean:
+    shell: "rm -f */*.fasta"

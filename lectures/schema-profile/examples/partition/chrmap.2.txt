@@ -1,0 +1,6 @@
+1	autsome
+2	autosome
+X	sex
+Y	Sex
+scaffold1	autosome
+scaffold2	PAR

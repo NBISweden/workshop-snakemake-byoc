@@ -21,6 +21,7 @@ class: center, middle
 
 .HUGE[An Example Snakemake Workflow &]
 <br>
+<br>
 .HUGE[Applying Tools for Reproducible Research in Snakemake]
 
 ```{r Setup, echo = FALSE, message = FALSE}
@@ -232,6 +233,12 @@ historical_bam_mapDamage: False
 historical_rescaled_samplenames: []
 #####
 ```
+
+---
+
+class: center, middle
+
+.HUGE[Questions?]
 
 ---
 
@@ -584,5 +591,11 @@ $ docker run --name my_first_workflow_instance -i -t my_workflow
 --
 
 * Share your container on GitHub or BitBucket
+
+---
+
+class: center, middle
+
+.HUGE[Questions?]
 
 ---

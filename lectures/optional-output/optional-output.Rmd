@@ -1,0 +1,239 @@
+---
+title: "Snakemake workflow optional outputs"
+subtitle: "Snakemake BYOC NBIS course"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+    xaringan::moon_reader:
+        self-contained: true
+        seal: false
+        css: ["default", "../template.css"]
+        nature:
+            slideNumberFormat: ""
+---
+
+layout: true
+<div class="scilife-logo"></div>
+<div class="nbis-logo"></div>
+
+---
+
+class: center, middle
+
+.HUGE[Snakemake workflows]
+<br>
+.HUGE[that do different things]
+<br>
+
+---
+
+# Workflows can be straightforward
+
+.pull-left[
+.small[
+Such workflows may for instance:
+
+- reproduce methods used for a research article, or
+- perform common analyses (*e.g.* assembly, differential expression)
+]
+]
+
+.pull-right[
+<img src="https://images.unsplash.com/photo-1506111000315-1a7249511ad9?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1868&q=80">
+]
+
+---
+
+# Workflows can also be sprawling
+
+.pull-left[
+.small[
+
+Analysis may depend on for instance:
+
+- type of input data, or
+- user-preferences
+]
+]
+
+.pull-right[
+<img src="https://images.unsplash.com/photo-1547336863-6491b008052b?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=3014&q=80" width="100%">
+]
+---
+
+# Case in point
+
+[nbis-meta](https://github.com/NBISweden/nbis-meta): a workflow for metagenomic projects
+
+Takes fastq files as input, and can do:
+
+- preprocessing, incl.
+  - rRNA filtering
+  - adapter and/or quality trimming
+  - de-duplication
+
+followed by *e.g.*:
+
+- *de novo* assembly
+- functional/taxonomic annotation
+- genome binning
+- read-based classification
+- taxonomic profiles
+
+---
+
+# How to choose output
+
+--
+
+**Step 1**: Use booleans in your config as on/off switches
+
+.small[*e.g.* for annotation:]
+
+```yaml
+annotation:
+  # run tRNAscan-SE?
+  tRNAscan: False
+  # run infernal for rRNA identification?
+  infernal: True
+  # run eggnog-mapper to infer KEGG orthologs, pathways and modules?
+  eggnog: False
+  # run PFAM-scan to infer protein families from PFAM?
+  pfam: True
+  # run Resistance gene identifier?
+  rgi: False
+  # run taxonomic annotation of assembled contigs (using contigtax + sourmash)?
+  taxonomy: False
+```
+
+---
+
+# How to choose output
+
+**Step 1**: Use booleans in your config as on/off switches
+
+.small[Program-specific parameters can be specified separately in the config file]
+
+```yaml
+taxonomy:
+  # minimum length of contigs to use for taxonomic annotation
+  min_len: 300
+  # parameters for contigtax search
+  # use more permissive settings for search compared to assign in order to
+  # modify assignments without having to rerun the search step
+  search_params: "--evalue 0.01 --top 10"
+  # parameters for contigtax assign
+  assign_params: "--evalue 0.001 --top 5"
+  # hash fraction to use for sourmash when computing signatures for contigs
+  # this is evaluated as 1/<sourmash_fraction>
+  sourmash_fraction: 100
+  # ranks to report taxonomy for
+  ranks:
+    - "superkingdom"
+    - "phylum"
+    - "class"
+    - "order"
+    - "family"
+    - "genus"
+    - "species"
+  # protein database to use for taxonomic assignments
+  # choose between uniref50, uniref90, uniref100 and nr.
+  database: "uniref100"
+```
+
+---
+
+# How to choose output
+
+**Step 2**: Use [functions](https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#functions-as-input-files) to set rule input/output
+
+```python
+rule annotate:
+    input:
+        annotation_input(config, assemblies)
+```
+
+```python
+def annotation_input(config, assemblies):
+    input = []
+    if not config["assembly"]["megahit"] and not config["assembly"]["metaspades"]:
+        return input
+    for group in assemblies.keys():
+        # Add orfcalling results
+        input.append(opj(config["paths"]["results"], "annotation", group,
+                         "final_contigs.gff"))
+        if config["annotation"]["infernal"]:
+            input.append(opj(config["paths"]["results"], "annotation", group,
+                             "final_contigs.cmscan"))
+        if config["annotation"]["tRNAscan"]:
+            input.append(opj(config["paths"]["results"], "annotation", group,
+                             "tRNA.out"))
+        # Add EGGNOG annotation
+        if config["annotation"]["eggnog"]:
+            input += expand(opj(config["paths"]["results"], "annotation", group,
+                                "{db}.parsed.{fc}.tsv"),
+                            db=["enzymes", "pathways", "kos", "modules"],
+                            fc=["raw", "tpm"])
+        # Add PFAM annotation
+        if config["annotation"]["pfam"]:
+            input += expand(opj(config["paths"]["results"], "annotation", group,
+                                "pfam.parsed.{fc}.tsv"), fc=["tpm", "raw"])
+        # Add taxonomic annotation
+        if config["annotation"]["taxonomy"]:
+            input += expand(
+                opj(config["paths"]["results"], "annotation", group, "taxonomy",
+                    "tax.{fc}.tsv"), fc=["tpm", "raw"])
+    return input
+```
+
+---
+
+# How to choose output
+
+**Step 3**: Use target rules with proper naming to aid user experience
+
+```python
+rule annotate:
+    input:
+        annotation_input(config, assemblies)
+```
+
+.small[example run:]
+
+```bash
+snakemake -j 1 -p annotate
+Building DAG of jobs...
+Job counts:
+        count   jobs
+        4       aggregate_featurecount
+        1       annotate
+        4       bowtie_build
+        12      bowtie_map_pe
+        4       bowtie_map_se
+        1       download_pfam
+        1       download_pfam_info
+        1       download_rfams
+        12      featurecount_pe
+        4       featurecount_se
+        4       generate_megahit_input
+        4       infernal
+        7       link_files
+        4       megahit
+        16      normalize_featurecount
+        4       parse_pfam
+        4       pfam_scan
+        1       press_pfam
+        1       press_rfams
+        4       prodigal
+        8       quantify_features
+        16      remove_mark_duplicates
+        16      samtools_stats
+        3       trimmomatic_pe
+        1       trimmomatic_se
+        4       write_featurefile
+        141
+```
+
+---
+
+class: center, middle
+# Questions?

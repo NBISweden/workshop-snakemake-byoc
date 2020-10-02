@@ -144,13 +144,115 @@ rule trim_reads:
 
 ## The snakemake workflows template
 
-A [cookiecutter](https://cookiecutter.readthedocs.io/en/1.7.2/) template available on [GitHub](https://github.com/snakemake-workflows/cookiecutter-snakemake-workflow)
+- A [cookiecutter](https://cookiecutter.readthedocs.io/en/1.7.2/) template available on [GitHub](https://github.com/snakemake-workflows/cookiecutter-snakemake-workflow)
+- Can be used to initialize new workflows
+---
+### How to use the template
 
---
+Step 1. Install `cookiecutter` if you haven't already
 
-Can be used to initialize new workflows by running:
+```
+$ conda create -n cc -c conda-forge cookiecutter
+<...>
+$ conda activate cc
+```
+---
 
-`cookiecutter gh:snakemake-workflows/cookiecutter-snakemake-workflow`
+### How to use the template
+
+Step 2. Create a new workflow with cookiecutter
+
+```
+$ (cc) cookiecutter gh:snakemake-workflows/cookiecutter-snakemake-workflow
+full_name [Johannes Köster]: John Sundh
+```
+
+---
+### How to use the template
+
+Step 2. Create a new workflow with cookiecutter
+
+```
+$ (cc) cookiecutter gh:snakemake-workflows/cookiecutter-snakemake-workflow
+full_name [Johannes Köster]: John Sundh
+email [johannes.koester@protonmail.com]: john.sundh@scilifelab.se
+```
+
+---
+### How to use the template
+
+Step 2. Create a new workflow with cookiecutter
+
+```
+$ (cc) cookiecutter gh:snakemake-workflows/cookiecutter-snakemake-workflow
+full_name [Johannes Köster]: John Sundh
+email [johannes.koester@protonmail.com]: john.sundh@scilifelab.se
+username [johanneskoester]: johnne
+```
+
+---
+### How to use the template
+
+Step 2. Create a new workflow with cookiecutter
+
+```
+$ (cc) cookiecutter gh:snakemake-workflows/cookiecutter-snakemake-workflow
+full_name [Johannes Köster]: John Sundh
+email [johannes.koester@protonmail.com]: john.sundh@scilifelab.se
+username [johanneskoester]: johnne
+project_name [RNA-Seq]: gut-microbiota
+repo_name [rna-seq]: gut-microbiome-repo
+min_snakemake_version [5.7.0]: 5.11.0
+```
+
+---
+### How to use the template
+Step 3. Inspect your new workflow
+
+```
+$ ls gut-microbiome-repo/
+-rw-r--r--  1 john  staff   1.0K Oct  1 15:49 LICENSE
+-rw-r--r--  1 john  staff   4.9K Oct  1 15:49 README.md
+drwxr-xr-x  4 john  staff   128B Oct  1 15:49 config
+drwxr-xr-x  3 john  staff    96B Oct  1 15:49 resources
+drwxr-xr-x  6 john  staff   192B Oct  1 15:49 results
+drwxr-xr-x  8 john  staff   256B Oct  1 15:49 workflow
+```
+---
+### How to use the template
+
+.small[Your info has been inserted into the `README.md` file]
+
+```markdown
+# Snakemake workflow: gut-microbiota
+
+[![Snakemake](https://img.shields.io/badge/snakemake->5.11.0-brightgreen.svg)](https://snakemake.bitbucket.io)
+[![Build Status](https://travis-ci.org/snakemake-workflows/gut-microbiome-repo.svg?branch=master)](https://travis-ci.org/snakemake-workflows/gut-microbiome-repo)
+
+This is the template for a new Snakemake workflow. Replace this text with a comprehensive description covering the purpose and domain.
+Insert your code into the respective folders, i.e. `scripts`, `rules`, and `envs`. Define the entry point of the workflow in the `Snakefile` and the main configuration in the `config.yaml` file.
+
+## Authors
+
+* John Sundh (@johnne)
+```
+---
+### How to use the template
+
+.small[Your info has been inserted into the `README.md` file]
+
+<--- README.md --->
+# Snakemake workflow: gut-microbiota
+
+[![Snakemake](https://img.shields.io/badge/snakemake->5.11.0-brightgreen.svg)](https://snakemake.bitbucket.io)
+[![Build Status](https://travis-ci.org/snakemake-workflows/gut-microbiome-repo.svg?branch=master)](https://travis-ci.org/snakemake-workflows/gut-microbiome-repo)
+
+This is the template for a new Snakemake workflow. Replace this text with a comprehensive description covering the purpose and domain.
+Insert your code into the respective folders, i.e. `scripts`, `rules`, and `envs`. Define the entry point of the workflow in the `Snakefile` and the main configuration in the `config.yaml` file.
+
+## Authors
+
+* John Sundh (@johnne)
 
 ---
 # What are some best-practices and guidelines?
@@ -179,7 +281,6 @@ Lints for rule compose_sample_sheet (line 6, rna-seq-kallisto-sleuth/workflow/ru
       output of concurrent jobs will be mixed and become unreadable.
       Also see:
       https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#log-files
-
 ```
 
 ---

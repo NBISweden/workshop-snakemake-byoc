@@ -83,33 +83,41 @@ library("kableExtra")
 
 * Please join the Slack workspace (.green[nbissnakemakebyoc.slack.com], link is _e.g._ in the last email)
 
+.center[<img src="slack.png", width=40%/>]
+
+--
+
 * Here we will post announcements (#.green[general] channel) and lecture slides (#.green[lectures] channel)
+
+--
 
 * If you are kicked out of zoom or have other zoom-related issues, contact us in the #.green[zoom-issues] channel
 
+--
+
 * You can ask snakemake questions to everyone in the #.green[snakemake-issues] channel
 
-* Each group has their own channel, too (#.green[group-1], #.green[group-2], #.green[group-3]), to share code and info within the group
+--
 
-.center[<img src="slack.png", width=40%/>]
-
----
-
-# Schedule
-
-.center[<img src="day1.png", width=80%/>]
+* Each group has their own channel, too (#.green[group-1], #.green[group-2], #.green[group-3])
 
 ---
 
 # Schedule
 
-.center[<img src="day2.png", width=80%/>]
+.center[<img src="day1.png", width=100%/>]
 
 ---
 
 # Schedule
 
-.center[<img src="day3.png", width=80%/>]
+.center[<img src="day2.png", width=100%/>]
+
+---
+
+# Schedule
+
+.center[<img src="day3.png", width=100%/>]
 
 ---
 

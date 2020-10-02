@@ -9,3 +9,9 @@ lectures/workflow-example/.Rhistory
 lectures/.DS_Store
 workshop-common
 .DS_Store
+lectures/bestpractices/bestpractices.html
+lectures/example-workflow/example-workflow.html
+lectures/optional-output/optional-output.html
+lectures/reproducibility-tools/reproducibility-tools.html
+lectures/scatter-gather/scatter-gather.html
+lectures/welcome/welcome.html

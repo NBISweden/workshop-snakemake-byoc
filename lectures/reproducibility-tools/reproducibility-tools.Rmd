@@ -1,0 +1,384 @@
+---
+title: "Combining Tools for Reproducible Research with Snakemake"
+subtitle: "Snakemake BYOC NBIS course"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+    xaringan::moon_reader:
+        self-contained: true
+        seal: false
+        css: ["default", "../template.css"]
+        nature:
+            slideNumberFormat: ""
+---
+
+layout: true
+<div class="scilife-logo"></div>
+<div class="nbis-logo"></div>
+
+---
+
+class: center, middle
+
+.HUGE[Combining Tools for Reproducible Research with Snakemake]
+
+```{r Setup, echo = FALSE, message = FALSE}
+# Knitr setup
+knitr::opts_chunk$set(message = FALSE,
+                      warning = FALSE)
+
+# Load packages
+library("dplyr")
+library("kableExtra")
+```
+
+---
+
+# Reproducibility is rarer than you think
+
+The results of only 26% out of 204 randomly selected papers in the journal
+*Science* could be reproduced.<sup>1</sup>
+
+.tiny[<sup>1</sup> Stodden et. al (2018). "An empirical analysis of journal policy effectiveness for computational reproducibility". PNAS. 115 (11): 2584-2589]
+
+--
+
+> Many journals are revising author guidelines to include data and code
+> availability.
+
+--
+
+> (...) an improvement over no policy, but currently insufficient for
+> reproducibility.
+
+
+---
+
+# Combining Tools for Reproducible Research with Snakemake
+
+.center[<img src="reproducibility-overview.png" width=40%/>]
+
+--
+
+* Track your Snakemake code with Git and push it to a GitHub or BitBucket repository to ensure that the different code versions are tracked and available
+
+--
+
+* Combining Snakemake with .green[Conda] and/or .green[containers] can make the compute environment and the code reproducible
+
+---
+
+# Conda
+
+--
+
+* Is a package, dependency, and environment manager
+    > packages: any type of program (_e.g._ bowtie2, snakemake etc.)
+
+    > dependency: other software required by a package
+
+    > environment: a distinct collection of packages
+
+* Keeps track of the dependencies between packages in each environment
+
+---
+
+# Conda
+
+## Running a Snakemake rule with a Conda environment
+
+--
+
+* Make sure you have Conda installed (Miniconda or Anaconda)
+
+--
+
+* Find your Conda package on http://anaconda.org
+
+--
+
+* Create a Conda environment file (`tePSI.yaml`)
+
+```{python conda env one, eval = FALSE}
+name: tePSI
+channels:
+  - nanjiang
+  - bioconda
+dependencies:
+  - transposonpsi=1.0.0
+```
+
+--
+
+* A good location for the `yaml` file can be a directory for environments within your main Snakemake directory
+
+--
+
+* For reproducibility, it is important to keep track of software versions >> include package versions in your environment file
+
+
+---
+
+# Conda
+
+## Running a Snakemake rule with a Conda environment
+
+* Add the path to the Conda environment `yaml` file to your rule with the `conda` directive
+
+```{python conda rule, eval = FALSE}
+rule transposonPSI:
+    """Identify transposons in the UniProt/Swissprot protein dataset"""
+    input:
+        chunk = PROT_DIR + "split_result/" + PROT_NAME + "_chunk{nr}.fa"
+    output:
+        allHits = temp(PROT_DIR + "split_result/" + PROT_NAME + "_chunk{nr}.fa.TPSI.allHits"),
+        topHits = temp(PROT_DIR + "split_result/" + PROT_NAME + "_chunk{nr}.fa.TPSI.topHits")
+    params:
+        dir = PROT_DIR + "split_result/"
+    conda: "envs/tePSI.yaml"
+    shell:
+        """
+        cd {params.dir}
+        transposonPSI.pl {input.chunk} prot
+        """
+```
+
+--
+
+* Start your workflow on the command line with `--use-conda`
+
+```{bash snakemake use conda, eval=FALSE}
+$ snakemake --use-conda
+```
+
+--
+
+* This doesn't work if you use `run` instead of `shell` (or other directives)
+
+---
+
+# Conda
+
+## Using a Conda environment for the entire workflow
+
+--
+
+* Write a Conda environment file that includes all tools used by the workflow, or those used by rules with `run` directives (e.g. `gew.yaml`)
+
+```{python conda env big, eval=FALSE}
+name: gew
+channels:
+  - bioconda
+  - conda-forge
+dependencies:
+  - python=3.7.6
+  - snakemake=5.22.1
+  - biopython=1.76
+  - matplotlib=3.2.1
+  - pandas=1.0.3
+  - numpy=1.18.4
+```
+
+---
+
+# Conda
+
+## Using a Conda environment for the entire workflow
+
+* Create the environment
+
+--
+
+```{bash conda create, eval=FALSE}
+$ conda env create -f gew.yml
+```
+
+--
+
+* Use a terminal multiplexer to run the workflow in a shell instance in the background, _e.g._ tmux or screen
+
+--
+
+* Activate your Conda environment in the tmux or screen session
+
+```{bash conda activate, eval=FALSE}
+$ conda activate gew
+```
+
+--
+
+* Start your Snakemake workflow
+
+```{bash snakemake conda env, eval=FALSE}
+(gew) [...] $ snakemake
+```
+
+---
+
+# Docker & Singularity
+
+--
+
+## What can I use Docker for?
+
+* Run applications securely isolated in a container, packaged with all dependencies and libraries
+
+--
+
+* As advanced environment manager
+
+--
+
+* To package your code with the environment it needs
+
+--
+
+* To package a whole workflow (*e.g.* to accompany a manuscript)
+
+--
+
+* And much more
+
+--
+
+## Singularity 
+
+* Is an open source container platform suitable for HPC clusters
+
+---
+
+# Docker & Singularity
+
+## Docker nomenclature
+
+--
+
+* A Docker .green[file] is a recipe used to build a Docker .green[image]
+
+--
+
+* A Docker .green[image] is a standalone executable package of software
+
+--
+
+* A Docker .green[container] is a standard unit of software run on the Docker Engine
+
+--
+
+* .green[DockerHub] is an online service for sharing docker images
+
+--
+
+* Docker images can be converted into Singularity images
+
+---
+
+# Docker & Singularity
+
+## Running Snakemake rules with Singularity
+
+--
+
+* Snakemake can run a rule isolated in a container, using Singularity
+
+--
+
+* Each Conda package is also available as Docker and Singularity images (_e.g._ check http://biocontainers.pro for Conda packages from the bioconda channel)
+
+--
+
+* Many other Docker images are also available on DockerHub (https://hub.docker.com/)
+    * But be aware that Docker images in free accounts are automatically deleted after a certain time of inactivity
+
+---
+
+# Docker & Singularity
+
+## Running Snakemake rules with Singularity
+
+--
+
+* Make sure your system has Singularity installed
+
+--
+
+* Find your Docker or Singularity image, _e.g._ on http://biocontainers.pro
+
+--
+
+* Add the link to the container image to your rule with the `singularity` directive
+
+```{python singularity rule, eval = FALSE}
+rule transposonPSI:
+    """Identify transposons in the UniProt/Swissprot protein dataset"""
+    input:
+        chunk = PROT_DIR + "split_result/" + PROT_NAME + "_chunk{nr}.fa"
+    output:
+        allHits = temp(PROT_DIR + "split_result/" + PROT_NAME + "_chunk{nr}.fa.TPSI.allHits"),
+        topHits = temp(PROT_DIR + "split_result/" + PROT_NAME + "_chunk{nr}.fa.TPSI.topHits")
+    params:
+        dir = PROT_DIR + "split_result/"
+    singularity: "docker://quay.io/biocontainers/transposonpsi:1.0.0--pl526_0"
+    shell:
+        """
+        cd {params.dir}
+        transposonPSI.pl {input.chunk} prot
+        """
+```
+
+--
+
+* Start your workflow on the command line with `--use-singularity`
+
+```{bash snakemake use singularity, eval=FALSE}
+$ snakemake --use-singularity
+```
+
+---
+
+# Docker & Singularity
+
+## Packaging your Snakemake workflow in a Docker container
+
+--
+
+* Write a Docker file (`my_workflow`), _e.g._
+
+    * Start with the official Miniconda `base` image
+    * Install the core packages of the workflow (_e.g._ Snakemake and dependencies such as pandas)
+    * Include all rule-specific environments as separate Conda files (running your rules with Conda)
+    * Include your workflow with `COPY <local-src> <container-destination>` into the Docker file
+    * Include the required input data, _e.g._
+        * Mount the path with the data inside the container
+        * Mount a sample list, specifying their data paths
+
+---
+
+# Docker & Singularity
+
+## Packaging your Snakemake workflow in a Docker container
+
+* Create a Docker image from your Docker file (_e.g._ called `my_workflow`)
+
+```{bash docker image, eval=FALSE}
+$ docker build -t my_workflow .
+```
+
+--
+
+* Run your container
+
+```{bash docker run, eval=FALSE}
+$ docker run --name my_first_workflow_instance -i -t my_workflow
+```
+
+--
+
+* Share your container on GitHub or BitBucket
+
+---
+
+class: center, middle
+
+.HUGE[Questions?]
+
+---

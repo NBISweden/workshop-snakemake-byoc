@@ -20,6 +20,7 @@ class: center, middle
 
 .HUGE[Welcome to the]
 <br>
+<br>
 .HUGE[Snakemake]
 <br>
 .HUGE[_bring-your-own-code_]
@@ -43,21 +44,21 @@ library("kableExtra")
 .pull-left[
 <img src="john-sundh.jpg" width=50%/>
 <br>
-.small[John: instructor (group 1)]
+.small[John]
 
 <img src="per-unneberg.jpg" width=40%/>
 <br>
-.small[Per: instructor (group 2)]
+.small[Per]
 ]
 
 .pull-right[
 <img src="erik-fasterius.jpg" width=50%/>
 <br>
-.small[Erik: instructor (group 3)]
+.small[Erik]
 
 <img src="verena-kutschera.jpg" width=50%/>
 <br>
-.small[Verena: instructor & main organizer]
+.small[Verena]
 ]
 
 ---
@@ -72,7 +73,7 @@ library("kableExtra")
     * If you have a question, use the raise-your-hand function (via "Participants") or write in the zoom chat
 
 
-* .green[Break-out rooms]
+* .green[Breakout rooms]
     * Feel free to stay unmuted, unless there is a lot of background noise
 
 

@@ -7,6 +7,9 @@ channels:
 
 dependencies:
 
+    # Snakemake
+    - snakemake=5.26.1
+
     # Jupyter
     - python=3.8
     - jupyter=1.0

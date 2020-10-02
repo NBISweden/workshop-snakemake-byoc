@@ -70,7 +70,7 @@ library("kableExtra")
 
 * .green[Lectures]
     * Please stay muted
-    * If you have a question, use the raise-your-hand function (via "Participants") or write in the zoom chat
+    * If you have a question, use the raise-your-hand function (via "Participants") or post your question on slack (#.green[lectures] channel)
 
 
 * .green[Breakout rooms]
@@ -81,15 +81,17 @@ library("kableExtra")
 
 # Slack
 
-* Please join the Slack workspace (.green[nbissnakemakebyoc.slack.com], link in the email)
+* Please join the Slack workspace (.green[nbissnakemakebyoc.slack.com], link is _e.g._ in the last email)
 
-* Here we will post announcements and lecture slides (#.green[general] channel)
-
-* You can ask snakemake questions in the #.green[snakemake-issues] channel
+* Here we will post announcements (#.green[general] channel) and lecture slides (#.green[lectures] channel)
 
 * If you are kicked out of zoom or have other zoom-related issues, contact us in the #.green[zoom-issues] channel
 
-.center[<img src="slack.png", width=60%/>]
+* You can ask snakemake questions to everyone in the #.green[snakemake-issues] channel
+
+* Each group has their own channel, too (#.green[group-1], #.green[group-2], #.green[group-3]), to share code and info within the group
+
+.center[<img src="slack.png", width=40%/>]
 
 ---
 
@@ -126,7 +128,7 @@ Group 3:
 
 # Breakout room feedback session (today)
 
-* You will be in a .green[breakout room] with your group (incl. instructor)
+* You will be in a .green[breakout room] with your group (incl. your instructor)
 
 * Each of you .green[presents] their project to your group
 
@@ -140,13 +142,13 @@ Group 3:
 
 # Breakout room coding sessions (days 2 and 3)
 
-* You will be in a .green[breakout room] with your group (incl. instructor)
+* You will be in a .green[breakout room] with your group (incl. your instructor)
 
 * There, you will each .green[work individually] on your project
 
 * You can .green[ask questions] whenever you need help
 
-* Your instructor will try to .green[help], but all participants are encouraged to help each other
+* Your instructor will try to help, but all participants are encouraged to .green[help each other]
 
 .center[<img src="john-schnobrich-FlPc9_VocJ4-unsplash.jpg" width=50%/>]
 
@@ -158,7 +160,7 @@ Group 3:
 
 * In the main zoom room
 
-* Time to .green[discuss open questions] that were difficult to solve in the groups
+* Time to .green[discuss open questions] that were difficult to solve in the groups or any .green[interesting insights] about Snakemake
 
 .center[<img src="cx-insight-YloghyfD7e8-unsplash.jpg" width=50%/>]
 

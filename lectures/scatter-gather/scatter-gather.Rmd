@@ -61,8 +61,8 @@ library("kableExtra")
 
 * .green[Sample]
     * Multiple samples per plate
-    * Identified by sample-level barcodes in each sequenced read
-    * Sample barcodes are identical across plates
+    * Identified by sample-level samples in each sequenced read
+    * Sample samples are identical across plates
 
 ---
 
@@ -82,7 +82,7 @@ library("kableExtra")
 
 # Metadata
 
-An example `metadata.txt` file might contain data like so:
+An example `metadata.tsv` file might contain data like so:
 
 ```{r Metadata structure, echo = FALSE}
 # Function for creating tables
@@ -97,11 +97,10 @@ create_table <- function(data, full_width = TRUE) {
 }
 
 # Define and show metadata
-metadata <- data.frame(plate_id    = c(rep("plate_1", 2), rep("plate_2", 2)),
-                       sample_id   = paste0("sample_", seq_len(4)),
-                       barcode_id  = seq_len(4),
-                       barcode_seq = c("TTTTTTTTTA", "TTTTTTTTAA",
-                                       "TTTTTTTAAA", "TTTTTTAAAA"))
+metadata <- data.frame(plate_id   = c(rep("plate_A", 2), rep("plate_B", 2)),
+                       sample_id  = rep(seq_len(2), 2),
+                       sequence   = c("AAAAAA", "CCCCCC",
+                                      "AAAAAA", "CCCCCC"))
 create_table(metadata)
 ```
 
@@ -114,11 +113,11 @@ This metadata can be used as input to the pipeline:
 import pandas as pd
 
 # Read metadata
-metadata = pd.read_csv('metadata.txt', sep = '\t')
+metadata = pd.read_csv('metadata.tsv', sep = '\t')
 
 # Define plate and barcode IDs
 plates = metadata['plate_id'].unique().tolist()
-barcodes = metadata['barcode_id'].unique().tolist()
+samples = metadata['sample_id'].unique().tolist()
 ```
 
 ---
@@ -126,11 +125,11 @@ barcodes = metadata['barcode_id'].unique().tolist()
 # Step 1: Demultiplexing
 
 ```{python demultiplexing 1, eval = FALSE}
-rule A_demultiplex:
+rule demultiplex:
     input:
         data = '{plate}.fastq.gz',
     output:
-        expand('{{plate}}-{sample}.fastq.gz', sample = barcodes)
+        expand('{{plate}}-{sample}.fastq.gz', sample = samples)
 ```
 
 Notice the double curly brackets (`{{plate}}`) in the `expand()` call:
@@ -142,11 +141,11 @@ Snakemake wildcard.
 # Step 2: Quality controls
 
 ```{python demultiplexing 2, eval = FALSE}
-rule A_demultiplex:
+rule demultiplex:
     input:
         data = '{plate}.fastq.gz',
     output:
-        expand('{{plate}}-{sample}.fastq.gz', sample = barcodes)
+        expand('{{plate}}-{sample}.fastq.gz', sample = samples)
 ```
 
 Notice the double curly brackets (`{{plate}}`) in the `expand()` call:
@@ -154,7 +153,7 @@ this expands the barcode IDs (identical across plates) but keeps `plate` as a
 Snakemake wildcard.
 
 ```{python quality controls 1, eval = FALSE}
-rule B_quality_controls:
+rule quality_controls:
     input:
         rules.A_demultiplex.output
     output:
@@ -169,11 +168,11 @@ per sample per plate.
 # Step 3: Collecting per-plate results
 
 ```{python demultiplexing 3, eval = FALSE}
-rule A_demultiplex:
+rule demultiplex:
     input:
         data = '{plate}.fastq.gz',
     output:
-        expand('{{plate}}-{sample}.fastq.gz', sample = barcodes)
+        expand('{{plate}}-{sample}.fastq.gz', sample = samples)
 ```
 
 Notice the double curly brackets (`{{plate}}`) in the `expand()` call:
@@ -181,7 +180,7 @@ this expands the barcode IDs (identical across plates) but keeps `plate` as a
 Snakemake wildcard.
 
 ```{python quality controls 2, eval = FALSE}
-rule B_quality_controls:
+rule quality_controls:
     input:
         rules.A_demultiplex.output
     output:
@@ -192,9 +191,9 @@ This rule allows for any combination of `plate` and `sample`, thus running once
 per sample per plate.
 
 ```{python Collect results, eval = FALSE}
-rule C_collect_results:
+rule collect_results:
     input:
-        expand('{{plate}}-{sample}_fastqc.zip', sample = barcodes)
+        expand('{{plate}}-{sample}_fastqc.zip', sample = samples)
     output:
         '{plate}.collected_QC.txt'
 ```
@@ -211,28 +210,28 @@ instead.
 import pandas as pd
 
 # Read metadata
-metadata = pd.read_csv('metadata.txt', sep = '\t')
+metadata = pd.read_csv('metadata.tsv', sep = '\t')
 
 # Define plate and barcode IDs
 plates = metadata['plate_id'].unique().tolist()
-barcodes = metadata['barcode_id'].unique().tolist()
+samples = metadata['sample_id'].unique().tolist()
 
 # Define rules
-rule A_demultiplex:
+rule demultiplex:
     input:
         data = '{plate}.fastq.gz',
     output:
-        expand('{{plate}}-{sample}.fastq.gz', sample = barcodes)
+        expand('{{plate}}-{sample}.fastq.gz', sample = samples)
 
-rule B_quality_controls:
+rule quality_controls:
     input:
         rules.A_demultiplex.output
     output:
         '{plate}-{sample}_fastqc.zip'
 
-rule C_collect_results:
+rule collect_results:
     input:
-        expand('{{plate}}-{sample}_fastqc.zip', sample = barcodes)
+        expand('{{plate}}-{sample}_fastqc.zip', sample = samples)
     output:
         '{plate}.collected_QC.txt'
 ```
@@ -244,8 +243,16 @@ Finally, an `all` rule with input FASTQ files:
 ```{python Rule all, eval = FALSE}
 rule all:
     input:
-        expand('input_plate_{plate}.collected_QC.txt', plate = plates)
+        expand('{plate}.collected_QC.txt', plate = plates)
 ```
+
+---
+
+# Putting it all together
+
+<br>
+<br>
+.center[<img src="workflow/dag.png" width=60%/>]
 
 ---
 
@@ -260,3 +267,9 @@ rule all:
 
 * Collecting the collected .green[results into a single file] for further
   analyses and/or statistics
+
+---
+
+class: center, middle
+
+.HUGE[Questions?]

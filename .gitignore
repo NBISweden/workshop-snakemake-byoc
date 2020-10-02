@@ -1,11 +1,17 @@
+# HTML and PDF files
+*.html
+*.pdf
+
 # Conda environments
 *-env
 
 # Xaringan build files
 *_files
 
-# other files
-lectures/workflow-example/.Rhistory
-lectures/.DS_Store
+# Snakemake files
+**/.snakemake
+
+# Other files
+**/.Rhistory
+**/.DS_Store
 workshop-common
-.DS_Store

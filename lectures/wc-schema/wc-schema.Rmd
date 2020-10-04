@@ -14,6 +14,7 @@ output:
     fig_caption: false
     toc: true
     toc_depth: 2
+    slide_level: 1
     reveal_options:
       slideNumber: true
       previewLinks: true
@@ -59,7 +60,6 @@ theme_set(bw)
 <div style="padding:100px">
 <h3>Wildcard constraints</h3>
 <h3>Schema validation and jsonschema</h3>
-<h3>Snakemake profiles</h3>
 </div>
 
 <div class="fragment" style="padding:100px">
@@ -83,17 +83,17 @@ All examples are available in lecture repository
 # Wildcard constraints
 
 
-## A motivating example
+# A motivating example
 
 
-### Snakefile
+## Snakefile
 
 ```{r  byoc-2020-wc1-snakefile, code=readLines("examples/wc/1/Snakefile"), engine='python' }
  
 ```
 
 
-### Results {.fragment}
+## Results {.fragment}
 
 <div class="fragment">
 
@@ -108,17 +108,50 @@ cat examples/wc/1/foo.bar.txt
 </div>
 
 
-## Using wildcards
+# Snakemake, rules and the benefit of wildcards
 
 
-### Snakefile
+## Snakemake
+
+-   is **text**-based
+-   **rules** determine how to make outputs from inputs
+-   **dependencies** between rules are determined automatically primarily
+    based on **matching** file names
+-   a **DAG** (<strong>D</strong>irected <strong>A</strong>cyclic
+    <strong>G</strong>raph) of jobs determines dependencies and can be
+    parallelized
+
+
+## Wildcard foo
+
+```{r  byoc-2020-wc-foo-ex-text, code=readLines("examples/wc/1/Snakefile")[1:3], engine='python' }
+ 
+```
+
+```{r  byoc-2020-wc-foo-ex-wc, code=readLines("examples/wc/2/Snakefile")[1:3], engine='python' }
+ 
+```
+
+
+## The power of generalization
+
+```{r  byoc-2020-wc-foo-generalize, engine='python' }
+rule all:
+    input: expand("{prefix}.txt", prefix=["foo", "bar", "echidna"]) 
+```
+
+
+# Wildcards often collide
+
+
+## Snakefile
 
 ```{r  byoc-2020-wc2-snakefile, code=readLines("examples/wc/2/Snakefile"), engine='python' }
  
 ```
 
 
-### Results {.fragment}
+## Results {.fragment}
 
 <div class="fragment">
 
@@ -128,21 +161,24 @@ snakemake -d examples/wc/2 -s examples/wc/2/Snakefile foo.bar.txt -j 1 -F -q
 
 </div>
 <div class="fragment">
-Wildcards often collide resulting in `AmbiguousRuleException`
+Wildcards often collide resulting in `AmbiguousRuleException`.
+</div>
+<div class="fragment">
+One solution is to add `ruleorder: foobar > foo > bar` to Snakefile.
 </div>
 
 
-## Wildcard constraints solution 1
+# Wildcard constraints solution 1
 
 
-### Snakefile
+## Snakefile
 
 ```{r  byoc-2020-wc3-snakefile, code=readLines("examples/wc/3/Snakefile"), engine='python' }
  
 ```
 
 
-### Results {.fragment}
+## Results {.fragment}
 
 <div class="fragment">
 
@@ -157,17 +193,17 @@ cat examples/wc/3/foo.bar.txt
 </div>
 
 
-## Wildcard constraints solution 2
+# Wildcard constraints solution 2
 
 
-### Snakefile
+## Snakefile
 
 ```{r  byoc-2020-wc4-snakefile, code=readLines("examples/wc/4/Snakefile"), engine='python' }
  
 ```
 
 
-### Results {.fragment}
+## Results {.fragment}
 
 <div class="fragment">
 
@@ -182,20 +218,22 @@ cat examples/wc/4/foo.bar.txt
 </div>
 
 
-## Wildcards
+# Wildcards
 
 -   are used to generalize a rule
     -   e.g `output: "foo.txt"` -> `output: "{wc}.txt"`
 -   are stored in `wildcards` object
--   are accessed by key; e.g. wildcard `wc` accessed by
-    `{wildcards.wc}`, for instance in input lambda functions
+-   are accessed by **key**; e.g. wildcard `wc` accessed by
+    `{wildcards.wc}`
+    -   example in input lambda functions:
+        `input: lambda wildcards: wildcards.wc + ".txt"`
 -   multiple wildcards can cause ambiguity
     -   becomes an issue with many rules
 
 &nbsp;
 
 
-### A word of warning {.fragment}
+## A word of warning {.fragment}
 
 <div class="fragment">
 Wildcards in inputs must be determined from outputs! The following
@@ -215,13 +253,13 @@ snakemake -d examples/wc -s examples/wc/Snakefile foo.docx -j 1 -F -q
 </div>
 
 
-## Wildcard constraints
+# Wildcard constraints
 
 -   resolve ambiguity
 -   are based on regular expressions
 
 
-### Examples
+## Examples
 
 -   **`.+`:** default regexp
 -   **`\d+`:** match multiple digits
@@ -230,14 +268,14 @@ snakemake -d examples/wc -s examples/wc/Snakefile foo.docx -j 1 -F -q
 -   **`(|gatk|freebayes)`:** as above but also match empty string
 
 
-### Syntax 1: constraint within file pattern
+## Syntax 1: constraint within file pattern
 
 ```{r  byoc-2020-wc-syntax1, engine='python' }
 output: "{dataset,\d+}.{group}.txt" 
 ```
 
 
-### Syntax 2: constraint within rule
+## Syntax 2: constraint within rule
 
 ```{r  byoc-2020-wc-syntax2, engine='python' }
 rule complex_conversion:
@@ -249,7 +287,7 @@ rule complex_conversion:
 ```
 
 
-### Syntax 3: global constraint in file
+## Syntax 3: global constraint in file
 
 ```{r  byoc-2020-wc-syntax3, engine='python' }
 wildcard_constraints:
@@ -263,13 +301,13 @@ rule b:
 ```
 
 
-## Another example: partition sequences
+# Another example: partition sequences
 
 Goal: partition sequence input file into output files consisting of
 autosomes, pseudo-autosomal regions (PARs), or sex chromosomes.
 
 
-### Input files: reference fasta and chromosome map {.fragment}
+## Input files: reference fasta and chromosome map {.fragment}
 
 <div id="container">
 <div id="left">
@@ -297,7 +335,7 @@ cat examples/partition/1/chrmap.txt
 </div>
 
 
-### Snakefile and results {.fragment}
+## Snakefile and results {.fragment}
 
 <div id="container">
 <div id="left" class="fragment">
@@ -316,7 +354,7 @@ cat examples/partition/1/chrmap.txt
 <div style="width:800px;">
 
 ```{r  byoc-2020-snakemake-partition1-run, eval=TRUE, echo=TRUE, comment=NA, class.source="sourceCode", class.output="sourceCode", engine='bash' }
-snakemake -d examples/partition/1 -s examples/partition/1/Snakefile -F -q 
+snakemake -d examples/partition/1 -s examples/partition/1/Snakefile -F -q -j 1 
 ```
 
 ```{r  byoc-2020-snakemake-partition1-ls, eval=TRUE, echo=TRUE, comment=NA, class.source="sourceCode", class.output="sourceCode", engine='bash' }
@@ -329,10 +367,10 @@ ls examples/partition/1/*.fasta
 </div>
 
 
-## Chromosome map misspecifications
+# Chromosome map misspecifications
 
 
-### Input files
+## Input files
 
 <div id="container">
 <div id="left">
@@ -356,14 +394,12 @@ cat examples/partition/2/chrmap.txt
 
 </div>
 </small>
-<div class="fragment">
 NB: mis-spelling lines 1 and 4
 </div>
 </div>
-</div>
 
 
-### Snakefile and results {.fragment}
+## Snakefile and results {.fragment}
 
 <div id="container">
 <div id="left" class="fragment">
@@ -382,7 +418,7 @@ NB: mis-spelling lines 1 and 4
 <div style="width:800px;">
 
 ```{r  byoc-2020-snakemake-partition2-run, eval=TRUE, echo=TRUE, comment=NA, class.source="sourceCode", class.output="sourceCode", engine='bash' }
-snakemake -d examples/partition/2 -s examples/partition/2/Snakefile -F -q 
+snakemake -d examples/partition/2 -s examples/partition/2/Snakefile -F -q -j 1 
 ```
 
 ```{r  byoc-2020-snakemake-partition2-ls, eval=TRUE, echo=TRUE, comment=NA, class.source="sourceCode", class.output="sourceCode", engine='bash' }
@@ -398,26 +434,26 @@ Five output files. Probably not what you want.
 </div>
 
 
-## Wildcard constraint solution
+# Wildcard constraint solution
 
 
-### Snakefile
+## Snakefile
 
 <div style="width:1200px;">
 
-```{r  byoc-2020-snakemake-partition3-snakefile, code=readLines("examples/partition/3/Snakefile"), code.attr="data-line-numbers=5,6", engine='python' }
+```{r  byoc-2020-snakemake-partition3-snakefile, code=readLines("examples/partition/3/Snakefile"), engine='python' }
  
 ```
 
 </div>
 
 
-### Results {.fragment}
+## Results {.fragment}
 
 <div style="width:1200px;" class="fragment">
 
 ```{r  byoc-2020-snakemake-partition3-run, eval=TRUE, echo=TRUE, comment=NA, engine='bash' }
-snakemake -d examples/partition/3 -s examples/partition/3/Snakefile -F 
+snakemake -d examples/partition/3 -s examples/partition/3/Snakefile -F -j 1 
 ```
 
 </div>
@@ -430,80 +466,41 @@ to specify input data format to begin with!
 </div>
 
 
-# Jsonschema
+# Input file validation with jsonschema (advanced)
+
+NB: the "advanced" has less to do with snakemake than jsonschema
+itself!
 
 
-## Solution using jsonschema
+# Solution using validation with jsonschema
 
 
-### Snakefile
+## Snakefile
 
-<div style="width:1200px;">
+<div style="width:1200px; font-size:90%">
 
 ```{r  byoc-2020-snakemake-partition4-snakefile, code=readLines("examples/partition/4/Snakefile"), engine='python' }
  
 ```
 
-NB: lines 3, 6!
 </div>
 
 
-### Results {.fragment}
+## Results {.fragment}
 
 <div style="width:1200px;" class="fragment">
 
 ```{r  byoc-2020-snakemake-partition4-run, eval=TRUE, echo=TRUE, comment=NA, engine='bash' }
-snakemake -d examples/partition/4 -s examples/partition/4/Snakefile -F 
+snakemake -d examples/partition/4 -s examples/partition/4/Snakefile -F -j 1 
 ```
 
 </div>
 
 
-## About
+# The schema yaml file describes the input data
 
 &nbsp;
-
-
-### <https://json-schema.org/>
-
--   Describes your existing data format(s)
--   Provides clear human- and machine- readable documentation.
--   Validates data which is useful for:
-    -   Automated testing.
-    -   Ensuring quality of client submitted data
-
-&nbsp;
-
-
-### <https://cswr.github.io/JsonSchema/spec/introduction/#introduction>
-
-> A JSON Schema is a file that specifies the structure of JSON
-> documents that are used in a certain application
-
-(Since JSON is a subset of YAML we use the latter here as it is easier
-    for humans to read)
-
-
-## The why and how
-
--   eliminates typos (indentation, values) in input configurations and
-    data files
--   eliminates errors in general
--   provides documentation(!) of configuration file
-    
-    &nbsp;
-
-
-### Good starting resources
-
-<https://json-schema.org/understanding-json-schema/>
-
-<https://cswr.github.io/JsonSchema/>
-
-
-## Schema file
-
-&nbsp;
+<div style="font-size: 90%">
 
 ```
     $schema: "http://json-schema.org/draft-07/schema#"
@@ -515,7 +512,9 @@ snakemake -d examples/partition/4 -s examples/partition/4/Snakefile -F
       chrtype:
         description: chromosome type
         type: string
-        enum:
+        # enumerate allowed values; causes error validating
+        # first row "1\tautsome" in previous example
+        enum: 
           - autosome
           - sex
           - PAR
@@ -528,8 +527,10 @@ snakemake -d examples/partition/4 -s examples/partition/4/Snakefile -F
 
 ```
 
+</div>
 
-### Contents of above schema file
+
+## Contents of above schema file
 
 -   **$schema:** declaration that this is a schema file (as opposed to
     regular json/yaml file). Also may define JSON schema version.
@@ -543,113 +544,172 @@ snakemake -d examples/partition/4 -s examples/partition/4/Snakefile -F
     Many more keywords exist
 
 
-## Another example - main schema file for rule and workflow configuration
+# About schemas and jsonschema
 
 &nbsp;
 
+
+## <https://json-schema.org/>
+
+-   Describes your existing data format(s)
+-   Provides clear human- and machine- readable documentation.
+-   Validates data which is useful for:
+    -   Automated testing.
+    -   Ensuring quality of client submitted data
+
+&nbsp;
+
+
+## <https://cswr.github.io/JsonSchema/spec/introduction/#introduction>
+
+> A JSON Schema is a file that specifies the structure of JSON
+> documents that are used in a certain application
+
+(Since JSON is a subset of YAML we use the latter here as it is easier
+    for humans to read)
+
+
+## Good starting resources
+
+-   <https://json-schema.org/understanding-json-schema/>
+-   <https://cswr.github.io/JsonSchema/>
+
+
+# The why, when and how - my 5 cents
+
+&nbsp;
+
+
+## Why?
+
+-   Eliminates typos (indentation, values) in input configurations and
+    data files
+-   Eliminates errors in general -> less debugging
+-   Provides documentation(!) of configuration file
+-   More confidence that input data is correct
+-   Allows default configuration values (use with care; explicit or
+    implicit?)
+
+&nbsp;
+
+
+## When?
+
+-   For workflows in heavy reuse
+-   Large workflows
+-   For the future you
+
+&nbsp;
+
+
+## How?
+
+-   Start easy with (tabular) sample configuration files
+-   Read up on resources and examples (previous slide)
+
+
+# metadata.txt revisited
+
+
+## metadata table
+
+```{r  byoc-2020-metadata-structure, echo=FALSE, eval=TRUE, results="asis" }
+kable(data.frame(plate_id   = c(rep("plate_A", 2), rep("plate_B", 2)),
+           sample_id  = rep(seq_len(2), 2),
+           sequence   = c("AAAAAA", "CCCCCC",
+                          "AAAAAA", "CCCCCC"))) 
+```
+
+&nbsp;
+
+
+## Schema example {.fragment}
+
+<div class="fragment">
+  &nbsp;
+
 ```
     $schema: "http://json-schema.org/draft-07/schema#"
-    description: Main configuration schema
-    definitions:
-      rule:
-        type: object
-        default: {}
-        description: generic configuration for rules
-        properties:
-          options:
-            type: [string, array, object]
-            default: ""
-            items:
-              type: string
-          runtime:
-            default: 60
-            type: number
-          threads:
-            default: 1
-            type: number
-          mem_mb:
-            description: Resource that defines assigned memory
-            default: 8192
-            type: number
+    description: Define data format for metadata
+    properties:
+      plate_id:
+        description: Plate identifier
+        type: string
+        pattern: "^plate_[A-Z]$"      # restrict to this pattern
+        examples:                     # provide an example
+          - plate_A
+      sample_id:
+        description: Sample identifier
+        default: 1                    # set default value if missing data
+        type: integer
+        exclusiveMinimum: 0           # only positive integers
+      sequence:
+        description: DNA barcode sequence
+        type: string
+        pattern: "^[A,C,G,T]+$"
+      barcode_name:
+        description: DNA barcode name
+        type: string
+    required:                         # NB: barcode_name is optional!
+      - plate_id
+      - sample_id
+      - sequence
     
-    properties:
-      workflow:
-        title: Workflow section
-        description: Workflow section
-        type: object
-        default: {}
-        patternProperties:
-          '^[a-zA-Z\-_0-9]+$':
-            type: object
+    additionalProperties: false
 
 
 ```
 
-Lots of stuff here. Mentioning but a few:
-
--   **definitions:** define an object that represents a schema
--   **properties:** defines the properties of elements that make up a
-    schema
+</div>
 
 
-## Specific rule schema using main schema
+# Another example - main rule and workflow schema
 
 &nbsp;
+<div style="font-size:90%">
 
-```
-    $schema: "http://json-schema.org/draft-07/schema#"
-    description: Configuration schema for gmap workflow
-    definitions:
-      build:
-        $ref: "../config.schema.yaml#/definitions/rule"
-      map:
-        $ref: "../config.schema.yaml#/definitions/rule"
-    properties:
-      workflow/gmap:
-        title: gmap workflow configuration
-        description: gmap workflow configuration
-        type: object
-        default: {}
-        properties:
-          path:
-            type: string
-            default: "gmap"
-          build:
-            type: object
-            default: {}
-            $ref: "#/definitions/build"
-          map:
-            type: object
-            default: {}
-            $ref: "#/definitions/map"
-
-
+```{r  byoc-2020-main-schema, echo=FALSE, eval=TRUE,  comment=NA, class.source="sourceCode", class.output="sourceCode", engine='bash' }
+cat examples/schema/main.schema.yaml 
 ```
 
--   `workflow/gmap` has properties `build` and `map` that describe rule
-    configurations
--   schema definitions can be split across files and accessed with
-    `$ref`
+</div>
+More complex example:
+
+-   use **definitions** to define auxiliary schema to be **reused** and
+    **combined** later on
+-   here define subschema for a generic **rule** that consists of four
+    properties
+-   top-level property is a workflow section
 
 
-## Schema in action
+# gmap workflow schema reuses definitions from main schema
 
+&nbsp;
+<div style="font-size:90%">
 
-### Configuration
-
+```{r  byoc-2020-gmap-schema, echo=FALSE, eval=TRUE,  comment=NA, class.source="sourceCode", class.output="sourceCode", engine='bash' }
+cat examples/schema/gmap.schema.yaml 
 ```
-    workflow/gmap:
-      map:
-        threads: 10
-        runtime: 120
-      build:
-        runtime: 7200
+
+</div>
+
+-   `workflow/gmap` has properties `build` and `map` that reuse rule
+    subschema from `main.schema.yaml`
+-   access definitions in other files with `$ref`
+-   allows building complex schemas
 
 
+# Schema in action
+
+
+## Configuration
+
+```{r  byoc-2020-config-schema-ex, echo=FALSE, eval=TRUE,  comment=NA, class.source="sourceCode", class.output="sourceCode", engine='bash' }
+cat examples/schema/config.yaml 
 ```
 
 
-### Snakefile
+## Example Snakefile
 
 ```{r  byoc-2020-snakefile-schema-ex, engine='python' }
 rule gmapl_map:
@@ -666,32 +726,38 @@ rule gmapl_map:
 ```
 
 
-### config object in snakemake
+## config object in snakemake
 
 After loading configuration object will be populated with default
 values:
+<div style="font-size: 80%">
 
-```{r  byoc-2020-schema-ex-config-object, engine='python' }
-{'workflow/gmap': {'map': {'options': "",
-                           'runtime': 120,
-                           'threads': 10,
-                           'mem_mb': 8192}}} 
+```{r  byoc-2020-snakefile-config-object-schema, eval=TRUE, echo=FALSE, comment=NA, class.source="sourceCode", class.output="sourceCode", engine='bash' }
+snakemake -d examples/schema -s examples/schema/Snakefile -j 1 -F -q 
 ```
 
-
-# Snakemake profiles
-
-
-## Cluster executors
-
--   show example of slurm submission
--   use custom scripts for status command and submission script
+</div>
 
 
-## Profiles
+# Recap
 
--   config just lists options passed to snakemake
--   more advanced status handling
+&nbsp;
 
-NB: mention bug(?) in executor functions
+
+## Wildcard constraints
+
+-   use `wildcard_constraints` keyword to restrict wildcard values
+-   useful to resolve AmbiguousRule exceptions
+
+&nbsp;
+
+
+## Validation with json schema
+
+-   describe input data formats
+-   define configuration and input data properties
+-   provide description of configuration files
+
+
+# Questions?
 

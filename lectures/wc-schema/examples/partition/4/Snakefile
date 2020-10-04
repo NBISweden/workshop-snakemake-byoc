@@ -1,9 +1,11 @@
 # -*- snakemake -*-
 import pandas as pd
-chrmap = pd.read_table("chrmap.txt", header=None)
+# Import validate function from snakemake.utils
+from snakemake.utils import validate
 
-wildcard_constraints:
-    chr = "(autosome|sex|PAR)"
+chrmap = pd.read_table("chrmap.txt", header=None, names=["chr", "chrtype"])
+# Validate chrmap.txt with a schema
+validate(chrmap, "chrmap.schema.yaml")
 
 rule all:
     input: expand("{chr}.fasta", chr=chrmap[1].unique())

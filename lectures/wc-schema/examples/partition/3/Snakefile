@@ -1,9 +1,10 @@
 # -*- snakemake -*-
 import pandas as pd
-from snakemake.utils import validate
+chrmap = pd.read_table("chrmap.txt", header=None)
 
-chrmap = pd.read_table("chrmap.txt", header=None, names=["chr", "chrtype"])
-validate(chrmap, "chrmap.schema.yaml")
+# Constrain 'chr' wildcard to three allowed values
+wildcard_constraints:
+    chr = "(autosome|sex|PAR)"
 
 rule all:
     input: expand("{chr}.fasta", chr=chrmap[1].unique())

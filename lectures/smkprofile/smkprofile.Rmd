@@ -1,0 +1,140 @@
+---
+title:
+author: Per Unneberg
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+  revealjs::revealjs_presentation:
+    css: reveal.css
+    includes:
+      in_header: footer.html
+    self_contained: true
+    highlight: tango
+    fig_width: 10
+    fig_height: 8
+    fig_caption: false
+    toc: true
+    toc_depth: 2
+    slide_level: 1
+    reveal_options:
+      slideNumber: true
+      previewLinks: true
+      minScale: 1
+      maxScale: 1
+      height: 1400
+      width: 1200
+---
+
+```{r  snakemake-byoc-2020-knitr, echo=FALSE, eval=TRUE, include=TRUE }
+library(knitr)
+knitr::opts_chunk$set(warning = FALSE, message = FALSE,
+                      fig.width=12, fig.height=10, autodep=TRUE, echo=TRUE,
+                      cache=FALSE, include=TRUE, eval=FALSE, tidy=FALSE, error=TRUE,
+                      class.source = "numberLines lineAnchors",
+                      class.output = c("numberLines lineAnchors chunkout"))
+knitr::knit_hooks$set(inline = function(x) {
+                      prettyNum(x, big.mark=" ")
+}) 
+```
+
+```{r  snakemake-byoc-2020-libs, echo=FALSE, eval=TRUE, cache=FALSE }
+library(ggplot2)
+library(viridis)
+bw <- theme_bw(base_size=24) %+replace% theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))
+theme_set(bw) 
+```
+
+#
+
+<div>
+<section>
+<h1 class="title">Snakemake BYOC 2020</h1>
+<h2 class="subtitle">Snakemake profiles</h2>
+<h2 class="author">Per Unneberg</h2>
+<h3 class="date">2020-10-06</h3>
+</section>
+</div>
+
+
+# Contents
+
+<div style="padding:100px">
+<h3>Cluster execution</h3>
+<h3>Snakemake profiles</h3>
+</div>
+
+<div class="fragment" style="padding:100px">
+<h3>Setup</h3>
+
+-   Very simple examples with snakefiles and code to run
+-   All snakefiles and code is available in code repository (show path)
+-   NB: slurm examples are run on uppmax (or use docker?)
+
+</div>
+
+<div class="fragment">
+<h3>Examples</h3>
+
+All examples are available in lecture repository
+<https://github.com/NBISweden/workshop-snakemake-byoc> under
+`lectures/smkprofile`
+
+<div>
+
+
+# Cluster execution
+
+From <https://snakemake.readthedocs.io/en/stable/executing/cluster.html>:
+
+> Snakemake can make use of cluster engines that support shell scripts
+> and have access to a common filesystem, (e.g. the Sun Grid Engine). In
+> this case, Snakemake simply needs to be given a submit command that
+> accepts a shell script as first positional argument:
+
+```{r  byoc-2020-cluster-exec-example, engine='bash' }
+snakemake --cluster qsub -j 32 
+```
+
+&nbsp;
+
+
+## Important cluster command options
+
+-   **&#x2013;cluster CMD:** execute snakemake rule with submit command; can be
+    decorated e.g. `$ snakemake --cluster 'sbatch -c {threads}'`
+-   **&#x2013;jobscript SCRIPT:** Provide a custom job script for submission to
+    the cluster
+-   **&#x2013;cluster-status STATUS:** status command for cluster execution to
+    determine if job has finished
+
+
+# Example Snakefile
+
+Simple Snakefile, two rules, one timeout. Successively add important
+options mentioned in previous slide which leads up to docker
+profiles&#x2026;
+
+
+# Cluster execution example
+
+Run only with &#x2013;cluster sbatch&#x2026;
+
+
+# Modifying the jobscript
+
+
+# Checking cluster status
+
+
+# SnakemakeProfiles
+
+
+# slurm profile
+
+#
+
+<div>
+<section>
+<h1 class="title">Questions?</h1>
+</section>
+</div>
+

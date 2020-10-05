@@ -62,21 +62,37 @@ Analysis may depend on for instance:
 
 # Case in point
 
-[nbis-meta](https://github.com/NBISweden/nbis-meta): a workflow for metagenomic projects
+[nbis-meta](https://github.com/NBISweden/nbis-meta) - a workflow for metagenomic projects
 
-Takes fastq files as input, and can do:
+**Input:** paired and/or single-end fastq files
 
-- preprocessing, incl.
+**Analysis steps:**
+
+--
+- preprocessing, *e.g.*
   - rRNA filtering
   - adapter and/or quality trimming
   - de-duplication
 
-followed by *e.g.*:
-
+--
 - *de novo* assembly
-- functional/taxonomic annotation
+
+--
+- functional annotation, *e.g*
+  - eggNOG
+  - pfam
+  - resistance genes
+
+--
+- taxonomic annotation
+
+--
 - genome binning
+
+--
 - read-based classification
+
+--
 - taxonomic profiles
 
 ---
@@ -86,6 +102,8 @@ followed by *e.g.*:
 --
 
 **Step 1**: Use booleans in your config as on/off switches
+
+.small[[nbis-meta/config/config.yaml](https://github.com/NBISweden/nbis-meta/blob/master/config/config.yaml)]
 
 .small[*e.g.* for annotation:]
 
@@ -110,6 +128,8 @@ annotation:
 # How to choose output
 
 **Step 1**: Use booleans in your config as on/off switches
+
+.small[[nbis-meta/config/config.yaml](https://github.com/NBISweden/nbis-meta/blob/master/config/config.yaml)]
 
 .small[Program-specific parameters can be specified separately in the config file]
 
@@ -145,6 +165,8 @@ taxonomy:
 # How to choose output
 
 **Step 2**: Use [functions](https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#functions-as-input-files) to figure out what the workflow will do.
+
+.small[[nbis-meta/workflow/Snakefile](https://github.com/NBISweden/nbis-meta/blob/master/workflow/Snakefile)]
 
 ```python
 ##### master target rule #####
@@ -188,6 +210,8 @@ Here, the function `all_input` uses a couple of `if` statements and the function
 
 **Step 2**: Use [functions](https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#functions-as-input-files) to figure out what the workflow will do.
 
+.small[[nbis-meta/workflow/scripts/common.py](https://github.com/NBISweden/nbis-meta/blob/master/workflow/scripts/common.py)]
+
 ```python
 def annotation_input(config, assemblies):
     input = []
@@ -206,6 +230,8 @@ The functions may return empty lists, *e.g.* if the configuration does not speci
 # How to choose output
 
 **Step 3 (optional)**: Use target rules with proper naming to aid user experience
+
+.small[[nbis-meta/workflow/rules/annotation.smk](https://github.com/NBISweden/nbis-meta/blob/master/workflow/rules/annotation.smk)]
 
 ```python
 rule annotate:
@@ -229,10 +255,7 @@ Job counts:
         1       download_pfam_info
         1       download_rfams
         12      featurecount_pe
-        4       featurecount_se
-        4       generate_megahit_input
-        4       infernal
-        7       link_files
+        ...
         4       megahit
         16      normalize_featurecount
         4       parse_pfam

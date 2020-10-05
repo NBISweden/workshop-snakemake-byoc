@@ -6,6 +6,7 @@ wildcard_constraints:
         sec = "\d+"
 
 rule sleep:
-    output: "sleep_{sec}.txt"
+    output: "shadow_sleep_{sec}.txt"
     threads: 1
+    shadow: "minimal"
     shell: "for i in $(seq 1 {wildcards.sec}); do echo $i >> {output}; sleep 1; done"

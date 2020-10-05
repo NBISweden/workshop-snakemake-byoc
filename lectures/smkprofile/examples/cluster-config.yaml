@@ -1,0 +1,9 @@
+__default__:
+  time: 10
+  partition: devel
+  cpus-per-task: 1
+  
+sleep:
+  time: 1
+  cpus-per-task: 3
+  

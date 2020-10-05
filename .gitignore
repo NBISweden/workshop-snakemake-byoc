@@ -1,0 +1,19 @@
+# HTML and PDF files
+*.html
+*.pdf
+
+# Conda environments
+*-env
+
+# Xaringan build files
+*_files
+
+# Snakemake files
+**/.snakemake
+
+# Other files
+**/.Rhistory
+**/.DS_Store
+workshop-common
+.DS_Store
+lectures/*/*.html

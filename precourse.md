@@ -26,7 +26,8 @@ The workshop is held entirely online and we will work with the following tools:
 - Please download and install ([Zoom](https://zoom.us/)) and test your
   sound and webcam before the workshop starts as we want to make sure we can see
   and hear each other during the workshop.
-- We will send out a link to all accepted participants to join
+- If you already have a Zoom installation, please update it to the latest version.
+- We have sent out a link to all accepted participants to join
   a [Slack](https://slack.com/) workspace for the workshop. You can choose to
   download and install the app or to run it in your browser.
 

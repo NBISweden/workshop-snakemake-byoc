@@ -1,0 +1,181 @@
+---
+title: "Snakemake 'bring-your-own-code' workshop"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+    xaringan::moon_reader:
+        self-contained: true
+        seal: false
+        css: ["default", "../template.css"]
+        nature:
+            slideNumberFormat: ""
+---
+
+layout: true
+<div class="scilife-logo"></div>
+<div class="nbis-logo"></div>
+
+---
+
+class: center, middle
+
+.HUGE[Welcome to the]
+<br>
+<br>
+.HUGE[Snakemake]
+<br>
+.HUGE[_bring-your-own-code_]
+<br>
+.HUGE[Workshop]
+
+```{r Setup, echo = FALSE, message = FALSE}
+# Knitr setup
+knitr::opts_chunk$set(message = FALSE,
+                      warning = FALSE)
+
+# Load packages
+library("dplyr")
+library("kableExtra")
+```
+
+---
+
+# Your Instructors
+
+.pull-left[
+<img src="john-sundh.jpg" width=50%/>
+<br>
+.small[John]
+
+<img src="per-unneberg.jpg" width=40%/>
+<br>
+.small[Per]
+]
+
+.pull-right[
+<img src="erik-fasterius.jpg" width=50%/>
+<br>
+.small[Erik]
+
+<img src="verena-kutschera.jpg" width=50%/>
+<br>
+.small[Verena]
+]
+
+---
+
+# Zoom etiquette
+
+* Please keep your .green[webcam] on, unless you have problems with your internet connection
+
+
+* .green[Lectures]
+    * Please stay muted
+    * If you have a question, use the raise-your-hand function (via "Participants") or post your question on slack (#.green[lectures] channel)
+
+
+* .green[Breakout rooms]
+    * Feel free to stay unmuted, unless there is a lot of background noise
+
+
+---
+
+# Slack
+
+* Please join the Slack workspace (.green[nbissnakemakebyoc.slack.com], link is _e.g._ in the last email)
+
+.center[<img src="slack.png", width=40%/>]
+
+--
+
+* Here we will post announcements (#.green[general] channel) and lecture slides (#.green[lectures] channel)
+
+--
+
+* If you are kicked out of zoom or have other zoom-related issues, contact us in the #.green[zoom-issues] channel
+
+--
+
+* You can ask snakemake questions to everyone in the #.green[snakemake-issues] channel
+
+--
+
+* Each group has their own channel, too (#.green[group-1], #.green[group-2], #.green[group-3])
+
+---
+
+# Schedule
+
+.center[<img src="day1.png", width=100%/>]
+
+---
+
+# Schedule
+
+.center[<img src="day2.png", width=100%/>]
+
+---
+
+# Schedule
+
+.center[<img src="day3.png", width=100%/>]
+
+---
+
+# Breakout room groups
+
+Group 1:
+* .green[John], Margherita, Jonas, Rashmi
+
+Group 2:
+* .green[Per], Prasoon, George, Valentina
+
+Group 3:
+* .green[Erik], Daniel, Johan, Julie
+
+---
+
+# Breakout room feedback session (today)
+
+* You will be in a .green[breakout room] with your group (incl. your instructor)
+
+* Each of you .green[presents] their project to your group
+
+* You have .green[30 minutes], incl. questions and feedback from your group
+
+* This will hopefully help you to find a .green[starting point] to work on your project
+
+.center[<img src="windows-p74ndnYWRY4-unsplash.jpg" width=50%/>]
+
+---
+
+# Breakout room coding sessions (days 2 and 3)
+
+* You will be in a .green[breakout room] with your group (incl. your instructor)
+
+* There, you will each .green[work individually] on your project
+
+* You can .green[ask questions] whenever you need help
+
+* Your instructor will try to help, but all participants are encouraged to .green[help each other]
+
+.center[<img src="john-schnobrich-FlPc9_VocJ4-unsplash.jpg" width=50%/>]
+
+---
+
+# Feedback sessions (days 2 and 3)
+
+* At the end of each day, after the coding sessions
+
+* In the main zoom room
+
+* Time to .green[discuss open questions] that were difficult to solve in the groups or any .green[interesting insights] about Snakemake
+
+.center[<img src="cx-insight-YloghyfD7e8-unsplash.jpg" width=50%/>]
+
+---
+
+class: center, middle
+
+.HUGE[Questions?]
+
+---

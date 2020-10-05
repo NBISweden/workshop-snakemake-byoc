@@ -1,0 +1,222 @@
+---
+title: "An Example Snakemake Workflow"
+subtitle: "Snakemake BYOC NBIS course"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+    xaringan::moon_reader:
+        self-contained: true
+        seal: false
+        css: ["default", "../template.css"]
+        nature:
+            slideNumberFormat: ""
+---
+
+layout: true
+<div class="scilife-logo"></div>
+<div class="nbis-logo"></div>
+
+---
+
+class: center, middle
+
+.HUGE[An Example Snakemake Workflow]
+
+
+```{r Setup, echo = FALSE, message = FALSE}
+# Knitr setup
+knitr::opts_chunk$set(message = FALSE,
+                      warning = FALSE)
+
+# Load packages
+library("dplyr")
+library("kableExtra")
+```
+
+---
+
+# The Genome Erosion Workflow
+
+* Developed in a LTS project with Love Dalén's lab (Centre for Palaeogenetics, SU & NRM)
+
+--
+
+* Compares population genomics statistics from historical and modern samples of endangered populations
+
+.center[<img src="sumatran_rhino_3_2016-07-13.jpg" width=40%/>]
+.center[.tiny[Sumatran rhinoceros (_Dicerorhinus sumatrensis_), critically endangered]]
+--
+
+* Data processing from fastq files to BAM & VCF files plus downstream population genomics analyses
+
+---
+
+# The Genome Erosion Workflow
+
+* Historical and modern samples are processed in parallel
+
+--
+
+* Whole-genome resequencing data from historical/ancient samples needs special processing as DNA degrades over time
+
+--
+
+* Some analyses or filtering steps are run separately for modern and historical samples, or only for historical samples
+
+---
+
+# Analysis Tracks of the Workflow
+
+* .green[Data processing track]
+    * Repeat element identification
+    * Fastq file processing \*
+    * _Optional:_ mapping to mitochondrial genomes \*
+    * Mapping to reference genome \*
+    * BAM file processing \*
+    * _Optional:_ base quality rescaling for historical samples \*
+    * _Optional:_ subsampling to target depth \*
+    * Genotyping
+    * _Optional:_ CpG site identification
+
+
+\*_Steps of the workflow with different treatment of modern and historical samples_
+
+---
+
+# Analysis Tracks of the Workflow
+
+* .green[BAM file track]
+    * mlRho
+        * _Optional:_ analyze sex chromosomes separately
+        * _Optional:_ remove CpG sites
+
+
+* .green[VCF file track]
+    * _Optional:_ CpG filtering
+    * VCF file processing & merging per dataset
+    * _Optional:_ PCA, Runs of homozygosity (ROH), snpEff
+
+
+* .green[GERP++ score track]
+    * GERP++ score calculation from reference genome and genomes of outgroup species
+
+---
+
+# The Workflow Structure
+
+* Rules with the actual analyses in separate snakefiles
+
+--
+
+* Snakefile
+    * Python code to create sample and readgroup ID dictionaries & lists 
+        * From metadata tables and a config file
+    * ”include” of rule snakefiles
+    * ”all” rule collecting output files produced by the different snakefiles
+
+--
+
+* UPPMAX / slurm system: cluster.yaml file (_! deprecated !_)
+
+---
+
+# The Workflow Structure
+
+* Metadata files (to be created by users)
+    * Sample IDs, readgroup IDs, sequencing technology, paths to fastq files
+    * Separate files for modern and historical samples
+
+--
+
+* Example `historical_samples.txt` file:
+
+```{r Metadata structure, echo = FALSE}
+# Function for creating tables
+create_table <- function(data, full_width = TRUE) {
+    data %>%
+        kable() %>%
+        kable_styling(bootstrap_options = c("basic", "hover"),
+                      font_size         = 10,
+                      fixed_thead       = TRUE,
+                      full_width        = full_width,
+                      position          = "center")
+}
+
+# Define and show metadata
+metadata <- data.frame(samplename_index_lane    = c("VK01_01_L2","VK01_02_L2"),
+                       readgroup_id             = c("BHYOX3ALTH.L2.01","BHYOX3ALTH.L2.02"),
+                       readgroup_platform       = c(rep("illumina",2)),
+                       path_to_R1_fastq         = c("data/S1/P01_2.R1.fq.gz","data/S1/P02_2.R1.fq.gz"),
+                       path_to_R2_fastq         = c("data/S1/P01_2.R2.fq.gz","data/S1/P02_2.R2.fq.gz"))
+create_table(metadata)
+```
+
+--
+
+* The metadata tables are parsed with Python code (in the main Snakefile) to generate sample lists for the workflow
+
+---
+
+# The Workflow Structure
+
+* Config file (to be edited by users)
+    * Set different workflow steps to True or False 
+        * The corresponding rules snakefiles are attached to the workflow using ”include” in the main Snakefile
+    * Lists with samples for optional analyses
+    * Parameters for different rules
+
+--
+
+```{python config file data, eval = FALSE}
+#################################################################
+# Configuration settings for the genome erosion workflow v3.0   #
+# for ancient or historical samples, and modern samples         #
+#################################################################
+
+#################################################################
+# 1) Full path to reference genome assembly.
+# Reference genome has to be checked for short and concise fasta 
+# headers without special characters. 
+# File name extension can be ".fasta" or ".fa".
+ref_path: ""
+#################################################################
+
+
+#################################################################
+# 2) Relative paths (from the main snakemake directory) to metadata tables of samples.
+# Example files can be found in "config/"
+historical_samples: "" # leave empty ("") if not run for historical samples.
+modern_samples: "" # leave empty ("") if not run for modern samples. 
+#################################################################
+```
+
+---
+
+# The Workflow Structure
+
+* Config file (to be edited by users)
+
+```{python config file mapDamage, eval = FALSE}
+#####
+# OPTIONAL: 
+# Run mapDamage2 on historical samples specified in the list "historical_rescaled_samplenames" below.
+# Will rescale base qualities at potentially damaged sites and 
+# calculate statistics on ancient DNA damage patterns in realigned bam files.
+historical_bam_mapDamage: False
+
+# List of historical samples on which mapDamage2 should be run. 
+# Sample names without lane or index number in quotation marks, 
+# separated by commas (e.g. ["VK01", "VK02", "VK03"]).
+# List has to be left empty ([]) if mapDamage2 is not run.
+# Keep the list of sample names for the entire workflow run 
+# if rescaled BAM files should be used in downstream analyses.
+historical_rescaled_samplenames: []
+#####
+```
+
+---
+
+class: center, middle
+
+.HUGE[Questions?]
+
+---

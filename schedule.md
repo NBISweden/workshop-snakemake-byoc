@@ -6,7 +6,6 @@ title:  'Schedule'
 # Schedule
 
 ### Monday 2020-10-05
-
 **09.00 - 09.10** Welcome and introduction
 
 **09.10 - 10.10** Lectures 
@@ -47,4 +46,5 @@ title:  'Schedule'
 **09.35 - 12.00** Breakout rooms: coding session (incl. *break*)
 
 **12.00** Feedback session for open questions & final wrap-up
+
 **ca. 12.30** End of the workshop

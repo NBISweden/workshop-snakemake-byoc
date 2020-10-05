@@ -17,3 +17,11 @@ the command line:
 ```bash
 Rscript -e 'rmarkdown::render(<Rmd-file>, "xaringan::moon_reader")'
 ```
+
+### revealjs lectures
+
+Lectures in subfolders `smkprofile` and `wc-schema` are created with [revealjs](https://revealjs.com) and can be rendered as follows:
+
+```bash
+Rscript -e 'rmarkdown::render(<Rmd-file>)'
+```

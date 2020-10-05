@@ -26,3 +26,6 @@ dependencies:
     - r-reticulate=1.16
     - r-xaringan=0.15
     - phantomjs=2.1
+
+    # revealjs
+    - r-revealjs

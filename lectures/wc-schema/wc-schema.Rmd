@@ -573,6 +573,8 @@ snakemake -d examples/partition/4 -s examples/partition/4/Snakefile -F -j 1
 
 -   <https://json-schema.org/understanding-json-schema/>
 -   <https://cswr.github.io/JsonSchema/>
+-   schemas in <https://github.com/snakemake-workflows> (e.g. [variant
+    calling schema](https://github.com/snakemake-workflows/dna-seq-gatk-variant-calling/tree/master/schemas))
 
 
 # The why, when and how - my 5 cents

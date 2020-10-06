@@ -2,6 +2,7 @@ name: lectures
 
 channels:
     - conda-forge
+    - bioconda
     - defaults
     - r
 
@@ -26,3 +27,8 @@ dependencies:
     - r-reticulate=1.16
     - r-xaringan=0.15
     - phantomjs=2.1
+
+    # revealjs
+    - r-revealjs
+    - r-viridis
+    - seqtk

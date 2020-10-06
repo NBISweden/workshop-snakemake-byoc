@@ -1,0 +1,6 @@
+workflow/gmap:
+  map:
+    threads: 10
+    runtime: 120
+  build:
+    runtime: 7200

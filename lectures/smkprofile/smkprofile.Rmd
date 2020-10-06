@@ -1,0 +1,659 @@
+---
+title:
+author: Per Unneberg
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+  revealjs::revealjs_presentation:
+    css: reveal.css
+    includes:
+      in_header: footer.html
+    self_contained: true
+    highlight: tango
+    fig_width: 10
+    fig_height: 8
+    fig_caption: false
+    toc: true
+    toc_depth: 2
+    slide_level: 1
+    reveal_options:
+      slideNumber: true
+      previewLinks: true
+      minScale: 1
+      maxScale: 1
+      height: 1400
+      width: 1200
+---
+
+```{r  snakemake-byoc-2020-knitr, echo=FALSE, eval=TRUE, include=TRUE }
+library(knitr)
+knitr::opts_chunk$set(warning = FALSE, message = FALSE,
+                      fig.width=12, fig.height=10, autodep=TRUE, echo=TRUE,
+                      cache=FALSE, include=TRUE, eval=FALSE, tidy=FALSE, error=TRUE,
+                      class.source = "numberLines lineAnchors",
+                      class.output = c("numberLines lineAnchors chunkout"))
+knitr::knit_hooks$set(inline = function(x) {
+                      prettyNum(x, big.mark=" ")
+}) 
+```
+
+```{r  snakemake-byoc-2020-libs, echo=FALSE, eval=TRUE, cache=FALSE }
+library(ggplot2)
+library(viridis)
+bw <- theme_bw(base_size=24) %+replace% theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))
+theme_set(bw) 
+```
+
+#
+
+<div>
+<section>
+<h1 class="title">Snakemake BYOC 2020</h1>
+<h2 class="subtitle">Cluster execution and Snakemake profiles</h2>
+<h2 class="author">Per Unneberg</h2>
+<h3 class="date">2020-10-07</h3>
+</section>
+</div>
+
+
+# Contents
+
+<div style="padding:100px">
+<h3>Cluster execution</h3>
+<h3>Snakemake profiles</h3>
+</div>
+
+<div class="fragment" style="padding:100px">
+<h3>Setup</h3>
+
+-   Very simple examples with snakefiles and code to run
+-   All snakefiles and code is available in code repository (show path)
+-   NB: slurm examples are run on uppmax!
+
+</div>
+
+<div class="fragment">
+<h3>Examples</h3>
+
+All examples are available in lecture repository
+<https://github.com/NBISweden/workshop-snakemake-byoc> under
+`lectures/smkprofile`
+
+<div>
+
+
+# Cluster execution
+
+From <https://snakemake.readthedocs.io/en/stable/executing/cluster.html>:
+
+> Snakemake can make use of cluster engines that support shell scripts
+> and have access to a common filesystem, (e.g. the Sun Grid Engine). In
+> this case, Snakemake simply needs to be given a submit command that
+> accepts a shell script as first positional argument:
+
+```{r  byoc-2020-cluster-exec-example, engine='bash' }
+snakemake --cluster qsub -j 32 
+```
+
+&nbsp;
+
+
+## Important cluster command options
+
+-   **&#x2013;cluster CMD:** execute snakemake rule with submit command; can be
+    decorated e.g. `$ snakemake --cluster 'sbatch -c {threads}'`
+-   **&#x2013;jobscript SCRIPT:** Provide a custom job script for submission to
+    the cluster
+-   **&#x2013;cluster-status STATUS:** status command for cluster execution to
+    determine if job has finished
+
+
+# Cluster execution example
+
+
+## Snakefile
+
+```{r  byoc-2020-slurm-snakefile, code=readLines('examples/1/Snakefile'), engine='python' }
+ 
+```
+
+
+## Slurm cluster execution
+
+```{r  byoc-2020-slurm-exec-1, engine='bash' }
+module load snakemake
+snakemake --cluster "sbatch -A $ACCOUNT -p devel -n 1 -t 00:01:00" sleep_10.txt -j 1  -d examples/1 -s examples/1/Snakefile -F & 
+```
+
+
+## squeue
+
+```{r  byoc-2020-slurm-exec-1-squeue, engine='bash' }
+squeue -u $USER -A $ACCOUNT -l 
+```
+
+```
+       JOBID PARTITION     NAME     USER    STATE       TIME TIME_LIMI  NODES NODELIST(REASON)
+    15816917     devel snakejob    perun  PENDING       0:00      1:00      1 (Resources)
+
+
+```
+
+
+# Modifying the jobscript
+
+
+## The jobscript
+
+Snakemake wraps the rule in a `jobscript` which by default is located
+at `/path/to/snakemake_installation/jobscript.sh`:
+<small>
+
+```{r  byoc-2020-show-snakemake-install-path, eval=TRUE, comment=NA, engine='bash' }
+SMKPATH=$(python -c "import os; import snakemake; print(os.path.dirname(snakemake.__file__))")
+## NB: for newer snakemake versions the path is $SMKPATH/executors/jobscript.sh
+cat $SMKPATH/jobscript.sh 
+```
+
+</small>
+
+A custom jobscript can be provided with the `--jobscript` option.
+
+
+## An active jobscript
+
+Generated jobscripts are output to a temporary directory in
+`.snakemake` and can be accessed if the job is active or has failed:
+<small>
+
+```{r  byoc-2020-cat-jobscript, engine='bash' }
+cat  examples/1/.snakemake/tmp.oihhb07u/snakejob.sleep.0.sh 
+```
+
+<div style="width:1200px;">
+
+```
+    #!/bin/sh
+    # properties = {"type": "single", "rule": "sleep", "local": false, "input": [], "output": ["sleep_10.txt"], "wildcards": {"sec": "10"}, "params": {}, "log": [], "threads": 1, "resources": {}, "jobid": 0, "cluster": {}}
+     cd /domus/h1/perun/teaching/workshop-snakemake-byoc/lectures/smkprofile/examples/1 && \
+    /sw/comp/python/3.7.2_rackham/bin/python3.7 \
+    -m snakemake sleep_10.txt --snakefile /domus/h1/perun/teaching/workshop-snakemake-byoc/lectures/smkprofile/examples/1/Snakefile \
+    --force -j --keep-target-files --keep-remote \
+    --wait-for-files /domus/h1/perun/teaching/workshop-snakemake-byoc/lectures/smkprofile/examples/1/.snakemake/tmp.oihhb07u --latency-wait 5 \
+     --attempt 1 --force-use-threads \
+    --wrapper-prefix https://github.com/snakemake/snakemake-wrappers/raw/ \
+    --directory /domus/h1/perun/teaching/workshop-snakemake-byoc/lectures/smkprofile/examples/1   --allowed-rules sleep --nocolor --notemp --no-hooks --nolock \
+    --mode 2  && touch /domus/h1/perun/teaching/workshop-snakemake-byoc/lectures/smkprofile/examples/1/.snakemake/tmp.oihhb07u/0.jobfinished || (touch /domus/h1/perun/teaching/workshop-snakemake-byoc/lectures/smkprofile/examples/1/.snakemake/tmp.oihhb07u/0.jobfailed; exit 1)
+
+
+```
+
+</div>
+</small>
+
+
+# Cluster status and missing errors
+
+
+## Motivation: some errors go undetected
+
+```{r  byoc-2020-timeout-example, engine='bash' }
+snakemake -d examples/1 -s examples/1/Snakefile --cluster "sbatch -A $ACCOUNT -p devel -n 1 -t 00:01:00" sleep_90.txt -j 1 -F 
+```
+
+```
+    Building DAG of jobs...
+    Using shell: /usr/bin/bash
+    Provided cluster nodes: 1
+    Job counts:
+    	count	jobs
+    	1	sleep_90
+    	1
+    
+    [Mon Oct  5 17:11:22 2020]
+    rule sleep:
+        output: sleep_90.txt
+        jobid: 0
+    
+    Submitted job 0 with external jobid 'Submitted batch job 15817155'.
+      C-c C-cTerminating processes on user request, this might take some time.
+    Will exit after finishing currently running jobs.
+
+
+```
+
+Snakemake never returns from status page since it cannot determine
+whether job completed successfully.
+
+
+# Checking cluster status with custom script
+
+
+## Custom status script
+
+```{r  byoc-2020-cluster-status-script, code=readLines("examples/1/cluster-status.py"), engine='python' }
+ 
+```
+
+
+## Results
+
+<small>
+
+```{r  byoc-2020-timeout-example-with-status, engine='bash' }
+snakemake -d examples/1 -s examples/1/Snakefile --cluster "sbatch -A $ACCOUNT -p devel -n 1 -t 00:01:00 --parsable" sleep_90.txt -j 1 -F --cluster-status ./cluster-status.py 
+```
+
+<div style="width:1200px;">
+
+```
+    Building DAG of jobs...
+    <------
+    ....
+    ------->
+    Submitted job 0 with external jobid '15817459'.
+    [Mon Oct  5 19:07:35 2020]
+    Error in rule sleep:
+        jobid: 0
+        output: sleep_90.txt
+        shell:
+            for i in $(seq 1 90); do echo $i >> sleep_90.txt; sleep 1; done
+            (one of the commands exited with non-zero exit code; note that snakemake uses bash strict mode!)
+        cluster_jobid: 15817459
+    
+    Error executing rule sleep on cluster (jobid: 0, external: 15817459, jobscript: /domus/h1/perun/teaching/workshop-snakemake-byoc/lectures/smkprofile/examples/1/.snakemake/tmp.9od4w1lk/snakejob.sleep.0.sh). For error details see the cluster log and the log files of the involved rule(s).
+    Shutting down, this might take some time.
+    Exiting because a job execution failed. Look above for error message
+    Complete log: /domus/h1/perun/teaching/workshop-snakemake-byoc/lectures/smkprofile/examples/1/.snakemake/log/2020-10-05T190533.034527.snakemake.log
+
+
+```
+
+</div>
+</small>
+
+
+# Using a custom job submissions script
+
+-   upon submission, snakemake formats a string `{submitcmd} "{jobscript}"` where
+    `submitcmd` is constructed from the `--cluster` argument and `jobscript` from `--jobscript`
+-   until now we have used `sbatch` as argument to `--cluster`
+
+
+## A custom job submission script
+
+```{r  byoc-2020-custom-job-submission-script, code=readLines("examples/1/submit-script.py"), engine='python' }
+ 
+```
+
+
+## Results
+
+```{r  byoc-2020-custom-submit, engine='bash' }
+snakemake -d examples/1 -s examples/1/Snakefile --cluster ./submit-script.py sleep_10.txt -j 1 -F --cluster-status ./cluster-status.py
+## Grab job id and run
+sacct -u $USER --format State,JobID,JobName,AllocCPUS -j 15817959 
+```
+
+<div style="width:1200px;">
+
+```
+         State        JobID    JobName  AllocCPUS 
+    ---------- ------------ ---------- ---------- 
+     COMPLETED 15817959     snakejob.+          2 
+     COMPLETED 15817959.ba+      batch          2 
+     COMPLETED 15817959.ex+     extern          2 
+
+
+```
+
+</div>
+
+
+# SnakemakeProfiles (<https://github.com/Snakemake-Profiles>)
+
+
+## About
+
+A Snakemake profile specifies a particular configuration (see [profile
+readthedocs](https://snakemake.readthedocs.io/en/stable/executing/cli.html#profiles)). Running
+
+```{r  byoc-2020-profile-option, engine='bash' }
+snakemake --profile myprofile 
+```
+
+will load a profile stored in the folder `myprofile`, which unless it
+resides in the working directory defaults to
+`$HOME/.config/snakemake/myprofile` (or similar).
+
+
+## Minimum config
+
+At a minimum it contains a `config.yaml` file with key-value pairs
+corresponding to command line arguments:
+
+```
+    cluster: sbatch -A $ACCOUNT -p core -n 1 -t 00:10:00
+    jobs: 10
+
+
+```
+
+The above example would use `sbatch` as cluster argument and submit 10
+parallel `jobs` at a time.
+
+
+## Additional files
+
+The profile can also contain auxiliary files, such as submission
+scripts, which can be accessed via the command line options in the
+`config.yaml` file:
+
+```
+    cluster-status: "cluster-status.py"
+
+
+```
+
+
+# slurm profile
+
+<https://github.com/Snakemake-Profiles/slurm>
+
+
+## Setting up
+
+```
+    $ cd examples
+    $ cookiecutter https://github.com/Snakemake-Profiles/slurm.git
+    You've downloaded /home/perun/.cookiecutters/slurm before. Is it okay to delete and re-download it? [yes]: profile_name [slurm]: 
+    sbatch_defaults []: --account=$ACCOUNT --output=logs/slurm-%j.out --error=logs/slurm-%j.err
+    cluster_config []: ../cluster-config.yaml
+    Select advanced_argument_conversion:
+    1 - no
+    2 - yes
+    Choose from 1, 2 [1]: 2
+
+
+```
+
+```{r  byoc-2020-slurm-profile, eval=TRUE, engine='bash' }
+ls -l examples/slurm 
+```
+
+
+# Configuring jobs with cluster configuration
+
+
+## Cluster configuration
+
+Configure jobs with `--cluster-config`
+
+```{r  byoc-2020-cluster-config, echo=FALSE, eval=TRUE,  comment=NA, class.source="sourceCode", class.output="sourceCode", engine='bash' }
+cat examples/cluster-config.yaml 
+```
+
+
+## Running
+
+```{r  byoc-2020-snakemake-profile-run, engine='bash' }
+snakemake -d examples/1 -s examples/1/Snakefile --profile examples/slurm sleep_10.txt -j 10 -F
+sacct -u $USER --format State,JobID,JobName,AllocCPUS -j 15818130 
+```
+
+```
+         State        JobID    JobName  AllocCPUS 
+    ---------- ------------ ---------- ---------- 
+       PENDING 15818130     snakejob.+          3 
+
+
+```
+
+
+## BEWARE! cluster configuration is deprecated!
+
+<small>
+<div style="width:1200px;">
+
+```
+    --cluster-config FILE, -u FILE
+                            A JSON or YAML file that defines the wildcards used in 'cluster'for specific rules, instead of having them specified in the Snakefile. For example, for rule 'job' you may define: { 'job' : { 'time' :
+                            '24:00:00' } } to specify the time for rule 'job'. You can specify more than one file. The configuration files are merged with later values overriding earlier ones. This option is deprecated in favor of
+                            using --profile, see docs. (default: [])
+
+
+```
+
+</div>
+</small>
+
+
+# Solving timeout with shadow rules
+
+
+## Timeout issue again
+
+Unfortunately snakemake does not remove incomplete output sleep\_90.txt
+(NB: this is a snakemake issue! Feature or bug? Dunno).
+
+```{r  byoc-2020-profile-timeout, engine='bash' }
+snakemake -d examples/1 -s examples/1/Snakefile --profile examples/slurm sleep_90.txt -j 10 
+```
+
+```
+    Building DAG of jobs...
+    Nothing to be done.
+
+
+```
+
+
+## Workaround: shadow rule
+
+With the `shadow` directive the rule runs in executed temporary
+directories (default `.snakemake/shadow`)
+<small>
+<div style="width:1200px;">
+
+```{r  byoc-2020-profile-shadow, engine='bash' }
+snakemake -d examples/shadow -s examples/shadow/Snakefile --profile examples/slurm shadow_sleep_90.txt -j 10 
+```
+
+```
+    Building DAG of jobs...
+    Using shell: /usr/bin/bash
+    Provided cluster nodes: 10
+    Job counts:
+    	count	jobs
+    	1	sleep
+    	1
+    
+    [Mon Oct  5 23:36:39 2020]
+    rule sleep:
+        output: shadow_sleep_90.txt
+        jobid: 0
+        wildcards: sec=90
+    
+    Submitted job 0 with external jobid '15818142'.
+    [Mon Oct  5 23:38:41 2020]
+    Error in rule sleep:
+        jobid: 0
+        output: shadow_sleep_90.txt
+        shell:
+            for i in $(seq 1 90); do echo $i >> shadow_sleep_90.txt; sleep 1; done
+            (one of the commands exited with non-zero exit code; note that snakemake uses bash strict mode!)
+        cluster_jobid: 15818142
+    
+    Error executing rule sleep on cluster (jobid: 0, external: 15818142, jobscript: /domus/h1/perun/teaching/workshop-snakemake-byoc/lectures/smkprofile/examples/shadow/.snakemake/tmp.lir98c26/snakejob.sleep.0.sh). For error details see the cluster log and the log files of the involved rule(s).
+    Trying to restart job 0.
+    
+    [Mon Oct  5 23:38:42 2020]
+    rule sleep:
+        output: shadow_sleep_90.txt
+        jobid: 0
+        wildcards: sec=90
+    
+    Submitted job 0 with external jobid '15818144'.
+    ...
+
+
+```
+
+</div>
+</small>
+
+
+# Adjusting jobs without cluster config
+
+Recall the rules schema? Here is another example, with config and
+Snakefile:
+
+<small style="width:1200px;">
+
+```{r  byoc-2020-adjust-schema, eval=TRUE, echo=FALSE, comment=NA, engine='bash' }
+cat examples/adjust/main.schema.yaml 
+```
+
+```{r  byoc-2020-adjust-config, eval=TRUE, echo=FALSE, comment=NA, engine='bash' }
+cat examples/adjust/config.yaml 
+```
+
+```{r  byoc-2020-adjust-snakefile, code=readLines("examples/adjust/Snakefile"), engine='python' }
+ 
+```
+
+</small>
+
+
+# Adjusting jobs without cluster config
+
+<small style="width:1200px;">
+
+```{r  byoc-2020-install-adjust-profile, engine='bash' }
+$ cd examples/adjust/
+$ cookiecutter https://github.com/Snakemake-Profiles/slurm.git
+You've downloaded /home/perun/.cookiecutters/slurm before. Is it okay to delete and re-download it? [yes]: 
+profile_name [slurm]: 
+sbatch_defaults []: --account=$ACCOUNT --partition=devel
+cluster_config []: 
+Select advanced_argument_conversion:
+1 - no
+2 - yes
+Choose from 1, 2 [1]: 2 
+```
+
+```{r  byoc-2020-adjust-run, engine='bash' }
+snakemake -d examples/adjust -s examples/adjust/Snakefile --profile examples/adjust/slurm -j 3 shadow_sleep_90.txt -F 
+```
+
+```
+    {'sleep': {'mem_mb': 10000, 'options': '', 'runtime': 1, 'threads': 1}}
+    Building DAG of jobs...
+    Using shell: /usr/bin/bash
+    Provided cluster nodes: 3
+    Job counts:
+    	count	jobs
+    	1	sleep
+    	1
+    
+    [Tue Oct  6 13:40:02 2020]
+    rule sleep:
+        output: shadow_sleep_90.txt
+        jobid: 0
+        wildcards: sec=90
+        resources: runtime=1, mem_mb=10000
+    
+    Submitted job 0 with external jobid '15820153'.
+    [Tue Oct  6 13:41:23 2020]
+    Error in rule sleep:
+        jobid: 0
+        output: shadow_sleep_90.txt
+        shell:
+            for i in $(seq 1 90); do echo $i >> shadow_sleep_90.txt; sleep 1; done
+            (one of the commands exited with non-zero exit code; note that snakemake uses bash strict mode!)
+        cluster_jobid: 15820153
+    
+    Error executing rule sleep on cluster (jobid: 0, external: 15820153, jobscript: /domus/h1/perun/teaching/workshop-snakemake-byoc/lectures/smkprofile/examples/adjust/.snakemake/tmp.xidgwyfk/snakejob.sleep.0.sh). For error details see the cluster log and the log files of the involved rule(s).
+    Trying to restart job 0.
+    
+    [Tue Oct  6 13:41:24 2020]
+    rule sleep:
+        output: shadow_sleep_90.txt
+        jobid: 0
+        wildcards: sec=90
+        resources: runtime=2, mem_mb=10000
+    
+    Submitted job 0 with external jobid '15820155'.
+    [Tue Oct  6 13:43:46 2020]
+    Finished job 0.
+    1 of 1 steps (100%) done
+    Complete log: /domus/h1/perun/teaching/workshop-snakemake-byoc/lectures/smkprofile/examples/adjust/.snakemake/log/2020-10-06T134001.948922.snakemake.log
+
+
+```
+
+```
+    $ sacct -j 15820153
+           JobID    JobName  Partition    Account  AllocCPUS      State ExitCode 
+    ------------ ---------- ---------- ---------- ---------- ---------- -------- 
+    15820153     snakejob.+      devel snic2019-+         20    TIMEOUT      0:0 
+    $ sacct -j 15820155
+           JobID    JobName  Partition    Account  AllocCPUS      State ExitCode 
+    ------------ ---------- ---------- ---------- ---------- ---------- -------- 
+    15820155     snakejob.+      devel snic2019-+         20  COMPLETED      0:0 
+
+
+```
+
+</small>
+
+
+# Conda, containers, envmodules, groups
+
+
+## Conda and containers
+
+Activate with `--use-conda` or `--use-singularity`
+
+
+## envmodules
+
+Specify and SLURM modules with [envmodules](https://snakemake.readthedocs.io/en/stable/snakefiles/deployment.html?highlight=envmodules#using-environment-modules), activate with
+`--use-envmodules`
+
+```{r  byoc-2020-slurm-modules, engine='python' }
+rule gmap_build_database:
+    ...
+    envmodules:
+        "gmap-gsnap"
+    ... 
+```
+
+
+## Limiting the number of jobs in the queue
+
+Limit jobs with e.g. `--jobs 100` (max 100 parallel jobs). Also, try
+[defining groups for execution](https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#defining-groups-for-execution):
+<small style="width:1200px;">
+
+```{r  byoc-2020-group-jobs, engine='python' }
+rule a:
+    ...
+    group: "group1"
+    ...
+
+rule b:
+    ...
+    input: rules.a.output
+    group: "group1"
+    ... 
+```
+
+</small>
+If rules `a` and `b` constitute a subgraph, submitting output of rule
+`b` will submit both rules to the same compute node as one job,
+thereby reducing load for the queue manager. Disclaimer: I have not
+tried this!
+
+
+# Questions?
+

@@ -1,0 +1,23 @@
+# -*- snakemake -*-
+import pandas as pd
+chrmap = pd.read_table("chrmap.txt", header=None)
+
+# Constrain 'chr' wildcard to three allowed values
+wildcard_constraints:
+    chr = "(autosome|sex|PAR)"
+
+rule all:
+    input: expand("{chr}.fasta", chr=chrmap[1].unique())
+
+rule make_chr_list:
+    """Make chromosome list"""
+    output: temp("{chr}.list")
+    input: "chrmap.txt"
+    shell: "awk '{{if ($2 == \"{wildcards.chr}\") print $1}}' {input} > {output}"
+           
+rule partition_chromosomes_by_type:
+    """Partition chromosomes by type"""
+    output: "{chr}.fasta"
+    input: ref = "ref.fa",
+           chrlist = "{chr}.list"
+    shell: "seqtk subseq {input.ref} {input.chrlist} > {output}"

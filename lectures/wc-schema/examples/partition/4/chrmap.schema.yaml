@@ -1,0 +1,18 @@
+$schema: "http://json-schema.org/draft-07/schema#"
+description: Define data format for chromosome mapping input file
+properties:
+  chr:
+    description: chromosome identifier
+    type: string
+  chrtype:
+    description: chromosome type
+    type: string
+    enum:
+      - autosome
+      - sex
+      - PAR
+required:
+  - chr
+  - chrtype
+
+additionalProperties: false

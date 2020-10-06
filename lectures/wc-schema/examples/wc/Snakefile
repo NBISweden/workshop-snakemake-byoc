@@ -1,0 +1,5 @@
+rule convert2docx:
+    """Why would you want to do that in the first place?"""
+    input: "{wc}.{suffix}"
+    output: "{wc}.docx"
+    shell: "convert2docx -i {input} -o {output}"

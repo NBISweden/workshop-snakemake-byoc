@@ -1,0 +1,11 @@
+# -*- snakemake -*-
+rule all:
+    input: expand("sleep_{i}.txt", i = [10, 90])
+
+wildcard_constraints:
+        sec = "\d+"
+
+rule sleep:
+    output: "sleep_{sec}.txt"
+    threads: 1
+    shell: "for i in $(seq 1 {wildcards.sec}); do echo $i >> {output}; sleep 1; done"

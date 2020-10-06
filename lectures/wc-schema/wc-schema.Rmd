@@ -48,9 +48,9 @@ theme_set(bw)
 <div>
 <section>
 <h1 class="title">Snakemake BYOC 2020</h1>
-<h2 class="subtitle">Schemas and snakemake profiles</h2>
+<h2 class="subtitle">Wildcard constraints and JSON schemas</h2>
 <h2 class="author">Per Unneberg</h2>
-<h3 class="date">2020-10-04</h3>
+<h3 class="date">2020-10-06</h3>
 </section>
 </div>
 
@@ -75,7 +75,7 @@ theme_set(bw)
 
 All examples are available in lecture repository
 <https://github.com/NBISweden/workshop-snakemake-byoc> under
-`lectures/schema-profile`
+`lectures/wc-schema`
 
 <div>
 

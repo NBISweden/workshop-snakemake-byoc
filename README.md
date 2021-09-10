@@ -2,4 +2,6 @@
 
 This is the repository for the Snakemake BYOC workshop.
 
-Course website: https://nbisweden.github.io/workshop-snakemake-byoc/
+It currently only hosts lecture slides, the workshop website can be found here (September 2021): https://uppsala.instructure.com/courses/52153
+
+The archived course website from 2020 can be found here: https://nbisweden.github.io/workshop-archive/workshop-snakemake-byoc/2020-10-07/

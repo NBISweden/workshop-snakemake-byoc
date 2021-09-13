@@ -44,21 +44,21 @@ library("kableExtra")
 .pull-left[
 <img src="john-sundh.jpg" width=50%/>
 <br>
-.small[John]
+.small[John (teacher)]
 
 <img src="per-unneberg.jpg" width=40%/>
 <br>
-.small[Per]
+.small[Per (teacher)]
 ]
 
 .pull-right[
 <img src="erik-fasterius.jpg" width=50%/>
 <br>
-.small[Erik]
+.small[Erik (TA)]
 
 <img src="verena-kutschera.jpg" width=50%/>
 <br>
-.small[Verena]
+.small[Verena (teacher & organizer)]
 ]
 
 ---
@@ -70,36 +70,32 @@ library("kableExtra")
 
 * .green[Lectures]
     * Please stay muted
-    * If you have a question, use the raise-your-hand function (via "Participants") or post your question on slack (#.green[lectures] channel)
+    * If you have a question, please use the raise-your-hand function (via "Participants")
+    * We will share the lecture slides with you
 
 
 * .green[Breakout rooms]
     * Feel free to stay unmuted, unless there is a lot of background noise
 
+---
+
+# Discussions forum
+
+* Please use the .green[Discussions] on Canvas during the workshop for communication
+
+.center[<img src="discussions.png"/>]
 
 ---
 
-# Slack
+# Discussions forum
 
-* Please join the Slack workspace (.green[nbissnakemakebyoc.slack.com], link is _e.g._ in the last email)
+* We will post announcements and links to lecture slides in .green[General discussions]
 
-.center[<img src="slack.png", width=40%/>]
+* You can ask Snakemake questions to everyone in .green[Snakemake issues]
 
---
+* Each group has their own discussion, too (.green[Group 1], .green[Group 2], .green[Group 3], .green[Group 4])
 
-* Here we will post announcements (#.green[general] channel) and lecture slides (#.green[lectures] channel)
-
---
-
-* If you are kicked out of zoom or have other zoom-related issues, contact us in the #.green[zoom-issues] channel
-
---
-
-* You can ask snakemake questions to everyone in the #.green[snakemake-issues] channel
-
---
-
-* Each group has their own channel, too (#.green[group-1], #.green[group-2], #.green[group-3])
+* If you are having problems with your zoom connection or other zoom-related issues, contact us via the .green[Zoom issues] discussion or via email (.green[edu.byoc-snakemake@nbis.se])
 
 ---
 
@@ -123,14 +119,19 @@ library("kableExtra")
 
 # Breakout room groups
 
-Group 1:
-* .green[John], Margherita, Jonas, Rashmi
+Whenever we open the breakout rooms, please move yourselves into your group room (except for group 2 who stays with Verena in the main room)
 
-Group 2:
-* .green[Per], Prasoon, George, Valentina
+.green[Group 1: Erik F.]
+* Yueqing, Marti, Juanita, Nina
 
-Group 3:
-* .green[Erik], Daniel, Johan, Julie
+.green[Group 2: Verena]
+* Nima, Andreas, Hao
+
+.green[Group 3: John]
+* Mohamed, Pol, Ymke, Dries
+
+.green[Group 4: Per]
+* Tom, Erik Z., Philipp, Hanna
 
 ---
 

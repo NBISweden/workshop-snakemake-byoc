@@ -59,11 +59,21 @@ The results of only 26% out of 204 randomly selected papers in the journal
 
 --
 
-* Track your Snakemake code with Git and push it to a GitHub or BitBucket repository to ensure that the different code versions are tracked and available
+* Track your Snakemake code with .green[Git] and push it to a remote .green[repository] on GitHub or BitBucket to ensure that the different code versions are tracked and available
 
 --
 
-* Combining Snakemake with .green[Conda] and/or .green[containers] can make the compute environment and the code reproducible
+* Combine Snakemake with .green[Conda] and/or .green[containers] to make the compute environment and the code reproducible
+
+--
+
+* Integrate foreign workflow management systems such as .green[Nextflow] pipelines into your Snakemake workflow
+
+---
+
+# Git
+
+* TBA
 
 ---
 
@@ -376,6 +386,13 @@ $ docker run --name my_first_workflow_instance -i -t my_workflow
 * Share your container on GitHub or BitBucket
 
 ---
+
+# Integrating foreign workflow management systems
+
+* TBA
+
+---
+
 
 class: center, middle
 

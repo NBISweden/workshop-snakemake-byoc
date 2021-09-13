@@ -1,6 +1,5 @@
-# HTML and PDF files
+# HTML files
 *.html
-*.pdf
 
 # Conda environments
 *-env

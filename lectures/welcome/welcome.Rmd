@@ -42,23 +42,23 @@ library("kableExtra")
 # Your Instructors
 
 .pull-left[
-<img src="john-sundh.jpg" width=50%/>
+<img src="john-sundh.jpg" width=40%/>
 <br>
-.small[John (teacher)]
+.small[John (instructor)]
 
-<img src="per-unneberg.jpg" width=40%/>
+<img src="per-unneberg.jpg"/>
 <br>
-.small[Per (teacher)]
+.small[Per (instructor)]
 ]
 
 .pull-right[
-<img src="erik-fasterius.jpg" width=50%/>
+<img src="erik-fasterius.jpg" width=40%/>
 <br>
-.small[Erik (TA)]
+.small[Erik (instructor)]
 
-<img src="verena-kutschera.jpg" width=50%/>
+<img src="verena-kutschera.jpg" width=40%/>
 <br>
-.small[Verena (teacher & organizer)]
+.small[Verena (instructor & organizer)]
 ]
 
 ---

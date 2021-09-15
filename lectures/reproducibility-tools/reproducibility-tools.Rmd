@@ -482,7 +482,50 @@ rule transposonPSI:
 
 # Integrating foreign workflow management systems
 
-* TBA
+* From version 6.2 on, Snakemake can run workflows written in other workflow 
+  management systems such as .green[Nextflow] 
+
+--
+
+* The workflow is run in Snakemake until a rule to run the foreign workflow
+  is reached, in which Snakemake .green[hands over] to the other workflow management system 
+  indicated by the directive `handover`
+
+--
+
+```{python nextflow, eval = FALSE}
+rule chipseq_pipeline:
+    input:
+        input="design.csv",
+        fasta="data/genome.fasta",
+        gtf="data/genome.gtf",
+    output:
+        "multiqc/broadPeaks/multiqc_report.html",
+    params:
+        pipeline="nf-core/chipseq",
+        revision="1.2.1",
+        profile=["conda"],
+    handover: True
+    wrapper:
+        "0.74.0/utils/nextflow"
+```
+
+_(example from Snakemake documentation)_
+
+
+---
+
+# Integrating foreign workflow management systems
+
+* The handover rule is run locally
+
+--
+
+* Submission of jobs to the cluster or cloud system is handled by the other workflow management system
+
+--
+
+* Afterwards, Snakemake continues running rules that use the output files of the foreign workflow
 
 ---
 

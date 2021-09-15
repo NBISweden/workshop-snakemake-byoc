@@ -534,6 +534,31 @@ _(example from Snakemake documentation)_
 
 ---
 
+# Summary
+
+There are many ways to use other .green[tools for reproducible research] together with Snakemake:
+
+--
+
+* Use .green[Git] to version control, backup and share your code
+
+--
+
+* Run rules or your entire workflow in .green[Conda] environments
+
+--
+
+* Run your rules in isolated Docker or Singularity .green[containers] using Singularity
+
+--
+
+* Package your entire workflow in a .green[Docker container]
+
+--
+
+* Run pipelines written in .green[other workflow management systems] in your Snakemake workflow
+
+---
 
 class: center, middle
 

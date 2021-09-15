@@ -73,7 +73,43 @@ The results of only 26% out of 204 randomly selected papers in the journal
 
 # Git
 
-* TBA
+--
+
+* A widely used system for distributed version control to .green[version, backup and share] your code and documents
+
+--
+
+* Keeps a .green[complete history] of the changes you make to your files that can be re-visited & compared
+
+--
+
+* Git tracks .green[who contributed what] to your code
+
+--
+
+* Git is mainly used for .green[text files], not large or binary files, so ideal for Snakemake workflows
+
+---
+
+# Git
+
+.center[<img src="git_overview_remote.png" style="width:50%"/>]
+
+--
+
+1. Do some .green[coding] (*i.e.* add or change contents of files)
+
+--
+
+2. .green[Stage] the changes (*i.e.* specify which changes should be stored)
+
+--
+
+3. .green[Commit] the changes (storing them in the repository's history)
+
+--
+
+4. .green[Push] and .green[pull] regularly to/from your remote repository (on GitHub or Bitbucket) to collaborate, backup and share your code
 
 ---
 
@@ -81,7 +117,7 @@ The results of only 26% out of 204 randomly selected papers in the journal
 
 --
 
-* Is a package, dependency, and environment manager
+* Is a .green[package, dependency, and environment] manager
     > packages: any type of program (_e.g._ bowtie2, snakemake etc.)
 
     > dependency: other software required by a package
@@ -106,7 +142,7 @@ The results of only 26% out of 204 randomly selected papers in the journal
 
 --
 
-* Create a Conda environment file (`tePSI.yaml`)
+* Create a .green[Conda environment file] (`tePSI.yaml`)
 
 ```{python conda env one, eval = FALSE}
 name: tePSI
@@ -123,8 +159,11 @@ dependencies:
 
 --
 
-* For reproducibility, it is important to keep track of software versions >> include package versions in your environment file
+* For reproducibility, it is important to keep track of software versions, so make sure to include package .green[versions] in your environment file
 
+--
+
+* .green[Git] is ideal to track changes in your Conda environment files
 
 ---
 
@@ -132,7 +171,9 @@ dependencies:
 
 ## Running a Snakemake rule with a Conda environment
 
-* Add the path to the Conda environment `yaml` file to your rule with the `conda` directive
+* Add the path to the Conda environment `yaml` file to your rule using the `conda` directive
+
+--
 
 ```{python conda rule, eval = FALSE}
 rule transposonPSI:
@@ -172,10 +213,10 @@ $ snakemake --use-conda
 
 --
 
-* Write a Conda environment file that includes all tools used by the workflow, or those used by rules with `run` directives (e.g. `gew.yaml`)
+* Write a .green[Conda environment file] that includes all tools used by the workflow, or those used by rules with `run` directives (e.g. `generode.yaml`)
 
 ```{python conda env big, eval=FALSE}
-name: gew
+name: generode
 channels:
   - bioconda
   - conda-forge
@@ -194,24 +235,24 @@ dependencies:
 
 ## Using a Conda environment for the entire workflow
 
-* Create the environment
+* .green[Create] the environment
 
 --
 
 ```{bash conda create, eval=FALSE}
-$ conda env create -f gew.yml
+$ conda env create -f generode.yml
 ```
 
 --
 
-* Use a terminal multiplexer to run the workflow in a shell instance in the background, _e.g._ tmux or screen
+* Use a terminal multiplexer to run the workflow in a shell instance in the background, _e.g._ .green[tmux] or .green[screen]
 
 --
 
-* Activate your Conda environment in the tmux or screen session
+* .green[Activate] your Conda environment in the tmux or screen session
 
 ```{bash conda activate, eval=FALSE}
-$ conda activate gew
+$ conda activate generode
 ```
 
 --
@@ -219,7 +260,7 @@ $ conda activate gew
 * Start your Snakemake workflow
 
 ```{bash snakemake conda env, eval=FALSE}
-(gew) [...] $ snakemake
+(generode) [...] $ snakemake
 ```
 
 ---
@@ -230,19 +271,19 @@ $ conda activate gew
 
 ## What can I use Docker for?
 
-* Run applications securely isolated in a container, packaged with all dependencies and libraries
+* Run applications securely .green[isolated] in a container, packaged with .green[all dependencies and libraries]
 
 --
 
-* As advanced environment manager
+* As advanced .green[environment manager]
 
 --
 
-* To package your code with the environment it needs
+* To .green[package your code] with the environment it needs
 
 --
 
-* To package a whole workflow (*e.g.* to accompany a manuscript)
+* To .green[package a whole workflow] (*e.g.* to accompany a manuscript)
 
 --
 
@@ -252,7 +293,7 @@ $ conda activate gew
 
 ## Singularity 
 
-* Is an open source container platform suitable for HPC clusters
+* Is an open source container platform suitable for .green[HPC clusters]
 
 ---
 
@@ -315,7 +356,7 @@ $ conda activate gew
 
 --
 
-* Add the link to the container image to your rule with the `singularity` directive
+* Add the link to the container image (or the path to a Singularity `*.sif` file) to your rule using the `container` directive
 
 ```{python singularity rule, eval = FALSE}
 rule transposonPSI:
@@ -327,7 +368,7 @@ rule transposonPSI:
         topHits = temp(PROT_DIR + "split_result/" + PROT_NAME + "_chunk{nr}.fa.TPSI.topHits")
     params:
         dir = PROT_DIR + "split_result/"
-    singularity: "docker://quay.io/biocontainers/transposonpsi:1.0.0--pl526_0"
+    container: "docker://quay.io/biocontainers/transposonpsi:1.0.0--pl526_0"
     shell:
         """
         cd {params.dir}
@@ -351,7 +392,7 @@ $ snakemake --use-singularity
 
 --
 
-* Write a Docker file (`my_workflow`), _e.g._
+* Write a .green[Docker file] (`my_workflow`), _e.g._
 
     * Start with the official Miniconda `base` image
     * Install the core packages of the workflow (_e.g._ Snakemake and dependencies such as pandas)
@@ -367,7 +408,7 @@ $ snakemake --use-singularity
 
 ## Packaging your Snakemake workflow in a Docker container
 
-* Create a Docker image from your Docker file (_e.g._ called `my_workflow`)
+* Create a .green[Docker image] from your Docker file (_e.g._ called `my_workflow`)
 
 ```{bash docker image, eval=FALSE}
 $ docker build -t my_workflow .
@@ -375,7 +416,7 @@ $ docker build -t my_workflow .
 
 --
 
-* Run your container
+* .green[Run] your container
 
 ```{bash docker run, eval=FALSE}
 $ docker run --name my_first_workflow_instance -i -t my_workflow
@@ -383,7 +424,15 @@ $ docker run --name my_first_workflow_instance -i -t my_workflow
 
 --
 
-* Share your container on GitHub or BitBucket
+* .green[Share] your Docker file on GitHub or BitBucket, or your Docker image on DockerHub
+
+* TBA
+
+---
+
+# Docker & Singularity
+
+## Containerization of Conda based workflows
 
 ---
 

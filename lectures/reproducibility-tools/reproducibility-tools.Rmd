@@ -73,8 +73,6 @@ The results of only 26% out of 204 randomly selected papers in the journal
 
 # Git
 
---
-
 * A widely used system for distributed version control to .green[version, backup and share] your code and documents
 
 --
@@ -115,14 +113,17 @@ The results of only 26% out of 204 randomly selected papers in the journal
 
 # Conda
 
+* Is a .green[package, dependency, and environment] manager
+
 --
 
-* Is a .green[package, dependency, and environment] manager
     > packages: any type of program (_e.g._ bowtie2, snakemake etc.)
 
     > dependency: other software required by a package
 
     > environment: a distinct collection of packages
+
+--
 
 * Keeps track of the dependencies between packages in each environment
 
@@ -138,7 +139,7 @@ The results of only 26% out of 204 randomly selected papers in the journal
 
 --
 
-* Find your Conda package on http://anaconda.org
+* Find your .green[Conda package] on http://anaconda.org
 
 --
 
@@ -329,7 +330,7 @@ $ conda activate generode
 
 --
 
-* Snakemake can run a rule isolated in a container, using Singularity
+* Snakemake can run a rule .green[isolated] in a container, using Singularity
 
 --
 
@@ -393,6 +394,8 @@ $ snakemake --use-singularity
 --
 
 * Write a .green[Docker file] (`my_workflow`), _e.g._
+
+--
 
     * Start with the official Miniconda `base` image
     * Install the core packages of the workflow (_e.g._ Snakemake and dependencies such as pandas)
@@ -487,11 +490,13 @@ rule transposonPSI:
 
 --
 
-* The workflow is run in Snakemake until a rule to run the foreign workflow
-  is reached, in which Snakemake .green[hands over] to the other workflow management system 
-  indicated by the directive `handover`
+* The workflow is run in Snakemake until a .green[rule] to run the foreign workflow
+  is reached
 
 --
+
+* In this rule, Snakemake .green[hands over] to the other workflow management system 
+  indicated by the directive `handover`
 
 ```{python nextflow, eval = FALSE}
 rule chipseq_pipeline:

@@ -426,13 +426,57 @@ $ docker run --name my_first_workflow_instance -i -t my_workflow
 
 * .green[Share] your Docker file on GitHub or BitBucket, or your Docker image on DockerHub
 
-* TBA
+---
+
+# Docker & Singularity
+
+## Containerization of Conda based workflows
+
+* Snakemake can .green[automatically] generate a Docker container image that contains all
+  Conda environments
+
+--
+
+* Some advantages:
+  * More .green[transparent] to understand for others than a black box container image
+  * The workflow can still be .green[run without containers]
+  * Testing can be done without containers, thereby limiting the number of uploads of updated images
 
 ---
 
 # Docker & Singularity
 
 ## Containerization of Conda based workflows
+
+* Generate a .green[Dockerfile] with `--containerize`
+
+```{python containerize, eval = FALSE}
+snakemake --containerize > Dockerfile
+```
+
+--
+
+* This Docker image can also be used in the workflow (globally or per rule) via the directive `containerized` 
+
+```{python containerization, eval = FALSE}
+containerized: "docker://username/myTEworkflow:1.0.0"
+
+rule transposonPSI:
+    """Identify transposons in the UniProt/Swissprot protein dataset"""
+    input:
+        chunk = PROT_DIR + "split_result/" + PROT_NAME + "_chunk{nr}.fa"
+    output:
+        allHits = temp(PROT_DIR + "split_result/" + PROT_NAME + "_chunk{nr}.fa.TPSI.allHits"),
+        topHits = temp(PROT_DIR + "split_result/" + PROT_NAME + "_chunk{nr}.fa.TPSI.topHits")
+    params:
+        dir = PROT_DIR + "split_result/"
+    conda: "envs/tePSI.yaml"
+    shell:
+        """
+        cd {params.dir}
+        transposonPSI.pl {input.chunk} prot
+        """
+```
 
 ---
 

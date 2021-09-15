@@ -18,6 +18,12 @@ the command line:
 Rscript -e 'rmarkdown::render(<Rmd-file>, "xaringan::moon_reader")'
 ```
 
+The HTML files can be converted to PDF with this command:
+
+```bash
+Rscript -e 'library(webshot); webshot(<HTML>, <PDF>)'
+```
+
 ### revealjs lectures
 
 Lectures in subfolders `smkprofile` and `wc-schema` are created with [revealjs](https://revealjs.com) and can be rendered as follows:

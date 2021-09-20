@@ -34,9 +34,9 @@ library("kableExtra")
 
 ---
 
-# The Genome Erosion Workflow
+# The GenErode pipeline
 
-* Developed in a LTS project with Love Dalén's lab (Centre for Palaeogenetics, SU & NRM)
+* Developed in a NBIS project with Love Dalén's lab (Centre for Palaeogenetics, SU & NRM)
 
 --
 
@@ -50,7 +50,11 @@ library("kableExtra")
 
 ---
 
-# The Genome Erosion Workflow
+# The GenErode pipeline
+
+* Started at Snakemake version 3.10 (!), current pipeline runs with Snakemake version 5.22
+
+--
 
 * Historical and modern samples are processed in parallel
 
@@ -98,30 +102,34 @@ library("kableExtra")
 
 * .green[GERP++ score track]
     * GERP++ score calculation from reference genome and genomes of outgroup species
+    * Relative mutational load calculation from GERP++ scores and derived alleles
 
 ---
 
 # The Workflow Structure
 
-* Rules with the actual analyses in separate snakefiles
+* Rules with the actual analyses in separate Snakefiles (in `workflow/rules/`)
 
 --
 
-* Snakefile
+
+* `Snakefile`
     * Python code to create sample and readgroup ID dictionaries & lists 
-        * From metadata tables and a config file
-    * ”include” of rule snakefiles
-    * ”all” rule collecting output files produced by the different snakefiles
+        * From metadata tables and a config file (`config/config.yaml`)
+    * `include` of rule Snakefiles
+    * `all` rule collecting output files produced by the different rule Snakefiles
+
 
 --
 
-* UPPMAX / slurm system: cluster.yaml file (_! deprecated !_)
+* UPPMAX / slurm system: 
+    * `cluster.yaml` file to set up slurm profile (in `config/`)
 
 ---
 
 # The Workflow Structure
 
-* Metadata files (to be created by users)
+* Metadata files (to be created by users, placed in `config/`)
     * Sample IDs, readgroup IDs, sequencing technology, paths to fastq files
     * Separate files for modern and historical samples
 
@@ -158,17 +166,17 @@ create_table(metadata)
 
 # The Workflow Structure
 
-* Config file (to be edited by users)
-    * Set different workflow steps to True or False 
-        * The corresponding rules snakefiles are attached to the workflow using ”include” in the main Snakefile
-    * Lists with samples for optional analyses
+* Config file `config.yaml` (to be edited by users, placed in `config/`)
+    * Paths to input data and metadata tables
+    * Selection of analysis steps to be run
     * Parameters for different rules
+    * Lists with samples for optional analyses
 
 --
 
 ```{python config file data, eval = FALSE}
 #################################################################
-# Configuration settings for the genome erosion workflow v3.0   #
+# Configuration settings for the genErode pipeline v3.0   #
 # for ancient or historical samples, and modern samples         #
 #################################################################
 
@@ -191,27 +199,126 @@ modern_samples: "" # leave empty ("") if not run for modern samples.
 
 ---
 
-# The Workflow Structure
+# How to choose which steps to run
 
-* Config file (to be edited by users)
+**Step 1**: Use booleans in the config file (`config.yaml`) as on/off switches
 
-```{python config file mapDamage, eval = FALSE}
+--
+
+```{python config file start, eval = FALSE}
 #####
-# OPTIONAL: 
-# Run mapDamage2 on historical samples specified in the list "historical_rescaled_samplenames" below.
-# Will rescale base qualities at potentially damaged sites and 
-# calculate statistics on ancient DNA damage patterns in realigned bam files.
-historical_bam_mapDamage: False
+# FastQC on raw reads, adapter trimming, read merging (historical samples), FastQC on trimmed reads.
+fastq_processing: True
 
-# List of historical samples on which mapDamage2 should be run. 
-# Sample names without lane or index number in quotation marks, 
-# separated by commas (e.g. ["VK01", "VK02", "VK03"]).
-# List has to be left empty ([]) if mapDamage2 is not run.
-# Keep the list of sample names for the entire workflow run 
-# if rescaled BAM files should be used in downstream analyses.
-historical_rescaled_samplenames: []
+[...]
+#####
+
+#####
+# Map historical and modern reads to reference genome assembly (specified above).
+mapping: False
 #####
 ```
+
+---
+
+# How to choose which steps to run
+
+**Step 1**: Use booleans in the config file (`config.yaml`) as on/off switches
+
+* For many analysis steps, parameters can be specified in the config file:
+
+--
+
+```{python config file parameters, eval = FALSE}
+#####
+# FastQC on raw reads, adapter trimming, read merging (historical samples), FastQC on trimmed reads.
+fastq_processing: True
+
+# Adapter sequences for trimming of historical samples using SeqPrep v1.1 (modified source code) (examples for inserted adapter sequences from Meyer & Kircher 2010).
+# Forward read primer/adapter sequence to trim historical samples in SeqPrep v1.1 (parameter "-A")
+hist_F_adapter: "AGATCGGAAGAGCACACGTCTGAACTCCAGTCACNNNNNNNATCTCGTATGCCGTCTTCTGCTTG" 
+# Reverse read primer/adapter sequence to trim historical samples in SeqPrep v1.1 (parameter "-B"). 
+# When using double indices, include full adapter length (replacing the index by "N").
+hist_R_adapter: "AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGTAGATCTCGGTGGTCGCCGTATCATTT" 
+
+# Fragment of forward adapter sequence used to count occurrence in the first 1 million reads of fastq-files of historical samples
+hist_F_adapter_fragment: "AGATCGGAAGAGCACACGTC" 
+# Fragment of reverse adapter sequence used to count occurrence in the first 1 million reads of fastq-files of historical samples
+hist_R_adapter_fragment: "AGATCGGAAGAGCGTCGTGT" 
+
+# Minimum read length allowed after trimming.
+# Historical samples (SeqPrep v1.1 with modified source code)
+hist_readlength: "30" # default setting: 30 bp
+
+# Modern samples (trim-galore)
+mod_readlength: "30"
+#####
+```
+
+--
+
+* These parameters can be used in rules with the syntax `config["parameter"]`, e.g. `config["hist_F_adapter"]`
+
+---
+
+# How to choose which steps to run
+
+**Step 2**: Use some Python code, `include` and the rule `all` to figure out what the workflow will do
+
+--
+
+* The main `Snakefile` contains 
+    * an empty Python list `all_outputs` to collect output files from the included rule Snakefiles,
+    * the `include` variable to attach the rule Snakefiles corresponding to the analysis steps that were set to `True` in the config file, and
+    * the rule `all` that takes the output files from the list `all_outputs` as input:
+
+--
+
+```{python Snakefile include fastq, eval = FALSE}
+all_outputs = []
+
+if config["fastq_processing"]:
+    include: "workflow/rules/1.1_fastq_processing.smk"
+
+if config["mapping"]:
+    include: "workflow/rules/0.1_reference_genome_preps.smk"
+    include: "workflow/rules/1.1_fastq_processing.smk"
+    include: "workflow/rules/2_mapping.smk"
+
+rule all:
+    input: all_outputs
+```
+
+---
+
+# How to choose which steps to run
+
+**Step 2**: Use some Python code, `include` and the rule `all` to figure out what the workflow will do
+
+* The rule Snakefile with the analysis step that should be run (e.g. `workflow/rules/1.1_fastq_processing.smk`) 
+  contains some Python code to add the output files from its rules to the list `all_outputs` in the main `Snakefile`:
+
+--
+
+```{python rules file fastq, eval = FALSE}
+import os
+if os.path.exists(config["historical_samples"]):
+    all_outputs.append("data/raw_reads_symlinks/historical/stats/multiqc/multiqc_report.html")
+    all_outputs.append("results/historical/trimmed_merged_reads/stats/multiqc/multiqc_report.html")
+
+if os.path.exists(config["modern_samples"]):
+    all_outputs.append("data/raw_reads_symlinks/modern/stats/multiqc/multiqc_report.html")
+    all_outputs.append("results/modern/trimmed_reads/stats/multiqc/multiqc_report.html")
+```
+
+--
+
+* This rule Snakefile contains different rules for historical and modern samples
+
+--
+
+* By using the `if` statement to check for the presence of metadata files, the workflow can also be run 
+  only for historical or only for modern samples
 
 ---
 

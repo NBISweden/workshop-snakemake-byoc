@@ -79,24 +79,6 @@ library("kableExtra")
 
 ---
 
-# Discussions forum
-
-* Please use the .green[Discussions] on Canvas during the workshop for communication
-
-.center[<img src="discussions.png"/>]
-
----
-
-# Discussions forum
-
-* We will post announcements and links to lecture slides in .green[General discussions]
-
-* You can ask Snakemake questions to everyone in .green[Snakemake questions]
-
-* If you are having problems with your zoom connection or other zoom-related issues, contact us via the .green[Zoom issues] discussion or via email (.green[edu.byoc-snakemake@nbis.se])
-
----
-
 # Schedule
 
 .center[<img src="day1.png", width=100%/>]
@@ -170,6 +152,26 @@ Whenever we open the breakout rooms, please move yourselves into your group room
 * Time to .green[discuss open questions] that were difficult to solve in the groups or any .green[interesting insights] about Snakemake
 
 .center[<img src="cx-insight-YloghyfD7e8-unsplash.jpg" width=50%/>]
+
+---
+
+# Discussions forum
+
+* Please use the .green[Discussions] on Canvas during the workshop for communication
+
+.center[<img src="discussions.png"/>]
+
+---
+
+# Discussions forum
+
+* We will post announcements and links to lecture slides in .green[General discussions]
+
+* You can ask Snakemake questions to everyone in .green[Snakemake questions]
+
+* If you are having problems with your zoom connection or other zoom-related issues, contact us via the .green[Zoom issues] discussion or via email (.green[edu.byoc-snakemake@nbis.se])
+
+* There are also separate Discussion threads for each of the groups that you can use to communicate within your groups outside of Zoom
 
 ---
 

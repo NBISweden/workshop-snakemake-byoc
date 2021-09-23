@@ -1,5 +1,0 @@
-import json
-from snakemake.utils import validate
-configfile: "config.yaml"
-validate(config, "gmap.schema.yaml")
-print(json.dumps(config, indent=4))

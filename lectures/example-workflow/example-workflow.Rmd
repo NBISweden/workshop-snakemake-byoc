@@ -160,7 +160,7 @@ create_table(metadata)
 
 --
 
-* The metadata tables are parsed with Python code (in the main Snakefile) to generate sample lists for the workflow
+* The metadata tables are parsed with Python code (in the main `Snakefile`) to generate sample lists for the workflow
 
 ---
 
@@ -267,16 +267,18 @@ mod_readlength: "30"
 
 --
 
-* The main `Snakefile` contains 
-    * an empty Python list `all_outputs` to collect output files from the included rule Snakefiles,
-    * the `include` variable to attach the rule Snakefiles corresponding to the analysis steps that were set to `True` in the config file, and
-    * the rule `all` that takes the output files from the list `all_outputs` as input:
+* The main `Snakefile` contains an empty Python list `all_outputs` to collect output files from the included rule Snakefiles,
+
+```{python Snakefile outputs list, eval = FALSE}
+all_outputs = []
+```
 
 --
 
-```{python Snakefile include fastq, eval = FALSE}
-all_outputs = []
+* the `include` variable to attach the rule Snakefiles corresponding to the analysis steps that were set to `True` in the config file, 
 
+
+```{python Snakefile include, eval = FALSE}
 if config["fastq_processing"]:
     include: "workflow/rules/1.1_fastq_processing.smk"
 
@@ -284,7 +286,13 @@ if config["mapping"]:
     include: "workflow/rules/0.1_reference_genome_preps.smk"
     include: "workflow/rules/1.1_fastq_processing.smk"
     include: "workflow/rules/2_mapping.smk"
+```
 
+--
+
+* and the rule `all` that takes the output files from the list `all_outputs` as input
+
+```{python Snakefile all, eval = FALSE}
 rule all:
     input: all_outputs
 ```
@@ -296,7 +304,7 @@ rule all:
 **Step 2**: Use some Python code, `include` and the rule `all` to figure out what the workflow will do
 
 * The rule Snakefile with the analysis step that should be run (e.g. `workflow/rules/1.1_fastq_processing.smk`) 
-  contains some Python code to add the output files from its rules to the list `all_outputs` in the main `Snakefile`:
+  contains some Python code to add the output files from its rules to the list `all_outputs` in the main `Snakefile`
 
 --
 
@@ -310,10 +318,6 @@ if os.path.exists(config["modern_samples"]):
     all_outputs.append("data/raw_reads_symlinks/modern/stats/multiqc/multiqc_report.html")
     all_outputs.append("results/modern/trimmed_reads/stats/multiqc/multiqc_report.html")
 ```
-
---
-
-* This rule Snakefile contains different rules for historical and modern samples
 
 --
 

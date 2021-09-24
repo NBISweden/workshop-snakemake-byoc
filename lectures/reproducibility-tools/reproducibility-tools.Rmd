@@ -342,12 +342,11 @@ $ conda activate best-practice-smk
 
 --
 
-* Each Conda package is also available as Docker and Singularity images (_e.g._ check http://biocontainers.pro for Conda packages from the bioconda channel)
+* Each Conda package is also available as Docker and Singularity images (_e.g._ check http://biocontainers.pro for Conda packages from the .green[bioconda] channel)
 
 --
 
-* Many other Docker images are also available on DockerHub (https://hub.docker.com/)
-    * But be aware that Docker images in free accounts are automatically deleted after a certain time of inactivity
+* Many other Docker images are also available on .green[DockerHub] (https://hub.docker.com/)
 
 ---
 
@@ -440,7 +439,7 @@ $ docker run --name my_first_workflow_instance -it my_workflow
 ## Containerization of Conda based workflows
 
 * Snakemake can .green[automatically] generate a Docker container image that contains all
-  Conda environments specified with the `conda` directive in the rules of the workflow
+  Conda environments used by the rules of the workflow
 
 --
 
@@ -479,13 +478,13 @@ rule NAME:
 
 --
 
-* The workflow is run in Snakemake until a .green[rule] to run the foreign workflow
+* The workflow is run in .green[Snakemake] until a rule to run the foreign workflow
   is reached
 
 --
 
 * In this rule, Snakemake .green[hands over] to the other workflow management system 
-  indicated by the directive `handover`
+  via the directive `handover`
 
 ```{python nextflow, eval = FALSE}
 rule chipseq_pipeline:

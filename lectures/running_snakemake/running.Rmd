@@ -1,0 +1,146 @@
+---
+title:
+author: Per Unneberg
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+  revealjs::revealjs_presentation:
+    css: ../revealjs.css
+    self_contained: true
+    highlight: tango
+    fig_width: 10
+    fig_height: 8
+    fig_caption: false
+    toc: true
+    toc_depth: 2
+    slide_level: 2
+    reveal_options:
+      slideNumber: true
+      previewLinks: true
+      minScale: 1
+      maxScale: 1
+      height: 1400
+      width: 1200
+---
+
+
+```{r  snakemake-byoc-2020-knitr, echo=FALSE, eval=TRUE, include=TRUE }
+library(knitr)
+knitr::opts_chunk$set(warning = FALSE, message = FALSE,
+                      fig.width=12, fig.height=10, autodep=TRUE, echo=TRUE,
+                      cache=FALSE, include=TRUE, eval=FALSE, tidy=FALSE, error=TRUE,
+                      class.source = "numberLines lineAnchors",
+                      class.output = c("numberLines lineAnchors chunkout"))
+knitr::knit_hooks$set(inline = function(x) {
+                      prettyNum(x, big.mark=" ")
+}) 
+```
+
+```{r  snakemake-byoc-2021-libs, echo=FALSE, eval=TRUE, cache=FALSE }
+library(ggplot2)
+library(viridis)
+bw <- theme_bw(base_size=24) %+replace% theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))
+theme_set(bw) 
+```
+
+#
+
+<div>
+<section>
+<h1 class="title">Snakemake BYOC 2021</h1>
+<h2 class="subtitle">Running snakemake, finetuning performance and setting resource usage</h2>
+<h2 class="author">Per Unneberg</h2>
+<h3 class="date">2021-10-01</h3>
+</section>
+</div>
+
+
+<div class="scilife-logo"></div>
+<div class="nbis-logo"></div>
+
+
+
+# Contents
+
+<div style="padding:100px">
+<h3>Basic execution</h3>
+<h3>Resources</h3>
+<h3>Profiles</h3>
+<h3>Cluster execution</h3>
+</div>
+
+<div class="fragment" style="padding:100px">
+<h3>Setup</h3>
+
+-   Very simple examples with snakefiles and code to run
+-   All snakefiles and code is available in code repository
+    https://github.com/NBISweden/snakemake_best_practice/
+
+</div>
+
+# Basic execution
+
+## Running locally
+
+Show basic command with commonly used options
+
+- dry runs
+- rerun incomplete
+- force
+- forceall
+
+## Containerization
+
+- use-conda
+- use-singularity
+- use-envmodules (SLURM-specific; move to that discussion?)
+
+## More options
+
+List all options?
+
+# Resources
+
+## Default resources
+
+Show that snakemake sets default resources
+
+## Threads and memory
+
+## Other resources
+
+## On the limits of the command line
+
+By now we have a long, illegible command line - what to do?
+
+Profiles to the rescue!
+
+# Profiles
+
+## A configuration profile
+
+Point out that at its simplest, a profile is simply a directory with a
+`config.yaml` file that sets program options
+
+# Cluster execution
+
+## The snakemake job scheduler
+
+need to explain that snakemake has its 
+
+run in tmux!
+
+## Generic execution
+
+--cluster "sbatch" command; point out that it doesn't properly check
+for terminated jobs
+
+Show the submit option etc. 
+
+If only there were already such scripts available!
+
+## snakemake-profiles
+
+There is! And the script checks for status etc
+
+
+# Questions?

@@ -1,0 +1,408 @@
+---
+title:
+author: Per Unneberg
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+  revealjs::revealjs_presentation:
+    css: ../revealjs.css
+    self_contained: true
+    highlight: tango
+    fig_width: 10
+    fig_height: 8
+    fig_caption: false
+    toc: true
+    toc_depth: 2
+    slide_level: 2
+    reveal_options:
+      slideNumber: true
+      previewLinks: true
+      minScale: 1
+      maxScale: 1
+      height: 1400
+      width: 1200
+---
+
+
+```{r  snakemake-byoc-2020-knitr, echo=FALSE, eval=TRUE, include=TRUE }
+library(knitr)
+knitr::opts_chunk$set(warning = FALSE, message = FALSE,
+                      fig.width=12, fig.height=10, autodep=TRUE, echo=TRUE,
+                      cache=FALSE, include=TRUE, eval=TRUE, tidy=FALSE, error=TRUE,
+                      class.source = "numberLines lineAnchors",
+                      class.output = c("numberLines lineAnchors chunkout"))
+knitr::knit_hooks$set(inline = function(x) {
+                      prettyNum(x, big.mark=" ")
+}) 
+```
+
+```{r  snakemake-byoc-2020-libs, echo=FALSE, cache=FALSE }
+library(ggplot2)
+library(viridis)
+bw <- theme_bw(base_size=24) %+replace% theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))
+theme_set(bw) 
+```
+
+```{r setup-snakemake-best-practice-repo, engine='bash', echo=FALSE }
+if [ ! -d snakemake_best_practice ]; then
+git clone git@github.com:NBISweden/snakemake_best_practice.git
+fi
+```
+
+
+
+#
+
+<div>
+<section>
+<h1 class="title">Snakemake BYOC 2021</h1>
+<h2 class="subtitle">More best practices, wrappers, schemas, report, config files, ... </h2>
+<h2 class="author">Per Unneberg</h2>
+<h3 class="date">2021-09-30</h3>
+</section>
+</div>
+
+
+<div class="scilife-logo"></div>
+<div class="nbis-logo"></div>
+
+
+
+# Contents
+
+<div style="padding:100px">
+<h3>A best practice repo</h3>
+<h3>Wrappers and scripts</h3>
+<h3>Configuration and schemas</h3>
+<h3>Reports</h3>
+<h3>Coding practices and hints</h3>
+</div>
+
+<div class="fragment" style="padding:100px">
+<h3>Setup</h3>
+
+-   Very simple examples with snakefiles and code to run
+-   All snakefiles and code is available in code repository
+    https://github.com/NBISweden/snakemake_best_practice/
+
+
+</div>
+
+
+# A best practice repo
+
+<div class="fragment">
+
+Clone the repo (`git clone
+git@github.com:NBISweden/snakemake_best_practice.git`) and list
+contents:
+
+```{r snakemake-byoc-2021-bp-overview, engine='bash', cache=TRUE }
+tree -a -d -L 2 -I '.snakemake|.git' snakemake_best_practice
+```
+
+</div>
+
+## What does it do?
+
+Excerpts from README.md:
+```{r snakemake-byoc-2021-bp-readme, code=readLines("snakemake_best_practice/README.md")[c(1,6:25)], eval=FALSE, highlight=FALSE }
+
+```
+
+<div class="fragment">
+
+```{r snakemake-byoc-2021-bp-readme-tail, code=readLines("snakemake_best_practice/README.md")[c(106:112)], eval=FALSE, highlight=FALSE }
+
+```
+
+Use a test data set for test driven development of the workflow. It
+also gives a new user a quick idea of how to organize input files and
+configuration.
+
+</div>
+
+## Dry-run the test suite
+
+```{r snakemake-byoc-2021-dry-run, engine='bash' }
+cd snakemake_best_practice/.test
+snakemake -s ../workflow/Snakefile -n -q -F
+```
+
+<div class="fragment">
+
+
+```{r cd_to_snakemake_best_practice_1, echo=FALSE }
+curdir = getwd()
+knitr::opts_knit$set(root.dir="snakemake_best_practice/.test")
+```
+
+```{r dry-run-fig, engine='bash', echo=TRUE }
+snakemake -s ../workflow/Snakefile --rulegraph 2> /dev/null | dot -T png > rulegraph.png
+```
+
+```{r cd_back_1, echo=FALSE }
+knitr::opts_knit$set(root.dir=curdir)
+```
+
+
+```{r dry-run-fig-png, fig.align="center" , echo=FALSE}
+knitr::include_graphics("./snakemake_best_practice/.test/rulegraph.png")
+```
+
+</div>
+
+
+## Snakefile
+
+<div style="font-size:80%">
+
+```{r Snakefile, code=readLines("snakemake_best_practice/workflow/Snakefile"), eval=FALSE, highlight=FALSE, engine="python" }
+
+```
+
+</div>
+
+
+<aside class="notes">
+    aside
+    - explain pseudo-targets 
+    - point out the two common idioms for collecting targets:
+1. expand
+2. input functions
+</aside>
+
+
+## Stuff common to all snakefiles
+
+<div style="font-size:80%">
+
+`workflow/rules/common.smk`
+
+```{r common-smk, code=readLines("snakemake_best_practice/workflow/rules/common.smk"), eval=FALSE, engine='python' }
+
+```
+</div>
+
+
+
+## Rules
+
+`workflow/rules/mapping.smk`
+
+```{r mapping-smk-rule-example, code=readLines("snakemake_best_practice/workflow/rules/mapping.smk")[4:25], eval=FALSE, engine='python' }
+
+```
+
+## Input functions
+
+
+`workflow/rules/inputfunctions.smk`
+
+```{r inputfunctions-smk, code=readLines("snakemake_best_practice/workflow/rules/inputfunctions.smk")[1:34], eval=FALSE, engine='python' }
+
+```
+
+
+## Pseudo-target functions
+
+
+`workflow/rules/inputfunctions.smk`
+
+```{r inputfunctions-smk-2, code=readLines("snakemake_best_practice/workflow/rules/inputfunctions.smk")[35:66], eval=FALSE, engine='python' }
+
+```
+
+
+# Scripts and wrappers
+
+`script` directive:
+
+- point to external script
+- path relative to **file containing the directive**
+
+## Scripts
+
+<h3>R script</h3>
+
+
+`workflow/scripts/plot_coverage.R`
+
+```{r snakemake-byoc-2021-r-script, code=readLines("snakemake_best_practice/workflow/scripts/plot_coverage.R"), engine='R', eval=FALSE }
+
+```
+S4 attributes map to rule directives (e.g. `snakemake@input[["png"]]`)
+
+## Scripts
+
+
+
+<h3>python script</h3>
+
+`workflow/scripts/plot_coverage.py`
+
+```{r snakemake-byoc-2021-python-script, code=readLines("snakemake_best_practice/workflow/scripts/plot_coverage.py"), engine='python', eval=FALSE}
+
+```
+
+Rule directives accessible via `snakemake` object (e.g. `snakemake.input.txt`)
+
+## jupyter notebook integration
+
+`workflow/rules/qc.smk`
+
+```{r jupyter-notebook-rule, code=readLines("snakemake_best_practice/workflow/rules/qc.smk")[102:115], engine='python', eval=FALSE, attr.source='startFrom="102"'}
+
+```
+Generate output in `.tests` with 
+```{r jupyter-notebook-output, engine='bash' , eval=FALSE}
+snakemake --use-conda -s ../workflow/Snakefile reports/qc/notebook.html -j 1
+```
+
+<div class="fragment">
+
+To edit, start `jupyter-notebook` and open `workflow/notebooks/notebook.py.ipynb`:
+
+```{r start-jupyter-notebook, engine='bash', eval=FALSE }
+jupyter-notebook workflow/notebooks/notebook.py.ipynb
+```
+
+</div>
+
+## Wrappers
+
+`wrapper` directive: 
+
+- Reusable wrapper scripts around e.g. command-line tools
+- [The Snakemake Wrappers
+  repository](https://snakemake-wrappers.readthedocs.io/en/stable/)
+  contains a collection of reusable wrappers.
+- accession format: `{version}/bio/{tool}/{command}`
+
+<h3>Example</h3>
+
+```{r qc-fastqc-wrapper, code=readLines("snakemake_best_practice/workflow/rules/qc.smk")[22:43], engine='python', eval=FALSE}
+
+```
+
+# Configuration and schemas
+
+The workflow can be configured with a configuration file:
+
+`workflow/config/config.yaml`
+
+```{r configuration-example, code=readLines("snakemake_best_practice/config/config.yaml"), eval=FALSE, highlight=FALSE}
+
+```
+
+
+<div class="fragment">
+
+
+
+`workflow/config/sample.tsv`
+
+```{r configuration-example-sample, code=readLines("snakemake_best_practice/config/samples.tsv"), eval=FALSE, highlight=FALSE}
+
+```
+
+`workflow/config/reads.tsv`
+
+```{r configuration-example-reads, code=readLines("snakemake_best_practice/config/reads.tsv")[1:4], eval=FALSE, highlight=FALSE}
+
+```
+
+</div>
+
+<div class="fragment">
+
+Question: is there a way to validate configuration files, require
+inputs and make sure they conform to some predefined format?
+
+</div>
+
+
+## Configuration schemas
+
+Schemas benefits according to [https://json-schema.org/]():
+
+- describes your existing data formats
+- provides human- and machine-readable **documentation**
+- validates data input
+
+<div class="fragment">
+
+`workflow/schemas/samples.schema.yaml`
+
+```{r configuration-sample-schema, code=readLines("snakemake_best_practice/workflow/schemas/samples.schema.yaml"), eval=FALSE, highlight=FALSE}
+
+```
+</div>
+
+
+## Configuration schemas
+
+<div style="font-size:70%">
+
+`workflow/schemas/config.schema.yaml`
+
+```{r configuration-config-schema, code=readLines("snakemake_best_practice/workflow/schemas/config.schema.yaml"), eval=FALSE, highlight=FALSE}
+
+```
+
+
+
+<div class="fragment">
+
+Recall validation step in `workflow/rules/common.smk`:
+
+```{r configuration-config-schema-validation, code=readLines("snakemake_best_practice/workflow/rules/common.smk")[15:20], eval=FALSE, engine="python"}
+
+```
+
+</div>
+</div>
+
+
+# Reports
+
+
+From snakemake 5.1 and on, generate detailed self-contained HTML
+reports that encompass runtime statistics, provenance information,
+workflow topology and results
+
+## The report directive
+
+`workflow/Snakefile`:
+
+```{r snakemake-report, code=readLines("snakemake_best_practice/workflow/Snakefile")[13:13], eval=FALSE, highlight=FALSE, attr.source='startFrom="13"'}
+
+```
+
+<div class="fragment">
+
+`workflow/rules/qc.smk`:
+
+```{r r-plot-report, code=readLines("snakemake_best_practice/workflow/rules/qc.smk")[63:81], eval=FALSE, highlight=FALSE, attr.source='startFrom="61"'}
+
+```
+
+</div>
+
+## Creating the report
+
+## Rmarkdown scripts
+
+
+
+# Coding practices and hints
+
+## Linting and formatting checks
+
+## Pre-commit - for the git power user
+
+```{r pre-commit, engine='bash' , eval=FALSE}
+pre-commit install
+```
+
+
+# Questions?

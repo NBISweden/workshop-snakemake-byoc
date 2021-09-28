@@ -40,7 +40,7 @@ Workflows can be organized basically anyway you want
 ]
 --
 .small[
-- You may mix and match snakemake rules with python code
+- You can mix and match snakemake rules with python code
 ]
 ```python
 def trim_params(config):
@@ -139,6 +139,9 @@ rule trim_reads:
 --
 
 - The workflow should be configurable via a well documented YAML-based .green[configuration file] and (when necessary) a .green[sample and a unit sheet].
+--
+
+- Whenever possible, Snakemake .green[wrappers] should be used.
 --
 
 - The structure of the workflow should follow our .green[template].

@@ -59,24 +59,31 @@ The results of only 26% out of 204 randomly selected papers in the journal
 
 --
 
-* Track your Snakemake code with Git and push it to a GitHub or BitBucket repository to ensure that the different code versions are tracked and available
+* Track your Snakemake code with .green[Git] and share it in a remote .green[repository] on GitHub or BitBucket (not covered in this lecture)
 
 --
 
-* Combining Snakemake with .green[Conda] and/or .green[containers] can make the compute environment and the code reproducible
+* Combine Snakemake with .green[Conda] and/or .green[containers] to make the compute environment reproducible
+
+--
+
+* Integrate foreign workflow management systems such as .green[Nextflow] pipelines into your Snakemake workflow
 
 ---
 
 # Conda
 
+* Is a .green[package, dependency, and environment] manager
+
 --
 
-* Is a package, dependency, and environment manager
     > packages: any type of program (_e.g._ bowtie2, snakemake etc.)
 
     > dependency: other software required by a package
 
     > environment: a distinct collection of packages
+
+--
 
 * Keeps track of the dependencies between packages in each environment
 
@@ -84,63 +91,61 @@ The results of only 26% out of 204 randomly selected papers in the journal
 
 # Conda
 
-## Running a Snakemake rule with a Conda environment
+## 1. Running a Snakemake rule with a Conda environment
 
 --
 
-* Make sure you have Conda installed (Miniconda or Anaconda)
+* Make sure you have Conda .green[installed] (Miniconda or Anaconda)
 
 --
 
-* Find your Conda package on http://anaconda.org
+* Find your Conda .green[package] on http://anaconda.org
 
 --
 
-* Create a Conda environment file (`tePSI.yaml`)
+* Create a Conda .green[environment file] (e.g. `bwa.yaml`)
 
 ```{python conda env one, eval = FALSE}
-name: tePSI
 channels:
-  - nanjiang
+  - conda-forge
   - bioconda
+  - defaults
 dependencies:
-  - transposonpsi=1.0.0
+  - bwa=0.7.17
 ```
 
+.tiny[source: [best practice example](https://github.com/NBISweden/snakemake_best_practice)]
+
+
 --
 
-* A good location for the `yaml` file can be a directory for environments within your main Snakemake directory
+* Store your `yaml` files in a directory for environments
 
 --
 
-* For reproducibility, it is important to keep track of software versions >> include package versions in your environment file
-
+* For reproducibility, it is important to keep include package .green[versions] in your environment file
 
 ---
 
 # Conda
 
-## Running a Snakemake rule with a Conda environment
+## 1. Running a Snakemake rule with a Conda environment
 
-* Add the path to the Conda environment `yaml` file to your rule with the `conda` directive
+* Add the .green[path] to the Conda environment `yaml` file to your rule using `conda`
+
+--
 
 ```{python conda rule, eval = FALSE}
-rule transposonPSI:
-    """Identify transposons in the UniProt/Swissprot protein dataset"""
-    input:
-        chunk = PROT_DIR + "split_result/" + PROT_NAME + "_chunk{nr}.fa"
-    output:
-        allHits = temp(PROT_DIR + "split_result/" + PROT_NAME + "_chunk{nr}.fa.TPSI.allHits"),
-        topHits = temp(PROT_DIR + "split_result/" + PROT_NAME + "_chunk{nr}.fa.TPSI.topHits")
-    params:
-        dir = PROT_DIR + "split_result/"
-    conda: "envs/tePSI.yaml"
+rule map_bwa_index:
+    output: expand("{{ref}}{ext}", ext=[".amb", ".ann", ".bwt", ".pac", ".sa"])
+    input: config["ref"]
+    log: "logs/bwa/index/{ref}.log"
+    conda: "../envs/bwa.yaml"
     shell:
-        """
-        cd {params.dir}
-        transposonPSI.pl {input.chunk} prot
-        """
+        "bwa index {input}"
 ```
+
+.tiny[modified from: [best practice example](https://github.com/NBISweden/snakemake_best_practice)]
 
 --
 
@@ -152,56 +157,59 @@ $ snakemake --use-conda
 
 --
 
-* This doesn't work if you use `run` instead of `shell` (or other directives)
+* This doesn't work if you use `run` (instead of `shell` or `script`)
 
 ---
 
 # Conda
 
-## Using a Conda environment for the entire workflow
+## 2. Using one Conda environment for the entire workflow
 
 --
 
-* Write a Conda environment file that includes all tools used by the workflow, or those used by rules with `run` directives (e.g. `gew.yaml`)
+* Write a Conda .green[environment file] that includes all tools used by the workflow (save it as e.g. `environment.yaml`)
 
 ```{python conda env big, eval=FALSE}
-name: gew
+name: best-practice-smk
 channels:
-  - bioconda
   - conda-forge
+  - bioconda
+  - default
 dependencies:
-  - python=3.7.6
-  - snakemake=5.22.1
-  - biopython=1.76
-  - matplotlib=3.2.1
-  - pandas=1.0.3
-  - numpy=1.18.4
+  - snakemake=6.8.0
+  - python=3.8
+  - pandas=1.3.3
+  - jupyter=1.0
+  - jupyter_contrib_nbextensions=0.5.1
+  - jupyterlab_code_formatter=1.4
+  - bwa=0.7.17
+  - multiqc=1.11
+  - r-ggplot2=3.3.5
+  - samtools=1.13
 ```
+
+.tiny[source: [best practice example](https://github.com/NBISweden/snakemake_best_practice)]
 
 ---
 
 # Conda
 
-## Using a Conda environment for the entire workflow
+## 2. Using one Conda environment for the entire workflow
 
-* Create the environment
+* .green[Create] the environment
 
 --
 
 ```{bash conda create, eval=FALSE}
-$ conda env create -f gew.yml
+$ conda env create -f environment.yml
 ```
 
 --
 
-* Use a terminal multiplexer to run the workflow in a shell instance in the background, _e.g._ tmux or screen
-
---
-
-* Activate your Conda environment in the tmux or screen session
+* .green[Activate] your Conda environment
 
 ```{bash conda activate, eval=FALSE}
-$ conda activate gew
+$ conda activate best-practice-smk
 ```
 
 --
@@ -209,30 +217,30 @@ $ conda activate gew
 * Start your Snakemake workflow
 
 ```{bash snakemake conda env, eval=FALSE}
-(gew) [...] $ snakemake
+(best-practice-smk) [...] $ snakemake
 ```
 
 ---
 
-# Docker & Singularity
+# Containers
+
+## What can I use containers for?
 
 --
 
-## What can I use Docker for?
-
-* Run applications securely isolated in a container, packaged with all dependencies and libraries
+* Run applications securely .green[isolated] in a container, packaged with .green[all dependencies and libraries]
 
 --
 
-* As advanced environment manager
+* As advanced .green[environment manager]
 
 --
 
-* To package your code with the environment it needs
+* To package your .green[code] with the environment it needs
 
 --
 
-* To package a whole workflow (*e.g.* to accompany a manuscript)
+* To package a whole .green[workflow] (*e.g.* to accompany a manuscript)
 
 --
 
@@ -240,13 +248,19 @@ $ conda activate gew
 
 --
 
-## Singularity 
+## Docker vs. Singularity
 
-* Is an open source container platform suitable for HPC clusters
+--
+
+* Docker was developed for .green[any operating system] except high-performance computing (HPC) clusters
+
+--
+
+* Singularity is an open source container platform suitable for .green[HPC clusters]
 
 ---
 
-# Docker & Singularity
+# Containers
 
 ## Docker nomenclature
 
@@ -264,7 +278,7 @@ $ conda activate gew
 
 --
 
-* .green[DockerHub] is an online service for sharing docker images
+* .green[DockerHub] is an online service for sharing Docker images
 
 --
 
@@ -272,58 +286,57 @@ $ conda activate gew
 
 ---
 
-# Docker & Singularity
+# Containers
 
-## Running Snakemake rules with Singularity
-
---
-
-* Snakemake can run a rule isolated in a container, using Singularity
+## 1. Running Snakemake rules with Singularity
 
 --
 
-* Each Conda package is also available as Docker and Singularity images (_e.g._ check http://biocontainers.pro for Conda packages from the bioconda channel)
+* Snakemake can run a rule .green[isolated] in a container, using Singularity
 
 --
 
-* Many other Docker images are also available on DockerHub (https://hub.docker.com/)
-    * But be aware that Docker images in free accounts are automatically deleted after a certain time of inactivity
+* All Conda packages are available as Docker and Singularity images, _e.g._ on http://biocontainers.pro (bioconda channel)
+
+--
+
+* Many other Docker images are available on [DockerHub](https://hub.docker.com/)
+
+--
+
+* Or build your own Docker or Singularity images
 
 ---
 
-# Docker & Singularity
+# Containers
 
-## Running Snakemake rules with Singularity
-
---
-
-* Make sure your system has Singularity installed
+## 1. Running Snakemake rules with Singularity
 
 --
 
-* Find your Docker or Singularity image, _e.g._ on http://biocontainers.pro
+* Make sure your system has Singularity .green[installed]
 
 --
 
-* Add the link to the container image to your rule with the `singularity` directive
+* Find the Docker or Singularity .green[image] in which you want to run the rule
+
+--
+
+* Add the .green[link] to the container image (or the path to a Singularity `*.sif` file) to your rule using the `container` directive
 
 ```{python singularity rule, eval = FALSE}
-rule transposonPSI:
-    """Identify transposons in the UniProt/Swissprot protein dataset"""
+rule NAME:
     input:
-        chunk = PROT_DIR + "split_result/" + PROT_NAME + "_chunk{nr}.fa"
+        "table.txt"
     output:
-        allHits = temp(PROT_DIR + "split_result/" + PROT_NAME + "_chunk{nr}.fa.TPSI.allHits"),
-        topHits = temp(PROT_DIR + "split_result/" + PROT_NAME + "_chunk{nr}.fa.TPSI.topHits")
-    params:
-        dir = PROT_DIR + "split_result/"
-    singularity: "docker://quay.io/biocontainers/transposonpsi:1.0.0--pl526_0"
-    shell:
-        """
-        cd {params.dir}
-        transposonPSI.pl {input.chunk} prot
-        """
+        "plots/myplot.pdf"
+    container:
+        "docker://joseespinosa/docker-r-ggplot2"
+    script:
+        "scripts/plot-stuff.R"
 ```
+
+.tiny[source: [Snakemake documentation](https://snakemake.readthedocs.io/en/stable/snakefiles/deployment.html#running-jobs-in-containers)]
 
 --
 
@@ -335,29 +348,32 @@ $ snakemake --use-singularity
 
 ---
 
-# Docker & Singularity
+# Containers
 
-## Packaging your Snakemake workflow in a Docker container
+## 2. Packaging your Snakemake workflow in a Docker container
 
 --
 
-* Write a Docker file (`my_workflow`), _e.g._
+* Make sure your system has Docker .green[installed]
 
-    * Start with the official Miniconda `base` image
-    * Install the core packages of the workflow (_e.g._ Snakemake and dependencies such as pandas)
-    * Include all rule-specific environments as separate Conda files (running your rules with Conda)
-    * Include your workflow with `COPY <local-src> <container-destination>` into the Docker file
-    * Include the required input data, _e.g._
-        * Mount the path with the data inside the container
-        * Mount a sample list, specifying their data paths
+--
+
+* Write a .green[Docker file], _e.g._ [see this example](https://github.com/NBISweden/workshop-reproducible-research/blob/main/tutorials/docker/Dockerfile)
+
+--
+
+    * Start with the official `Ubuntu` image 
+    * Install Miniconda and other required tools (_e.g._ Snakemake)
+    * Add the project files (e.g. `Snakefile`, `config.yaml`, `environment.yaml`)
+    * Install the Conda environment containing all packages run by the workflow
 
 ---
 
-# Docker & Singularity
+# Containers
 
-## Packaging your Snakemake workflow in a Docker container
+## 2. Packaging your Snakemake workflow in a Docker container
 
-* Create a Docker image from your Docker file (_e.g._ called `my_workflow`)
+* Create a Docker .green[image] from your Docker file (_e.g._ called `my_workflow`)
 
 ```{bash docker image, eval=FALSE}
 $ docker build -t my_workflow .
@@ -365,15 +381,114 @@ $ docker build -t my_workflow .
 
 --
 
-* Run your container
+* .green[Run] your container, _e.g._
 
 ```{bash docker run, eval=FALSE}
-$ docker run --name my_first_workflow_instance -i -t my_workflow
+$ docker run my_workflow
 ```
 
 --
 
-* Share your container on GitHub or BitBucket
+* .green[Share] your Docker file on GitHub or BitBucket, or your Docker image on DockerHub
+
+---
+
+# Combinations of Conda and Containers
+
+## Combine Conda-based package management with running jobs in containers
+
+--
+
+* A container can be specified globally (for the entire workflow) for a workflow 
+  with rule-specific Conda environments
+
+* Snakemake then runs each job in this container with its corresponding Conda 
+  environment when run with `--use-conda --use-singularity`
+
+.tiny[More info: [Snakemake documentation](https://snakemake.readthedocs.io/en/stable/snakefiles/deployment.html#ad-hoc-combination-of-conda-package-management-with-containers) & [best practice example](https://github.com/NBISweden/snakemake_best_practice)]
+
+---
+
+# Combinations of Conda and Containers
+
+## Containerization of Conda-based workflows
+
+--
+
+* Snakemake can automatically generate a Docker file that contains all
+  Conda environments used by the rules of the workflow using the flag `--containerize` 
+
+.tiny[More info: [Snakemake documentation](https://snakemake.readthedocs.io/en/stable/snakefiles/deployment.html#containerization-of-conda-based-workflows)]
+
+---
+
+# Integrating foreign workflow management systems
+
+* From version 6.2 on, Snakemake can run workflows written in other workflow 
+  management systems such as .green[Nextflow] 
+
+--
+
+.pull-left[
+
+* The workflow runs in .green[Snakemake] until a rule to run the foreign workflow is reached
+
+* In this rule, Snakemake .green[hands over] to the other workflow manager
+
+* Afterwards, .green[Snakemake] continues to run rules processing the output files of the foreign workflow
+
+]
+
+--
+
+.pull-right[
+
+```{python nextflow, eval = FALSE}
+rule chipseq_pipeline:
+    input:
+        input="design.csv",
+        fasta="data/genome.fasta",
+        gtf="data/genome.gtf",
+    output:
+        "multiqc/broadPeaks/multiqc_report.html",
+    params:
+        pipeline="nf-core/chipseq",
+        revision="1.2.1",
+        profile=["conda"],
+    handover: True
+    wrapper:
+        "0.74.0/utils/nextflow"
+```
+
+.tiny[More info & source: [Snakemake documentation](https://snakemake.readthedocs.io/en/stable/snakefiles/foreign_wms.html)]
+
+]
+
+---
+
+# Summary
+
+There are many ways to use other .green[tools for reproducible research] together with Snakemake:
+
+--
+
+* Use .green[Git] to version control, backup and share your code
+
+--
+
+* Run rules or your entire workflow in .green[Conda] environments
+
+--
+
+* Run your rules in isolated Singularity .green[containers]
+
+--
+
+* Package your entire workflow in a .green[Docker container]
+
+--
+
+* Run pipelines written in .green[other workflow management systems] in your Snakemake workflow
 
 ---
 

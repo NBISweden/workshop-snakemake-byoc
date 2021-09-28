@@ -1,0 +1,437 @@
+---
+title:
+author: Per Unneberg
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+  revealjs::revealjs_presentation:
+    css: ../revealjs.css
+    includes:
+      in_header: ../footer.html
+    self_contained: true
+    highlight: tango
+    fig_width: 10
+    fig_height: 8
+    fig_caption: false
+    toc: true
+    toc_depth: 2
+    slide_level: 2
+    reveal_options:
+      slideNumber: true
+      previewLinks: true
+      minScale: 1
+      maxScale: 1
+      height: 1400
+      width: 1200
+---
+
+
+```{r knitr, echo=FALSE, eval=TRUE, include=TRUE }
+library(knitr)
+knitr::opts_chunk$set(warning = FALSE, message = FALSE,
+                      fig.width=12, fig.height=10, autodep=TRUE, echo=TRUE,
+                      cache=FALSE, include=TRUE, eval=TRUE, tidy=FALSE, error=TRUE,
+                      class.source = "numberLines", comment="",
+                      class.output = c("numberLines chunkout"))
+knitr::knit_hooks$set(inline = function(x) {
+                      prettyNum(x, big.mark=" ")
+                  })
+knitr::opts_knit$set(root.dir="snakemake_best_practice/.test")
+```
+
+```{r libs, echo=FALSE, eval=TRUE, cache=FALSE }
+library(ggplot2)
+library(viridis)
+bw <- theme_bw(base_size=24) %+replace% theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))
+theme_set(bw) 
+```
+
+#
+
+<div>
+<section>
+<h1 class="title">Snakemake BYOC 2021</h1>
+<h2 class="subtitle">Running snakemake, finetuning performance and setting resource usage</h2>
+<h2 class="author">Per Unneberg</h2>
+<h3 class="date">2021-10-01</h3>
+</section>
+</div>
+
+
+
+# Contents
+
+<div style="padding:100px">
+<h3>Basic execution</h3>
+<h3>Resources</h3>
+<h3>Profiles</h3>
+<h3>Cluster execution</h3>
+</div>
+
+<div class="fragment" style="padding:100px">
+<h3>Setup</h3>
+
+- Very simple examples with snakefiles and code to run
+- All snakefiles and code is available in code repository
+  https://github.com/NBISweden/snakemake_best_practice/
+- code has been run with Snakemake version 6.8.1 
+- all commands have been executed in the snakemake_best_practice .test
+  directory
+
+</div>
+
+# Basic execution
+
+## Running locally - some commonly used options
+
+We first perform a dry run (option `--dry-run`, short option `-n`) to
+print (`--printshellcmds (-p)`) the commands that would happen if we
+were to force re-execution of all (`--forceall (-F)`) rules:
+
+```{bash snakemake-local, class.output="scroll-400" }
+snakemake -s ../workflow/Snakefile --forceall --dry-run --printshellcmds
+```
+
+This is equivalent to 
+
+```{bash snakemake-local-short, eval=FALSE }
+snakemake -s ../workflow/Snakefile -F -n -p
+```
+
+To actually rerun the workflow, we simple drop the `-p` and `-n` flags
+and add the number of cores (`--cores (-j)`) we want to utilize:
+
+```{bash snakemake-rerun-workflow, eval=FALSE }
+snakemake -s ../workflow/Snakefile -F -j 2
+```
+
+## More commonly used options
+
+One can also force regeneration of a single target with the `--force
+(-f)` option:
+
+```{bash snakemake-rerun-target }
+snakemake -s ../workflow/Snakefile -f -j 1 -n -p results/qc/fastqc/data/raw/CHS.HG00512_010101_AAABBB11XX_1.fastq.gz.html
+```
+
+
+When resuming a workflow it can be handy to add the
+`--rerun-incomplete (--ri)` and `--keep-going (-k)` options:
+
+```{bash snakemake-rerun-incomplete-workflow, eval=FALSE }
+snakemake -s ../workflow/Snakefile -j 2 --ri -k
+```
+
+
+
+## Distribution and reproducibility
+
+<h3>Isolated software environments</h3>
+
+Use the `conda` directive to define an isolated software environment
+and use option `--use-conda` to automate generation of the rule's
+software environment:
+
+```{bash conda, eval=FALSE }
+snakemake -s ../workflow/Snakefile -j 2 --use-conda
+```
+
+<h3>Running in containers</h3>
+
+Use the `container` directive to define a docker container to use,
+which is activated with the `--use-singularity` option:
+
+
+```{bash singularity, eval=FALSE }
+snakemake -s ../workflow/Snakefile -j 2 --use-singularity
+```
+
+<h3>Environment modules</h3>
+
+Use the `envmodules` directive to define environment modules available
+at your local HPC (uppmax) and activate with `--use-envmodules`:
+
+```{bash envmodules, eval=FALSE }
+snakemake -s ../workflow/Snakefile -j 2 --use-envmodules
+```
+
+More on this later as we discuss uppmax and SLURM.
+
+NB: this is most likely **not** portable to other systems. 
+
+## snakemake has many more options...
+
+
+<div style="font-size:70%;">
+```{bash snakemake-options, class.output="scroll-1000" }
+snakemake -h
+```
+
+</div>
+
+# Resources
+
+Resources are arbitrarily named keywords that can be defined with the
+`resources` directive. The snakemake job scheduler can make use of the
+resources information (e.g. disk usage or memory requirements) to make
+decisions on what jobs to run at what point and so on.
+
+<div style="font-size:70%">
+
+```{python snakemake-resources-example, eval=FALSE, code=readLines("snakemake_best_practice/workflow/rules/mapping.smk")[34:73] }
+
+```
+</div>
+
+## Default resources
+
+Snakemake can define `default resources` that can be explicitely
+listed (and set with arguments) with the `--default-resources` option:
+
+```{bash snakemake-default-resources }
+snakemake -f -n -p -s ../workflow/Snakefile resources/scaffolds.fa.amb --default-resources
+```
+
+## Default resources - setting
+
+```{bash snakemake-set-default-resources }
+snakemake -f -n -p -s ../workflow/Snakefile resources/scaffolds.fa.amb --default-resources runtime=200 mem_mb=2000
+```
+
+NB: `bwa_index` runtime resource not modified because it has been
+defined in the rule:
+
+```{python snakemake-bwa-index-runtime, code=readLines("snakemake_best_practice/workflow/rules/mapping.smk")[20:21], eval=FALSE, attr.source='startFrom="20"'}
+
+```
+
+
+
+## Customizing resources and threads
+
+Default resources are one-size-fits-all settings that would apply to
+all rules. However, in many workflows, there are certain rules that
+require more specific resource tuning.
+
+Resource tuning can be achieved with the `--set-resources` option.
+Similarly `--set-threads` allows setting rule-specific thread values:
+
+```{bash snakemake-set-resources }
+snakemake -f -n -p -s ../workflow/Snakefile resources/scaffolds.fa.amb --default-resources --set-resources map_bwa_index:runtime=1000 map_bwa_index:mem_mb=6000 --set-threads map_bwa_index=4 -j 8
+```
+
+
+## Putting it all together - on the limits of the command line
+
+Putting everything together, we could now have a command line that
+looks something like this:
+
+```{bash snakemake-long-command-line, eval=FALSE }
+snakemake -s ../workflow/Snakefile -F --ri -k \
+          --use-conda --use-singularity --use-envmodules \
+          --default-resources \
+          --set-resources map_bwa_index:runtime=1000 map_bwa_index:mem_mb=6000 \
+          --set-threads map_bwa_index=4 -j 8
+```
+
+This is getting illegible and it is tedious to write. What to do?
+
+<div class="fragment">
+
+Profiles to the rescue!
+
+</div>
+
+# Profiles
+
+Profiles are configuration files that apply to specific compute
+environments and analyses. They allow setting default options.
+
+
+<div class="fragment">
+
+At its simplest, a profile is simply a directory with a `config.yaml`
+file that sets program options. Let's put our previous example in a
+directory called `~/.config/snakemake/myprofile`. The minimum content of
+that directory is then a file `config.yaml` with (in this case) the
+following contents:
+
+```{r snakemake-local-profile, eval=FALSE, code=readLines("~/.config/snakemake/myprofile/config.yaml") }
+
+```
+
+</div>
+
+## Running the profile
+
+Run with `--profile` (NB: profile argument can also be absolute or
+relative path):
+
+<div style="font-size:70%;">
+
+```{bash snakemake-local-profile-run, class.output="sourceCode scroll-1000" }
+snakemake --profile myprofile -n -p -F
+```
+
+</div>
+
+# Cluster execution
+
+Sofar we have looked at local jobs. What if we want to submit jobs at
+a HPC? Here we focus on SLURM.
+
+The following commands will be executed in the
+snakemake_best_practices .test folder at uppmax.
+
+<div class="fragment">
+
+<h3>sbatch solution</h3>
+
+Wrap workflow in sbatch script (e.g. workflow.sh):
+
+```{bash sbatch-script,  eval=FALSE}
+#!/bin/bash -l
+#SBATCH -A account
+#SBATCH -p core
+#SBATCH -c 20
+#... other SBATCH arguments ...
+
+module load snakemake
+snakemake -j 20 --use-conda --use-envmodules all
+```
+
+and submit with 
+```{bash sbatch-submit, eval=FALSE}
+sbatch workflow.sh
+```
+
+</div>
+
+<div class="fragment">
+Downside: can only make use of one node at a time.
+</div>
+
+## The snakemake job scheduler
+
+When running jobs locally using limited number of threads, snakemake
+needs to decide what job to run when. These decisions are made by an
+internal *job scheduler*. As we will see, the internal scheduler still
+has this role when submitting jobs to a cluster scheduler.
+
+<div class="fragment">
+
+<h3>Background sessions</h3>
+
+A workflow can take a long time to run. A workflow submitted in a
+login shell will terminate once we logout. Therefore, it is advised to
+submit a workflow in a *background session*, either
+[screen](https://www.gnu.org/software/screen/manual/screen.html) or
+[tmux](https://tmuxguide.readthedocs.io/en/latest/tmux/tmux.html).
+
+A named `tmux` session can be initiated as
+
+```{bash tmux, eval=FALSE }
+tmux -s mysession
+```
+
+Inside the session, use a prefix (default `Ctrl-b`; many change to
+`Ctrl-a` which is default in `screen`) with key to launch command. For
+instance, `Ctrl-b d` will detach (exit) from the session. See the docs
+for further info.
+
+</div>
+
+## Generic execution
+
+The `--cluster` option can be used to submit jobs to the cluster
+scheduler:
+```{bash snakemake-cluster-generic, eval=FALSE }
+snakemake --cluster "sbatch -A account -p core -n 20 -t {resources.runtime}" \
+          --use-conda --use-envmodules --ri -k --default-resources runtime=100 -j 100
+```
+
+Note the use of the format string "{resources.runtime}" to set running
+times individually.
+
+One drawback with this approach is that failed jobs or timeouts go
+undetected, which means you have to monitor the outputs regularly. You
+don't want to do that.
+
+<div class="fragment">
+
+<h3>Custom cluster commands</h3>
+
+The argument to `--cluster` is a command (sbatch in example above), so
+could be any wrapper script that submits jobs to a cluster scheduler.
+
+Furthermore, option `--cluster-status` takes as argument a command
+(i.e. custom script) that checks jobs for their status.
+
+Also, option `--jobscript` takes as argument a script that submits
+jobs to the cluster.
+
+We could write custom scripts for each of these options to fine-tune
+job submission. If only there were such scripts already available!
+
+</div>
+
+
+## snakemake-profiles
+
+[Snakemake Profiles](https://github.com/Snakemake-Profiles/doc) are
+collections of reusable configuration profiles for various computing
+environments. The [slurm snakemake
+profile](https://github.com/Snakemake-Profiles/slurm) provides the
+scripts we requested on the previous slide.
+
+<div class="fragment">
+
+<h3>Installation</h3>
+
+The profiles are [cookiecutter
+templates](https://cookiecutter.readthedocs.io/en/1.7.2/) and can be
+installed as follows:
+
+```{bash cookicutter-profile-install, eval=FALSE}
+$ cookiecutter https://github.com/Snakemake-Profiles/slurm.git
+profile_name [slurm]: .myprofile
+sbatch_defaults []: --account=account --error=logs/slurm/%x-%j.err --output=logs/slurm/%x-%j.out"
+cluster_config []: 
+Select advanced_argument_conversion:
+1 - no
+2 - yes
+Choose from 1, 2 [1]: 2
+cluster_name []: rackham
+
+```
+
+</div>
+
+## snakemake slurm profile
+
+<div style="font-size:90%;">
+```{bash slurm-profile-tree, echo=FALSE}
+tree .myprofile
+```
+
+
+`.myprofile/settings.json`:
+```{bash slurm-settings, eval=FALSE, code=readLines("snakemake_best_practice/.test/.myprofile/settings.json") }
+
+```
+
+`.myprofile/config.yaml`:
+```{bash slurm-config, eval=FALSE, code=readLines("snakemake_best_practice/.test/.myprofile/config.yaml") }
+
+```
+</div>
+
+<h3>Job submission</h3>
+
+Submit jobs with
+```{bash slurm-profile-submit, eval=FALSE }
+snakemake --profile .myprofile -j 10 --ri -k -F
+```
+
+
+
+# Questions?

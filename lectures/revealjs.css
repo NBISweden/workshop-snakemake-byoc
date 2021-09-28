@@ -36,6 +36,16 @@
     max-height: 100%;
     font-size: 1.2em;
 }
+.scroll-1000 {
+    max-height: 1000px;
+    overflow-y: auto;
+    background-color: inherit;
+}
+.scroll-400  {
+    max-height: 400px;
+    overflow-y: auto;
+    background-color: inherit;
+}
 
 /* Better alignment of numbered source blocks */
 pre.numberSource code > span > a:first-child::before {
@@ -197,7 +207,7 @@ div.scilife-logo {
     background-size: contain;
     position: absolute;
     bottom: 10px;
-    left: 15px;
+    left: 150px;
     height: 50px;
     width: 200px;
 }
@@ -210,24 +220,7 @@ div.nbis-logo {
     background-size: contain;
     position: absolute;
     bottom: 23px;
-    right: 27px;
+    right: 150px;
     height: 35px;
     width: 100px;
-}
-
-/********** Customise logo, and footer disclaimer **********/
-/* NBIS and scilife  logo in bottom right corner */
-#nbis-footer .nbis-logo {
-  position: absolute;
-  bottom: 25px;
-  left: 75%;
-  height: 60px;
-  width: 150px;
-}
-#nbis-footer .scilife-logo {
-  position: absolute;
-  bottom: 25px;
-  left: 85%;
-  height: 60px;
-  width: 150px;
 }

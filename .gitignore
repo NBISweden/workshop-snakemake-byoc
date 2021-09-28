@@ -13,6 +13,7 @@
 # Other files
 **/.Rhistory
 **/.DS_Store
-workshop-common
 .DS_Store
-lectures/*/*.html
+lectures/welcome/*.html
+lectures/reproducibility-tools/*.html
+lectures/example-workflow/*.html

@@ -42,23 +42,23 @@ library("kableExtra")
 # Your Instructors
 
 .pull-left[
-<img src="john-sundh.jpg" width=50%/>
+<img src="john-sundh.jpg" width=40%/>
 <br>
-.small[John]
+.small[John (instructor)]
 
-<img src="per-unneberg.jpg" width=40%/>
+<img src="per-unneberg.jpg"/>
 <br>
-.small[Per]
+.small[Per (instructor)]
 ]
 
 .pull-right[
-<img src="erik-fasterius.jpg" width=50%/>
+<img src="erik-fasterius.jpg" width=40%/>
 <br>
-.small[Erik]
+.small[Erik (instructor)]
 
-<img src="verena-kutschera.jpg" width=50%/>
+<img src="verena-kutschera.jpg" width=40%/>
 <br>
-.small[Verena]
+.small[Verena (instructor & organizer)]
 ]
 
 ---
@@ -70,36 +70,37 @@ library("kableExtra")
 
 * .green[Lectures]
     * Please stay muted
-    * If you have a question, use the raise-your-hand function (via "Participants") or post your question on slack (#.green[lectures] channel)
+    * If you have a question, please use the raise-your-hand function (via "Participants")
+    * We will share the lecture slides with you on Canvas
 
 
 * .green[Breakout rooms]
     * Feel free to stay unmuted, unless there is a lot of background noise
 
+---
+
+# Discussions forum
+
+* Please use the [Discussions](https://uppsala.instructure.com/courses/52153/discussion_topics) 
+  on Canvas during the workshop for communication
+
+.center[<img src="discussions.png"/>]
 
 ---
 
-# Slack
+# Discussions forum
 
-* Please join the Slack workspace (.green[nbissnakemakebyoc.slack.com], link is _e.g._ in the last email)
+* We will post announcements and links to lecture slides in 
+  [General discussions](https://uppsala.instructure.com/courses/52153/discussion_topics/99402)
 
-.center[<img src="slack.png", width=40%/>]
+* You can ask Snakemake questions to everyone in [Snakemake questions](https://uppsala.instructure.com/courses/52153/discussion_topics/99394)
 
---
+* There are also separate Discussion threads for each of the 
+  groups that you can use to communicate
 
-* Here we will post announcements (#.green[general] channel) and lecture slides (#.green[lectures] channel)
-
---
-
-* If you are kicked out of zoom or have other zoom-related issues, contact us in the #.green[zoom-issues] channel
-
---
-
-* You can ask snakemake questions to everyone in the #.green[snakemake-issues] channel
-
---
-
-* Each group has their own channel, too (#.green[group-1], #.green[group-2], #.green[group-3])
+* If you are having problems with your Zoom connection or other Zoom-related issues, 
+  you can reach us via [email](edu.byoc-snakemake@nbis.se) or in the 
+  [Zoom issues](https://uppsala.instructure.com/courses/52153/discussion_topics/99406) discussion
 
 ---
 
@@ -121,24 +122,9 @@ library("kableExtra")
 
 ---
 
-# Breakout room groups
-
-Group 1:
-* .green[John], Margherita, Jonas, Rashmi
-
-Group 2:
-* .green[Per], Prasoon, George, Valentina
-
-Group 3:
-* .green[Erik], Daniel, Johan, Julie
-
----
-
 # Breakout room feedback session (today)
 
-* You will be in a .green[breakout room] with your group (incl. your instructor)
-
-* Each of you .green[presents] their project to your group
+* Each of you .green[presents] their project to your group (incl. your instructor)
 
 * You have .green[30 minutes], incl. questions and feedback from your group
 
@@ -152,9 +138,9 @@ Group 3:
 
 * You will be in a .green[breakout room] with your group (incl. your instructor)
 
-* There, you will each .green[work individually] on your project
+* You will each .green[work individually] on your project
 
-* You can .green[ask questions] whenever you need help
+* You can ask your group whenever you need help or feedback
 
 * Your instructor will try to help, but all participants are encouraged to .green[help each other]
 
@@ -166,11 +152,31 @@ Group 3:
 
 * At the end of each day, after the coding sessions
 
-* In the main zoom room
+* In the main Zoom room
 
-* Time to .green[discuss open questions] that were difficult to solve in the groups or any .green[interesting insights] about Snakemake
+* Time to .green[discuss open questions] that were difficult to solve in 
+  the groups or any .green[interesting insights] about Snakemake
 
 .center[<img src="cx-insight-YloghyfD7e8-unsplash.jpg" width=50%/>]
+
+---
+
+# Breakout room groups
+
+Whenever we open the breakout rooms, please move yourselves into your group room 
+(except for Verena's group who stays in the main room)
+
+.green[Breakout room 1: Erik F.]
+* Yueqing, Marti, Juanita, Nina
+
+.green[Breakout room 2: John]
+* Mohamed, Pol, Ymke, Dries
+
+.green[Breakout room 3: Per]
+* Tom, Erik Z., Philipp, Hanna
+
+.green[main room: Verena]
+* Nima, Andreas, Hao, Gabriel
 
 ---
 

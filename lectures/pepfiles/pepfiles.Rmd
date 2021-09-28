@@ -1,0 +1,20 @@
+---
+title: "Snakemake best-practices"
+subtitle: "Snakemake BYOC NBIS course"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+    xaringan::moon_reader:
+        self-contained: true
+        seal: false
+        css: ["default", "../template.css"]
+        nature:
+            slideNumberFormat: ""
+---
+
+class: center, middle
+
+.HUGE[Configuring workflows via PEPs]
+
+---
+
+# PEP-files

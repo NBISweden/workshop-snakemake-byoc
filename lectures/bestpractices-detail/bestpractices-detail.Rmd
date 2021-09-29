@@ -59,7 +59,7 @@ fi
 <div>
 <section>
 <h1 class="title">Snakemake BYOC 2021</h1>
-<h2 class="subtitle">More best practices, wrappers, schemas, report, config files, ... </h2>
+<h2 class="subtitle">Best practices, wrappers, schemas, report, config files, and more</h2>
 <h2 class="author">Per Unneberg</h2>
 <h3 class="date">2021-09-30</h3>
 </section>
@@ -84,6 +84,45 @@ fi
 - code has been run with Snakemake version 6.8.1 
 
 </div>
+
+
+# [Snakemake best practices summary](https://snakemake.readthedocs.io/en/stable/snakefiles/best_practices.html)
+
+Linting
+: Snakemake (>=5.11) comes with a code quality checker (a so called
+  linter). It is highly recommended to run the linter before
+  publishing any workflow, asking questions on Stack Overflow or
+  filing issues on Github.
+
+Formatting
+: There is an automatic formatter for Snakemake workflows, called
+  Snakefmt, which should be applied to any Snakemake workflow before
+  publishing it.
+
+Testing
+: It is a good idea to add some minimal test data and configure Github
+  Actions for continuously testing the workflow on each new commit.
+
+Structure
+: Stick to a standardized structure.
+
+Configuration
+: Configuration of a workflow should be handled via config files and,
+  if needed, tabular configuration like sample sheets (either via
+  Pandas or PEPs). Use such configuration for metadata and experiement
+  information, **not for runtime specific configuration like threads,
+  resources and output folders**. For those, just rely on Snakemake’s
+  CLI arguments like --set-threads, --set-resources,
+  --set-default-resources, and --directory.
+
+Filenames
+: Try to keep filenames short, but informative.
+
+Rules and functions
+: Try to keep Python code like helper functions separate from rules.
+
+Wrappers
+: Make use of Snakemake wrappers whenever possible
 
 
 # A best practice repo
@@ -349,7 +388,7 @@ inputs and make sure they conform to some predefined format?
 
 ## Configuration schemas
 
-Schemas benefits according to [https://json-schema.org/]():
+Schema benefits according to [https://json-schema.org/]():
 
 - describes your existing data formats
 - provides human- and machine-readable **documentation**
@@ -530,5 +569,25 @@ requests don't break the workflow.
 ```
 
 </div>
+
+## On project file structure vs workflow file structure
+
+Example from my config which is loosely modelled on the
+[drivendata](http://drivendata.github.io/cookiecutter-data-science/)
+setup and similar to the NBIS reproducibility file structure:
+
+```{bash project-file-structure, cache=TRUE, echo=FALSE }
+tree -a -d -L 2 -I '.snakemake|.git' project
+```
+
+Different snakemake workflows live in `opt` (see [File System Hierachy
+standard](https://www.pathname.com/fhs/pub/fhs-2.3.html) for choice of
+name). Launching from project root could then look like
+
+```{bash project-structure-launch, eval=FALSE}
+snakemake -s opt/datasources-smk/workflow/Snakefile -j 1
+```
+
+
 
 # Questions?

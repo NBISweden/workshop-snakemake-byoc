@@ -16,5 +16,95 @@ class: center, middle
 .HUGE[Configuring workflows via PEPs]
 
 ---
+# Snakemake and PEPs
 
-# PEP-files
+.SMALL[Since version 5.23.0, Snakemake supports configuration via PEP-files]
+
+```python
+pepfile: "pep/config.yaml"
+pepschema: "schemas/pep.yaml"
+
+rule all:
+    input: expand("results/{sample}.stats.txt", sample = pep.sample_table["sample_name"])
+```
+
+---
+# So what are PEPs?
+
+**P**ortable **E**ncapsulated **P**rojects (or [PEPs](http://pep.databio.org/en/latest/))
+is an attempt to standardize metadata and how it's used.
+
+--
+- Written in `yaml` and `csv` format
+--
+
+- Can be loaded by `R` (via `pepr`) and `python` (via `peppy`)
+--
+
+- Now supported by `Snakemake` (with Nextflow next in line?)
+
+---
+
+# Ok ok, but what is it _really_??
+
+--
+
+## Rationale
+
+- A lot of time in bioinformatics revolves around organizing sample data
+
+--
+- Each dataset is annotated in a unique way
+
+--
+- and tools often expect sample information in a unique format
+
+--
+- This limits .green[portability] and .green[reusability] of datasets.
+---
+# How do PEPs make my life easier?
+
+The idea is that PEPs help to:
+
+1. Standardize metadata so that it works for several projects and with several tools
+2. Collaborate on and share metadata with others by using a common interface
+---
+
+# How does it work in practice?
+
+`pep/config.yaml` - the project config file
+```yaml
+pep_version: 2.0.0
+sample_table: "config/samples.csv"
+```
+
+--
+
+`config/samples.csv` - the sample table
+```bash
+"sample_name","read1","read2"
+"sample1","/path/to/datadir/sample1_R1.fast1.gz","/path/to/datadir/sample1_R2.fastq.gz"
+"sample2","/path/to/datadir/sample2_R1.fast1.gz","/path/to/datadir/sample2_R2.fastq.gz"
+```
+--
+
+`Snakefile`
+```python
+pepfile: "pep/config.yaml"
+
+rule all:
+    input: expand("results/{sample}.bam", sample = pep.sample_table["sample_name"])
+
+rule align:
+    input:
+        R1 = lambda wildcards: pep.get_sample(wildcards.sample)["read1"],
+        R2 = lambda wildcards: pep.get_sample(wildcards.sample)["read2"],
+        ref = "resources/genome/genome.fasta"
+    output:
+        "results{sample}.bam"
+    shell: "someAlignmentTool -1 {input.R1} -2 {input.R2} -x {input.ref} > {output}"
+```
+---
+# Difference between pepfiles and workflow configfiles
+
+> a PEP should describe everything needed about the data, while a workflow and its configuration should describe everything needed about the analysis that is applied to it.

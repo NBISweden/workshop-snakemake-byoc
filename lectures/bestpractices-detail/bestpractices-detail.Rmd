@@ -524,10 +524,10 @@ knitr::opts_knit$set(root.dir=curdir)
 
 ## Pre-commit - for the git power user
 
-[Git hooks](https://github.com/NBISweden/snakemake_best_practice/) can
+[Git hooks](https://git-scm.com/docs/githooks) can
 be used to identify simple issues before submission to code review.
 
-[Pre-commit](https://github.com/NBISweden/snakemake_best_practice/) is
+[Pre-commit](https://pre-commit.com) is
 a "framework for managing and maintaining multi-language pre-commit
 hooks".
 

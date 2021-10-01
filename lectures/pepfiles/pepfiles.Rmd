@@ -1,5 +1,5 @@
 ---
-title: "Snakemake best-practices"
+title: "Configuring workflows via PEPs"
 subtitle: "Snakemake BYOC NBIS course"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:

@@ -1,0 +1,35 @@
+/* SCSS custom modifications for NBIS presentations using quarto, revealjs and rmarkdown */
+
+
+/*-- scss:defaults --*/
+
+// Cannot chanhe callout appearance for some reason?
+// $callout-border-width: 100px;
+// $callout-margin-top: 0.1em;
+// $callout-margin-bottom: 0.1em;
+// $callout-color-important: 
+//     #0099c2;
+// $callout-icon-scale: "50%";
+
+/*-- scss:rules --*/
+
+.scroll-1000 {
+    max-height: 1000px;
+    overflow-y: auto;
+    background-color: inherit;
+}
+.scroll-400  {
+    max-height: 400px;
+    overflow-y: auto;
+    background-color: inherit;
+}
+.scroll-300  {
+    max-height: 300px;
+    overflow-y: auto;
+    background-color: inherit;
+}
+.scroll-200  {
+    max-height: 200px;
+    overflow-y: auto;
+    background-color: inherit;
+}

@@ -1,0 +1,16 @@
+rerun-incomplete: true
+keep-going: true
+use-conda: true
+use-singularity: true
+use-envmodules: true
+
+default-resources:
+  - runtime=100
+  - mem_mb=6000
+  - disk_mb=1000000
+set-threads:
+  - bwa_mem_wildcard=4
+set-resources:
+  - bwa_mem_wildcard:runtime=1000
+  - bwa_mem_wildcard:mem_mb=6000
+  - samtools_merge_bam:runtime=100

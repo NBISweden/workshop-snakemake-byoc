@@ -1,5 +1,5 @@
 ---
-title: Snakemake BYOC 2022
+title: Running snakemake
 subtitle: Running snakemake locally and on the cluster, finetuning performance and setting resource usage
 author: Per Unneberg
 date: "`r format(Sys.time(), '%d %B, %Y')`"

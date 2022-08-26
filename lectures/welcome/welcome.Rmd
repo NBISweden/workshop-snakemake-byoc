@@ -159,10 +159,10 @@ Whenever we open the breakout rooms, please move yourselves into your group room
 * Daniela, Camille, Kang, Karin
 
 .green[Breakout room 2: John]
-* Trine, Magnus, Tianyi, Anna
+* Trine, Tianyi, Anna
 
 .green[Breakout room 3: Per]
-* Archana, Victor, Martyna, Begüm Serra
+* Archana, Martyna, Begüm Serra, Magnus
 
 
 ---

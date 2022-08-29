@@ -1,5 +1,5 @@
 ---
-title: "Combining Tools for Reproducible Research with Snakemake"
+title: "Reproducible Research and Snakemake"
 subtitle: "Snakemake BYOC NBIS course"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
@@ -19,7 +19,7 @@ layout: true
 
 class: center, middle
 
-.HUGE[Combining Tools for Reproducible Research with Snakemake]
+.HUGE[Reproducible Research and Snakemake]
 
 ```{r Setup, echo = FALSE, message = FALSE}
 # Knitr setup
@@ -33,23 +33,48 @@ library("kableExtra")
 
 ---
 
-# Reproducibility is rarer than you think
+# Reproducibility
 
-The results of only 26% out of 204 randomly selected papers in the journal
-*Science* could be reproduced.<sup>1</sup>
+- Reproducible research is about being able to replicate the results of a study
+- It is an important aspect of the scientific method
+- Computational reproducibility is one part of it
+- Given the same data and the same code, we expect identical outcomes
 
-.tiny[<sup>1</sup> Stodden et. al (2018). "An empirical analysis of journal policy effectiveness for computational reproducibility". PNAS. 115 (11): 2584-2589]
+---
 
+# Computational reproducibility
+
+Why the effort?
+
+> Because many researchers typically forget details
+> of their own work, they are not unlike strangers
+> when returning to projects after time away.
+> Thus, efforts to communicate your work to
+> strangers can actually help you communicate
+> with yourself over time.
+
+M. Schwab et al. *Making scientific computations reproducible*. https://dx.doi.org/10.1109/5992.881708
+
+→ It’s for **you**
+
+
+---
+
+# Don’t be *that* person
+
+The journal *Science* implemented a replication policy in 2011.
+A study in 2018 requested raw data and code in accordance with the policy. Some answers:
+
+> When you approach a PI for the source codes and raw data, you better explain who you are, whom you work for, why you need the data and what you are going to do with it.
+
+.
 --
 
-> Many journals are revising author guidelines to include data and code
-> availability.
+> I have to say that this is a very unusual request without any explanation! Please ask your supervisor to send me an email with a detailed, and I mean detailed, explanation.
 
---
+(26% out of 204 randomly selected papers in the journal could be reproduced.)
 
-> (...) an improvement over no policy, but currently insufficient for
-> reproducibility.
-
+.tiny[Stodden et. al (2018). *An empirical analysis of journal policy effectiveness for computational reproducibility* https://doi.org/10.1073/pnas.1708290115]
 
 ---
 
@@ -59,7 +84,7 @@ The results of only 26% out of 204 randomly selected papers in the journal
 
 --
 
-* Track your Snakemake code with .green[Git] and share it in a remote .green[repository] on GitHub or BitBucket (not covered in this lecture)
+* Track your code with .green[Git] and share it in a remote .green[repository] on GitHub or BitBucket (not covered in this lecture)
 
 --
 

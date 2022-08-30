@@ -96,7 +96,7 @@ Some answers:
 
 --
 
-* Track code changes over time with .green[Git] and share it on .green[GitHub] (not here)
+* Track code changes over time with .green[Git] and share it on [GitHub](https://github.com) (not this talk)
 
 --
 
@@ -123,6 +123,7 @@ Some answers:
 Prerequisites
 
 * Install Conda, for example with [Miniconda](https://docs.conda.io/en/latest/miniconda.html)
+
 * Set up the [Bioconda](https://bioconda.github.io/) channel
 
 --
@@ -157,8 +158,11 @@ conda install -n mapping bowtie2
 # Conda environments
 
 * You can have as many environments as you wish
+
 * Environments are independent from each other
+
 * If something is broken, simply delete the environment and start over
+
 * To test a new tool, install it into a Conda environment. Delete the environment to uninstall.
 
 --
@@ -170,7 +174,8 @@ conda install -n mapping bowtie2
 
 # Conda environment files
 
-* Conda environments can be created from .green[environment files].
+* Conda environments can be created from .green[environment files] in YAML format.
+
 * Example `bwa.yaml`:
 
 ```{yaml conda env one, eval = FALSE}
@@ -184,8 +189,8 @@ dependencies:
 
 --
 * Create the environment:
-```
-conda env create -n bwa -f bwa.yaml
+```{bash, eval = FALSE}
+$ conda env create -n bwa -f bwa.yaml
 ```
 
 ---
@@ -347,158 +352,58 @@ rule create_bwa_index:
 
 # Running Snakemake jobs in containers
 
-Snakemake can run a rule in a container, using Singularity
+Snakemake can run a jobs in a container using Singularity
 
 * Ensure your system has Singularity .green[installed]
 
 --
 
-* Find the Docker or Singularity .green[image] in which you want to run the rule (http://biocontainers.pro/ or [DockerHub](https://hub.docker.com/))
+* Find a Docker or Singularity image with the tool to run (https://biocontainers.pro/ or [DockerHub](https://hub.docker.com/))
 
 --
 
 * Add the `container:` directive to your rule:
 
 ```{python singularity rule, eval = FALSE}
-rule NAME:
-    input:
-        "table.txt"
-    output:
-        "plots/myplot.pdf"
-    container:
-        "docker://joseespinosa/docker-r-ggplot2"
-    script:
-        "scripts/plot-stuff.R"
+rule minimap2_version:
+    container: "docker://quay.io/biocontainers/minimap2:2.24--h5bf99c6_0"   # ← "docker://" is needed
+    shell:
+        "minimap2 --version"
 ```
-
-.tiny[source: [Snakemake documentation](https://snakemake.readthedocs.io/en/stable/snakefiles/deployment.html#running-jobs-in-containers)]
 
 --
 
 * Start your workflow on the command line with `--use-singularity`
 
 ```{bash snakemake use singularity, eval=FALSE}
-$ snakemake --use-singularity
+$ snakemake --use-singularity -j 1
+...
+Activating singularity image .../.snakemake/singularity/342e6ddbac7e5929a11e6ae9350454c0.simg
+INFO:    Converting SIF file to temporary sandbox...
+2.24-r1122
+INFO:    Cleaning up image...
+...
 ```
 
-
 ---
 
-# Containers
+# Containers – advanced topics
 
-## 2. Packaging your Snakemake workflow in a Docker container
-
---
-
-* Make sure your system has Docker .green[installed]
+* A [Docker image to use for *all* rules can be specified](https://snakemake.readthedocs.io/en/stable/snakefiles/deployment.html#running-jobs-in-containers)
 
 --
-
-* Write a .green[Docker file], _e.g._ [see this example](https://github.com/NBISweden/workshop-reproducible-research/blob/main/tutorials/docker/Dockerfile)
-
---
-
-    * Start with the official `Ubuntu` image 
-    * Install Miniconda and other required tools (_e.g._ Snakemake)
-    * Add the project files (e.g. `Snakefile`, `config.yaml`, `environment.yaml`)
-    * Install the Conda environment containing all packages run by the workflow
-
----
-
-# Containers
-
-## 2. Packaging your Snakemake workflow in a Docker container
-
-* Create a Docker .green[image] from your Docker file (_e.g._ called `my_workflow`)
-
-```{bash docker image, eval=FALSE}
-$ docker build -t my_workflow .
-```
+* You can package your entire workflow into a Docker image by writing a .green[Dockerfile].
+  [See this example](https://github.com/NBISweden/workshop-reproducible-research/blob/0ee1eca78ccefbd06fbeb2c0aba37030230df90d/tutorials/containers/Dockerfile)
+  - Snakemake runs *inside* the container.
+  - To run the workflow, only Docker or Singularity is needed
 
 --
-
-* .green[Run] your container, _e.g._
-
-```{bash docker run, eval=FALSE}
-$ docker run my_workflow
-```
+* [Conda and containers can be combined]([Snakemake documentation](https://snakemake.readthedocs.io/en/stable/snakefiles/deployment.html#ad-hoc-combination-of-conda-package-management-with-containers): Specify a global container, run with `--use-conda --use-singularity`, and Snakemake creates the Conda environment within the container.
 
 --
-
-* .green[Share] your Docker file on GitHub or BitBucket, or your Docker image on DockerHub
-
----
-
-# Combinations of Conda and Containers
-
-## Combine Conda-based package management with running jobs in containers
-
---
-
-* A container can be specified globally (for the entire workflow) for a workflow 
-  with rule-specific Conda environments
-
-* Snakemake then runs each job in this container with its corresponding Conda 
-  environment when run with `--use-conda --use-singularity`
-
-.tiny[More info: [Snakemake documentation](https://snakemake.readthedocs.io/en/stable/snakefiles/deployment.html#ad-hoc-combination-of-conda-package-management-with-containers) & [best practice example](https://github.com/NBISweden/snakemake_best_practice)]
-
----
-
-# Combinations of Conda and Containers
-
-## Containerization of Conda-based workflows
-
---
-
-* Snakemake can automatically generate a Docker file that contains all
-  Conda environments used by the rules of the workflow using the flag `--containerize` 
-
-.tiny[More info: [Snakemake documentation](https://snakemake.readthedocs.io/en/stable/snakefiles/deployment.html#containerization-of-conda-based-workflows)]
-
----
-
-# Integrating foreign workflow management systems
-
-* From version 6.2 on, Snakemake can run workflows written in other workflow 
-  management systems such as .green[Nextflow] 
-
---
-
-.pull-left[
-
-* The workflow runs in .green[Snakemake] until a rule to run the foreign workflow is reached
-
-* In this rule, Snakemake .green[hands over] to the other workflow manager
-
-* Afterwards, .green[Snakemake] continues to run rules processing the output files of the foreign workflow
-
-]
-
---
-
-.pull-right[
-
-```{python nextflow, eval = FALSE}
-rule chipseq_pipeline:
-    input:
-        input="design.csv",
-        fasta="data/genome.fasta",
-        gtf="data/genome.gtf",
-    output:
-        "multiqc/broadPeaks/multiqc_report.html",
-    params:
-        pipeline="nf-core/chipseq",
-        revision="1.2.1",
-        profile=["conda"],
-    handover: True
-    wrapper:
-        "0.74.0/utils/nextflow"
-```
-
-.tiny[More info & source: [Snakemake documentation](https://snakemake.readthedocs.io/en/stable/snakefiles/foreign_wms.html)]
-
-]
+* [Snakemake can automatically generate a Dockerfile](https://snakemake.readthedocs.io/en/stable/snakefiles/deployment.html#containerization-of-conda-based-workflows)
+  that contains all Conda environments used by the rules of the workflow using the flag
+  `--containerize`.
 
 ---
 
@@ -508,7 +413,7 @@ There are many ways to use other .green[tools for reproducible research] togethe
 
 --
 
-* Use .green[Git] to version control, backup and share your code
+* Use .green[Git] for version control, backup and share your code
 
 --
 
@@ -516,23 +421,20 @@ There are many ways to use other .green[tools for reproducible research] togethe
 
 --
 
-* Run your rules in isolated Singularity .green[containers]
+* Run your rules in isolated Docker/Singularity .green[containers]
 
 --
 
 * Package your entire workflow in a .green[Docker container]
 
---
 
-* Run pipelines written in .green[other workflow management systems] in your Snakemake workflow
-
----
-
-class: center, middle
-
-.HUGE[Questions?]
-
----
-
+<!--
 
 * Further reading: [conda-lock](https://github.com/conda-incubator/conda-lock)
+
+
+  * This starts from an Ubuntu image, installs Miniconda, Snakemake, adds relevant files such as `the workflow files
+    * Install Miniconda and other required tools (_e.g._ Snakemake)
+    * Add the project files (e.g. `Snakefile`, `config.yaml`, `environment.yaml`)
+    * Install the Conda environment containing all packages run by the workflow
+-->

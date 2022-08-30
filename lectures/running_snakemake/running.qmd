@@ -2,7 +2,7 @@
 title: Running snakemake
 subtitle: Running snakemake locally and on the cluster, finetuning performance and setting resource usage
 author: Per Unneberg
-date: "`r format(Sys.time(), '%d %B, %Y')`"
+date: "1 September, 2022"
 institute: NBIS
 from: markdown+emoji
 format:
@@ -19,7 +19,7 @@ format:
     preview-links: true
     chalkboard: true
     # Multiple logos not possible; would need to make custom logo combining both logos
-    footer: Snakemake BYOC 2022
+    footer: Snakemake BYOC 2022 - Running snakemake
     logo: https://nbis.se/assets/img/logos/nbislogo-green.svg
     smaller: true
     highlight-style: gruvbox
@@ -42,8 +42,6 @@ knitr:
 
 
 ## Setup  {.unnumbered .unlisted}
-
-
 
 ```{r libs }
 #| echo: false
@@ -68,7 +66,6 @@ snakemake_version <- system("snakemake --version", intern=TRUE)
 - Code has been run with Snakemake version `r snakemake_version`
 - Rules run `bwa mem` to map two samples to a reference
 
-
 :::: {.columns}
 
 ::: {.column width="50%"}
@@ -82,9 +79,7 @@ Input data:
 #| label: list-data-0
 tree -L 3 data resources
 ```
-
 :::
-
 
 :::
 
@@ -111,21 +106,50 @@ ls -1 *.smk
 
 ## Example 1 - ex1.smk
  
-Let's start with a snakefile that contains a single rule for doing an
-alignment with bwa:
+Let's start by writing a snakefile that runs an alignment with `bwa`. The command we want to run is 
+
+```{bash }
+#| label: bwa-command
+#| echo: true
+#| eval: false
+bwa mem -t 1 resources/ref.fa data/CHS.HG00512_1.fastq.gz data/CHS.HG00512_2.fastq.gz | samtools view -b -o bam/CHS.HG00512.bam
+```
+
+where we have 
+
+::: {.incremental}
+
+output
+: `bam/CHS.HG00512.bam`
+
+inputs
+: `resources/ref.fa`, `data/CHS.HG00512_1.fastq.gz`, and `data/CHS.HG00512_2.fastq.gz`
+
+command
+: `bwa mem -t 1 {inputs} | samtools view -b -o {output}`
+
+:::
+
+::: {.fragment}
+
+Putting these in a snakefile yields:
 
 ``` {python code=readLines("ex1.smk") }
 #| eval: false
 #| label: bwa_mem_CHS_HG00512-1
 ```
 
-::: {.fragment}
+:::
+
+
+
+## Example 1 - ex1.smk
+
 
 We first perform a dry run (option `--dry-run`, short option `-n`) to
 print (`--printshellcmds/-p`) the default rule in the snakefile
 `ex1.smk` which we point to using option `--snakefile/-s`:
 
-:::
 
 ::: {.fragment}
 
@@ -137,15 +161,9 @@ snakemake --snakefile ex1.smk --dry-run --printshellcmds
 ```
 :::
 
+
 ## Example 1 - ex1.smk
  
-Let's start with a snakefile that contains a single rule for doing an
-alignment with bwa:
-
-``` {python code=readLines("ex1.smk") }
-#| label:  bwa_mem_CHS_HG00512-2
-#| eval: false
-```
 
 We first perform a dry run (option `--dry-run`, short option `-n`) to
 print (`--printshellcmds/-p`) the default rule in the snakefile
@@ -163,22 +181,15 @@ snakemake -s ex1.smk -n -p
 ```{bash }
 #| label: snakemake-bwa_mem_CHS_HG00512_f2
 #| echo: false
-#| class-output: "scroll-200"
 rm -f bam/CHS.HG00512.bam
 snakemake -s ex1.smk -n -p
 ```
 :::
 
 
+
 ## Example 1 - ex1.smk
  
-Let's start with a snakefile that contains a single rule for doing an
-alignment with bwa:
-
-``` {python code=readLines("ex1.smk") }
-#| label:  bwa_mem_CHS_HG00512-3
-#| eval: false
-```
 
 We first perform a dry run (option `--dry-run`, short option `-n`) to
 print (`--printshellcmds/-p`) the default rule in the snakefile
@@ -190,19 +201,14 @@ print (`--printshellcmds/-p`) the default rule in the snakefile
 snakemake -s ex1.smk -n -p
 ```
 
-
 ```{bash }
 #| label: snakemake-bwa_mem_CHS_HG00512_f3
 #| echo: false
-#| class-output: "scroll-200"
 rm -f bam/CHS.HG00512.bam
 snakemake -s ex1.smk -n -p
 ```
 
-
 Note the reason the rule was run[^reason]
-
-
 
 [^reason]: for snakemake <7.12 use the `--reason/-r` option
 
@@ -478,7 +484,8 @@ which is activated with the `--use-singularity` option:
 
 ```{bash }
 #| label: singularity
-#| eval: false
+#| eval: true
+#| class-output: scroll-200
 snakemake -F -s ex5.smk -j 2 --use-singularity
 ```
 
@@ -487,7 +494,7 @@ snakemake -F -s ex5.smk -j 2 --use-singularity
 ##### Environment modules
 
 Use the `envmodules` keyword to define environment modules available
-at your local HPC (uppmax)
+at your local HPC (e.g. uppmax)
 
 ``` {python code=readLines("ex6.smk") }
 #| label: conda-environment
@@ -572,13 +579,13 @@ The resources `mem_mb` and `disk_mb` now have been assigned default values.
 
 :::
 
-::: {.fragment}
+<!-- ::: {.fragment} -->
 
-::: {.callout-note}
-Jobs can now fail if they exceed the specified resources.
-:::
+<!-- ::: {.callout-note} -->
+<!-- Jobs can now fail if they exceed the specified resources. -->
+<!-- ::: -->
 
-:::
+<!-- ::: -->
 
 ::: {.notes}
 
@@ -589,8 +596,8 @@ Point out that this can cause jobs to fail if they exceed the specified resource
 ## Adding threads and resources to workflow - ex7.smk ##
 
 Now that we will be fine-tuning resources and threads per rule we add
-another rule, the keyword `threads` and set resources for one of the
-rules:
+another rule `samtools_merge_bam` that will merge our bam files, the
+keyword `threads` and set resources for one of the rules:
 
 ``` {python code=readLines("ex7.smk") }
 #| label: workflow-adding-threads
@@ -608,35 +615,44 @@ snakemake -s ex7.smk -n -q -F -c 10
 ```
 :::
 
-## Setting resources ##
-
-##### Resources #####
-
-```{bash }
-#| label: setting-resources
-#| echo: true
-#| eval: true
-#| class-output: scroll-200
-snakemake -s ex7.smk --resources mem_mb=2000 -n
-```
-sets resources on rules with defined resources.
-
 ::: {.fragment}
 
-##### Default resources #####
-
-```{bash }
-#| label: setting-default-resources
-#| echo: true
-#| eval: true
-#| class-output: scroll-200
-snakemake -s ex7.smk --default-resources mem_mb=2000 -n 
-```
-
-sets default resources for each job. Note that `samtools_merge_bam`
-resources take precedence.
+Note that we changed the final pseudo-target name since the final
+workflow output now is a merged bam file!
 
 :::
+
+
+<!-- ## Setting resources ## -->
+
+<!-- ##### Resources ##### -->
+
+<!-- ```{bash } -->
+<!-- #| label: setting-resources -->
+<!-- #| echo: true -->
+<!-- #| eval: true -->
+<!-- #| class-output: scroll-200 -->
+<!-- snakemake -s ex7.smk --resources mem_mb=2000 -n -->
+<!-- ``` -->
+<!-- sets resources on rules with defined resources. -->
+
+<!-- ::: {.fragment} -->
+
+<!-- ##### Default resources ##### -->
+
+<!-- ```{bash } -->
+<!-- #| label: setting-default-resources -->
+<!-- #| echo: true -->
+<!-- #| eval: true -->
+<!-- #| class-output: scroll-200 -->
+<!-- snakemake -s ex7.smk --default-resources mem_mb=2000 -n  -->
+<!-- ``` -->
+
+<!-- sets default resources for each job. Note that `samtools_merge_bam` -->
+<!-- resources take precedence. -->
+
+<!-- ::: -->
+
 
 
 ## Setting rule-specific resources  ##
@@ -653,11 +669,15 @@ Similarly `--set-threads` allows setting rule-specific thread values:
 ```{bash }
 #| label:  snakemake-set-resources
 snakemake -F -n -s ex7.smk --default-resources --set-resources bwa_mem_wildcard:runtime=1000 \
-		  bwa_mem_wildcard:mem_mb=6000 samtools_merge_bam:runtime=100 \
-		  --set-threads bwa_mem_wildcard=4 -c 8
+		  bwa_mem_wildcard:mem_mb=6000 --set-threads bwa_mem_wildcard=4 -c 8
 ```
 
 :::
+
+<!-- ## GPU resources ## -->
+
+<!-- Snakemake provides support for GPUs via the Google Life Sciences API -->
+
 
 ## Putting it all together - on the limits of the command line
 
@@ -680,8 +700,7 @@ snakemake -s ex7.smk -F --ri -k \
 
 ::: {.fragment}
 
-This is getting illegible and it is tedious to write. What to do? Put
-it in a bash script?
+This is getting illegible and it is tedious to write. What to do?
 
 :::
 
@@ -941,4 +960,4 @@ snakemake -s ex7.smk --profile myprofile -j 10 --ri -k -F
 :::
 
 
-# Questions?
+# Questions?  {.unnumbered .unlisted}

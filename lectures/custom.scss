@@ -1,15 +1,6 @@
 /* SCSS custom modifications for NBIS presentations using quarto, revealjs and rmarkdown */
 
-
 /*-- scss:defaults --*/
-
-// Cannot chanhe callout appearance for some reason?
-// $callout-border-width: 100px;
-// $callout-margin-top: 0.1em;
-// $callout-margin-bottom: 0.1em;
-// $callout-color-important: 
-//     #0099c2;
-// $callout-icon-scale: "50%";
 
 /*-- scss:rules --*/
 
@@ -32,4 +23,33 @@
     max-height: 200px;
     overflow-y: auto;
     background-color: inherit;
+}
+
+pre.out {
+  background-color: lightgreen;
+}
+pre.sourceCode.src {
+  background-color: lightblue;
+}
+
+.green { color: #85be42; font-weight: bold }
+
+code.tree {
+    line-height: 8px;
+    font-size: 18px;
+}
+
+code.stree {
+    line-height: 6.6px;
+    font-size: 12px;
+}
+
+code.sstree {
+    line-height: 5.6px;
+    font-size: 10px;
+}
+
+
+code.large {
+    font-size: 20px;
 }

@@ -38,13 +38,22 @@ library("kableExtra")
 - Reproducible research is about being able to replicate the results of a study
 - It is an important aspect of the scientific method
 - Computational reproducibility is one part of it
-- Given the same data and the same code, we expect identical outcomes
+- Ideally, given the same data and the same code, there are identical outcomes
+
+--
+
+*Code* encompasses
+- The workflow itself (→ `Snakefile`)
+- The helper scripts you are calling (→ `scripts/`)
+- The 3rd-party tools you are running (→ this lecture)
 
 ---
 
 # Computational reproducibility
 
 Why the effort?
+
+.tiny[M. Schwab et al. *Making scientific computations reproducible*. https://dx.doi.org/10.1109/5992.881708]
 
 > Because many researchers typically forget details
 > of their own work, they are not unlike strangers
@@ -53,9 +62,9 @@ Why the effort?
 > strangers can actually help you communicate
 > with yourself over time.
 
-M. Schwab et al. *Making scientific computations reproducible*. https://dx.doi.org/10.1109/5992.881708
+--
 
-→ It’s for **you**
+→ **You** are also in the target audience
 
 
 ---
@@ -63,14 +72,17 @@ M. Schwab et al. *Making scientific computations reproducible*. https://dx.doi.o
 # Don’t be *that* person
 
 The journal *Science* implemented a replication policy in 2011.
-A study in 2018 requested raw data and code in accordance with the policy. Some answers:
+A study in 2018 requested raw data and code in accordance with the policy.
+Some answers:
 
-> When you approach a PI for the source codes and raw data, you better explain who you are, whom you work for, why you need the data and what you are going to do with it.
+> When you approach a PI for the source codes and raw data, you better explain who you are,
+> whom you work for, why you need the data and what you are going to do with it.
 
 .
 --
 
-> I have to say that this is a very unusual request without any explanation! Please ask your supervisor to send me an email with a detailed, and I mean detailed, explanation.
+> I have to say that this is a very unusual request without any explanation!
+> Please ask your supervisor to send me an email with a detailed, and I mean detailed, explanation.
 
 (26% out of 204 randomly selected papers in the journal could be reproduced.)
 
@@ -78,59 +90,90 @@ A study in 2018 requested raw data and code in accordance with the policy. Some 
 
 ---
 
-# Combining Tools for Reproducible Research with Snakemake
+# Combine tools to make research reproducible
 
 .center[<img src="reproducibility-overview.png" width=40%/>]
 
 --
 
-* Track your code with .green[Git] and share it in a remote .green[repository] on GitHub or BitBucket (not covered in this lecture)
+* Track code changes over time with .green[Git] and share it on .green[GitHub] (not here)
 
 --
 
-* Combine Snakemake with .green[Conda] and/or .green[containers] to make the compute environment reproducible
+* Make your workflow reproducible with a workflow manager (.green[Snakemake], .green[Nextflow], .green[WDL])
 
 --
 
-* Integrate foreign workflow management systems such as .green[Nextflow] pipelines into your Snakemake workflow
+* Make the execution environment reproducible with .green[Conda] environments and/or .green[containers]
+
 
 ---
 
-# Conda
+# Conda: a .green[package], .green[dependency], and .green[environment] manager
 
-* Is a .green[package, dependency, and environment] manager
-
---
-
-    > packages: any type of program (_e.g._ bowtie2, snakemake etc.)
-
-    > dependency: other software required by a package
-
-    > environment: a distinct collection of packages
-
---
-
-* Keeps track of the dependencies between packages in each environment
+* Conda installs packages
+* Packages come from a central repository at https://anaconda.org/
+* Users can contribute their own packages via *channels*
+* Highly recommended: The [Bioconda](https://bioconda.github.io/) channel
 
 ---
 
-# Conda
+# Using Conda
 
-## 1. Running a Snakemake rule with a Conda environment
+Prerequisites
 
---
-
-* Make sure you have Conda .green[installed] (Miniconda or Anaconda)
-
---
-
-* Find your Conda .green[package] on http://anaconda.org
+* Install Conda, for example with [Miniconda](https://docs.conda.io/en/latest/miniconda.html)
+* Set up the [Bioconda](https://bioconda.github.io/) channel
 
 --
 
-* Create a Conda .green[environment file] (e.g. `bwa.yaml`)
+* Install Samtools and BWA into a new Conda environment named `mapping`:
+```
+$ conda create -n mapping samtools bwa
+```
 
-```{python conda env one, eval = FALSE}
+--
+
+* Conda also installs also the .green[dependencies] – other software required by Samtools and/or BWA.
+
+--
+
+To use the tools in the environment, .green[activate] it:
+```
+$ conda activate mapping
+$ samtools --version
+samtools 1.15.1
+```
+
+--
+* Install a tool into an existing environment:
+```
+conda install -n mapping bowtie2
+```
+(Leaving out `-n mapping` installs into the currently active environment.)
+
+---
+
+# Conda environments
+
+* You can have as many environments as you wish
+* Environments are independent from each other
+* If something is broken, simply delete the environment and start over
+* To test a new tool, install it into a Conda environment. Delete the environment to uninstall.
+
+--
+
+* Find tools to install by searching [anaconda.org](https://anaconda.org) or with `conda search`
+
+
+---
+
+# Conda environment files
+
+* Conda environments can be created from .green[environment files].
+* Example `bwa.yaml`:
+
+```{yaml conda env one, eval = FALSE}
 channels:
   - conda-forge
   - bioconda
@@ -139,61 +182,19 @@ dependencies:
   - bwa=0.7.17
 ```
 
-.tiny[source: [best practice example](https://github.com/NBISweden/snakemake_best_practice)]
-
-
 --
-
-* Store your `yaml` files in a directory for environments
-
---
-
-* For reproducibility, it is important to keep include package .green[versions] in your environment file
+* Create the environment:
+```
+conda env create -n bwa -f bwa.yaml
+```
 
 ---
 
-# Conda
+# Snakemake + Conda
 
-## 1. Running a Snakemake rule with a Conda environment
+## Option one: A single environment for the entire workflow
 
-* Add the .green[path] to the Conda environment `yaml` file to your rule using `conda`
-
---
-
-```{python conda rule, eval = FALSE}
-rule map_bwa_index:
-    output: expand("{{ref}}{ext}", ext=[".amb", ".ann", ".bwt", ".pac", ".sa"])
-    input: config["ref"]
-    log: "logs/bwa/index/{ref}.log"
-    conda: "../envs/bwa.yaml"
-    shell:
-        "bwa index {input}"
-```
-
-.tiny[modified from: [best practice example](https://github.com/NBISweden/snakemake_best_practice)]
-
---
-
-* Start your workflow on the command line with `--use-conda`
-
-```{bash snakemake use conda, eval=FALSE}
-$ snakemake --use-conda
-```
-
---
-
-* This doesn't work if you use `run` (instead of `shell` or `script`)
-
----
-
-# Conda
-
-## 2. Using one Conda environment for the entire workflow
-
---
-
-* Write a Conda .green[environment file] that includes all tools used by the workflow (save it as e.g. `environment.yaml`)
-
+* Write an environment file (`environment.yaml`) that includes .green[all tools used by the workflow]:
 ```{python conda env big, eval=FALSE}
 name: best-practice-smk
 channels:
@@ -201,87 +202,114 @@ channels:
   - bioconda
   - default
 dependencies:
-  - snakemake=6.8.0
-  - python=3.8
-  - pandas=1.3.3
-  - jupyter=1.0
-  - jupyter_contrib_nbextensions=0.5.1
-  - jupyterlab_code_formatter=1.4
-  - bwa=0.7.17
-  - multiqc=1.11
-  - r-ggplot2=3.3.5
+  - snakemake=6.8.0   # ← Snakemake is part of the environment
+...
+  - multiqc=1.11   # ← Version numbers for reproducibility
   - samtools=1.13
 ```
+
+--
+* Create the environment, activate it and run the workflow within it:
+```{bash snakemake conda env, eval=FALSE}
+$ conda env create -f environment.yml
+$ conda activate best-practice-smk
+$ snakemake
+```
+
+--
+* Possibly helpful: `conda export -n envname > environment.yaml`
 
 .tiny[source: [best practice example](https://github.com/NBISweden/snakemake_best_practice)]
 
 ---
+# Snakemake + Conda
 
-# Conda
+## Option two: Rule-specific environments
 
-## 2. Using one Conda environment for the entire workflow
+You can let Snakemake create and activate Conda environments for you.
 
-* .green[Create] the environment
+--
+1. Create the environment file, such as `envs/bwa.yaml` (`envs/` is best practice)
+
+--
+1. Add the `conda:` directive to the rule:
+```{python conda rule, eval = FALSE}
+rule create_bwa_index:
+    output: ...
+    input: ...
+    conda: "envs/bwa.yaml"  # ← Path to environment YAML file
+    shell:
+        "bwa index {input}"
+```
+--
+1. Run `snakemake --use-conda`
 
 --
 
-```{bash conda create, eval=FALSE}
-$ conda env create -f environment.yml
+* Snakemake creates the environment for you and re-uses it next time
+* If the YAML file changes, the environment is re-created
+* `conda:` does not work if you use `run:` (instead of `shell:` or `script:`)
+
+
+.tiny[modified from: [best practice example](https://github.com/NBISweden/snakemake_best_practice)]
+
+
+---
+
+# Using a "module" system
+
+* Conda environments can be large and slow to create
+
+* Some cluster operators frown upon using it
+
+--
+
+* UPPMAX and other clusters have a .green[module] command for getting access to software:
+```
+$ module load bioinfo-tools bwa
 ```
 
 --
 
-* .green[Activate] your Conda environment
-
-```{bash conda activate, eval=FALSE}
-$ conda activate best-practice-smk
+* Snakemake supports this with the `envmodules:` directive:
+```{bash, eval = FALSE}
+rule create_bwa_index:
+    output: ...
+    input: ...
+    envmodules:
+      "bioinfo-tools",
+      "bwa",
+    conda: "envs/bwa.yaml"  # ← Fallback
+    shell:
+        "bwa index {input}"
 ```
 
 --
 
-* Start your Snakemake workflow
+* Run with `snakemake --use-envmodules`
 
-```{bash snakemake conda env, eval=FALSE}
-(best-practice-smk) [...] $ snakemake
-```
+--
+
+* For reproducibility, [the Snakemake documentation recommends](https://snakemake.readthedocs.io/en/stable/snakefiles/deployment.html#using-environment-modules) to also include a `conda:` section
 
 ---
 
 # Containers
 
-## What can I use containers for?
+* Containers represent another way of packaging applications
 
 --
 
-* Run applications securely .green[isolated] in a container, packaged with .green[all dependencies and libraries]
+* Each container contains the application itself and .green[all dependencies and libraries] (that is, a functional Linux installation)
 
 --
 
-* As advanced .green[environment manager]
+* It is fully .green[isolated] from the other software on the machine:
+  By default, the tools in the container can only access what is in the container.
 
 --
 
-* To package your .green[code] with the environment it needs
-
---
-
-* To package a whole .green[workflow] (*e.g.* to accompany a manuscript)
-
---
-
-* And much more
-
---
-
-## Docker vs. Singularity
-
---
-
-* Docker was developed for .green[any operating system] except high-performance computing (HPC) clusters
-
---
-
-* Singularity is an open source container platform suitable for .green[HPC clusters]
+* The most common software for managing containers is .green[Docker]
 
 ---
 
@@ -290,64 +318,46 @@ $ conda activate best-practice-smk
 ## Docker nomenclature
 
 --
-
-* A Docker .green[file] is a recipe used to build a Docker .green[image]
-
---
-
-* A Docker .green[image] is a standalone executable package of software
+* A Docker .green[image] is a standalone executable package of software (on disk)
 
 --
+* A .green[Dockerfile] is a recipe used to build a Docker .green[image]
 
+--
 * A Docker .green[container] is a standard unit of software run on the Docker Engine
+  (running an image gives a container)
 
 --
-
 * .green[DockerHub] is an online service for sharing Docker images
 
 --
 
+## Docker vs Singularity
+
+* On high-performance clusters (HPC), Docker is often not installed due to security concerns.
+  .green[Singularity] is often available as an alternative.
+
+--
 * Docker images can be converted into Singularity images
 
----
-
-# Containers
-
-## 1. Running Snakemake rules with Singularity
-
 --
-
-* Snakemake can run a rule .green[isolated] in a container, using Singularity
-
---
-
-* All Conda packages are available as Docker and Singularity images, _e.g._ on http://biocontainers.pro (bioconda channel)
-
---
-
-* Many other Docker images are available on [DockerHub](https://hub.docker.com/)
-
---
-
-* Or build your own Docker or Singularity images
+* → Singularity can be used to run Docker containers
 
 ---
 
-# Containers
+# Running Snakemake jobs in containers
 
-## 1. Running Snakemake rules with Singularity
+Snakemake can run a rule in a container, using Singularity
 
---
-
-* Make sure your system has Singularity .green[installed]
+* Ensure your system has Singularity .green[installed]
 
 --
 
-* Find the Docker or Singularity .green[image] in which you want to run the rule
+* Find the Docker or Singularity .green[image] in which you want to run the rule (http://biocontainers.pro/ or [DockerHub](https://hub.docker.com/))
 
 --
 
-* Add the .green[link] to the container image (or the path to a Singularity `*.sif` file) to your rule using the `container` directive
+* Add the `container:` directive to your rule:
 
 ```{python singularity rule, eval = FALSE}
 rule NAME:
@@ -370,6 +380,7 @@ rule NAME:
 ```{bash snakemake use singularity, eval=FALSE}
 $ snakemake --use-singularity
 ```
+
 
 ---
 
@@ -522,3 +533,6 @@ class: center, middle
 .HUGE[Questions?]
 
 ---
+
+
+* Further reading: [conda-lock](https://github.com/conda-incubator/conda-lock)

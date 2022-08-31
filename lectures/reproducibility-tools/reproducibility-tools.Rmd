@@ -37,15 +37,16 @@ library("kableExtra")
 
 - Reproducible research is about being able to replicate the results of a study
 - It is an important aspect of the scientific method
-- Computational reproducibility is one part of it
-- Ideally, given the same data and the same code, there are identical outcomes
+-  **Computational reproducibility** is one part of it
+- Ideally, given the **same data** and the **same code**, there are identical outcomes
 
 --
 
 *Code* encompasses
 - The workflow itself (→ `Snakefile`)
 - The helper scripts you are calling (→ `scripts/`)
-- The 3rd-party tools you are running (→ this lecture)
+- The 3rd-party tools you are running/the execution environment (→ this lecture)
+
 
 ---
 
@@ -64,25 +65,29 @@ Why the effort?
 
 --
 
-→ **You** are also in the target audience
+→ **You** are part of the target audience
 
 
 ---
 
 # Don’t be *that* person
 
-The journal *Science* implemented a replication policy in 2011.
+*Science* implemented a replication policy in 2011.
 A study in 2018 requested raw data and code in accordance with the policy.
 Some answers:
 
+--
 > When you approach a PI for the source codes and raw data, you better explain who you are,
 > whom you work for, why you need the data and what you are going to do with it.
 
-.
+&nbsp;
+
 --
 
 > I have to say that this is a very unusual request without any explanation!
 > Please ask your supervisor to send me an email with a detailed, and I mean detailed, explanation.
+
+--
 
 (26% out of 204 randomly selected papers in the journal could be reproduced.)
 
@@ -120,27 +125,25 @@ Some answers:
 
 # Using Conda
 
-Prerequisites
-
 * Install Conda, for example with [Miniconda](https://docs.conda.io/en/latest/miniconda.html)
 
 * Set up the [Bioconda](https://bioconda.github.io/) channel
 
 --
 
-* Install Samtools and BWA into a new Conda environment named `mapping`:
-```
+* Install Samtools and BWA into a new **Conda environment** named `mapping`:
+```{bash, eval=FALSE}
 $ conda create -n mapping samtools bwa
 ```
 
 --
 
-* Conda also installs also the .green[dependencies] – other software required by Samtools and/or BWA.
+* Conda also installs all .green[dependencies] – other software required by Samtools and/or BWA.
 
 --
 
 To use the tools in the environment, .green[activate] it:
-```
+```{bash, eval=FALSE}
 $ conda activate mapping
 $ samtools --version
 samtools 1.15.1
@@ -148,7 +151,7 @@ samtools 1.15.1
 
 --
 * Install a tool into an existing environment:
-```
+```{bash, eval=FALSE}
 conda install -n mapping bowtie2
 ```
 (Leaving out `-n mapping` installs into the currently active environment.)
@@ -159,15 +162,27 @@ conda install -n mapping bowtie2
 
 * You can have as many environments as you wish
 
-* Environments are independent from each other
+--
 
-* If something is broken, simply delete the environment and start over
-
-* To test a new tool, install it into a Conda environment. Delete the environment to uninstall.
+* Environments are independent
 
 --
 
-* Find tools to install by searching [anaconda.org](https://anaconda.org) or with `conda search`
+* If something is broken, simply delete the environment and start over
+
+--
+
+```{bash, eval=FALSE}
+$ conda env remove -n mapping
+```
+
+--
+
+* To test a new tool, install it into a fresh Conda environment. Delete the environment to uninstall.
+
+--
+
+* Find packages by searching [anaconda.org](https://anaconda.org) or with `conda search`
 
 
 ---
@@ -175,6 +190,8 @@ conda install -n mapping bowtie2
 # Conda environment files
 
 * Conda environments can be created from .green[environment files] in YAML format.
+
+--
 
 * Example `bwa.yaml`:
 
@@ -289,11 +306,7 @@ rule create_bwa_index:
         "bwa index {input}"
 ```
 
---
-
 * Run with `snakemake --use-envmodules`
-
---
 
 * For reproducibility, [the Snakemake documentation recommends](https://snakemake.readthedocs.io/en/stable/snakefiles/deployment.html#using-environment-modules) to also include a `conda:` section
 
@@ -305,7 +318,7 @@ rule create_bwa_index:
 
 --
 
-* Each container contains the application itself and .green[all dependencies and libraries] (that is, a functional Linux installation)
+* Each container contains the application itself and .green[all system-level dependencies and libraries] (that is, a functional Linux installation)
 
 --
 
@@ -354,7 +367,7 @@ rule create_bwa_index:
 
 Snakemake can run a jobs in a container using Singularity
 
-* Ensure your system has Singularity .green[installed]
+* Ensure your system has Singularity installed
 
 --
 
@@ -377,6 +390,8 @@ rule minimap2_version:
 
 ```{bash snakemake use singularity, eval=FALSE}
 $ snakemake --use-singularity -j 1
+...
+Pulling singularity image docker://quay.io/biocontainers/minimap2:2.24--h5bf99c6_0.
 ...
 Activating singularity image .../.snakemake/singularity/342e6ddbac7e5929a11e6ae9350454c0.simg
 INFO:    Converting SIF file to temporary sandbox...

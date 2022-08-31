@@ -1,0 +1,46 @@
+# Input functions
+
+# A dictionary that maps a sample name to a list of
+# libraries sequenced for that sample.
+# This could also be defined in some other way (configuration
+# file, sample sheet).
+SAMPLES = {
+    "A": ["lib1", "lib2"],
+    "B": ["lib3", "lib4", "lib5"],
+}
+
+
+# This is used as an input function below.
+# When Snakemake calls an input function, it passes
+# the values of wildcards encountered in the output file
+# name.
+def sample_libraries(wildcards):
+    print("Input function called")
+    return SAMPLES[wildcards.sample]
+
+
+rule merge_libraries_into_samples:
+    output:
+        bam="{sample}.bam"
+    input:
+        bams=sample_libraries
+    shell:
+        "samtools merge -o {output.bam} {input.bams}"
+
+
+# The input function is so short that we can also define it inline
+# using 'lambda' (this is equivalent to the above):
+
+rule merge_libraries_into_samples:
+    output:
+        bam="{sample}.bam"
+    input:
+        bams=lambda wildcards: SAMPLES[wildcards.samples]
+    shell:
+        "samtools merge -o {output.bam} {input.bams}"
+
+
+# Snakemake runs the input function when the DAG is created
+# (before the workflow is run).
+# This means that it cannot depend on files that
+# are created by the workflow.

@@ -1,0 +1,6 @@
+# Run this with `snakemake --use-singularity -j1` (Singularity needs to be installed)
+
+rule minimap2_version:
+  container: "docker://quay.io/biocontainers/minimap2:2.24--h5bf99c6_0"
+  shell:
+    "minimap2 --version"

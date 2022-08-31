@@ -235,8 +235,8 @@ Compute resources can be set with .green[threads] and .green[resources]:
 
 ```python
 rule generate_stats:
-    output: "results/{sample}.bam"
-    input: "results/{sample}.stats.txt"
+    output: "results/{sample}.stats.txt"
+    input: "results/{sample}.bam"
     log: "results/{sample}.flagstat.log"
     message: "Generating stats for sample {wildcards.sample}"
     threads: 4
@@ -254,8 +254,8 @@ Compute resources can be set with .green[threads] and .green[resources]:
 
 ```python
 rule generate_stats:
-    output: "results/{sample}.bam"
-    input: "results/{sample}.stats.txt"
+    output: "results/{sample}.stats.txt"
+    input: "results/{sample}.bam"
     log: "results/{sample}.flagstat.log"
     message: "Generating stats for sample {wildcards.sample}"
     threads: workflow.cores * 0.5 # <---- threads as a function of workflow cores
@@ -279,8 +279,8 @@ More on resources in a lecture tomorrow.
 Rule parameters can be set with the .green[params] directive:
 ```python
 rule generate_stats:
-    output: "results/{sample}.bam"
-    input: "results/{sample}.stats.txt"
+    output: "results/{sample}.stats.txt"
+    input: "results/{sample}.bam"
     log: "results/{sample}.flagstat.log"
     message: "Generating stats for sample {wildcards.sample}"
     threads: workflow.cores * 0.5
@@ -301,8 +301,8 @@ Software environments can be set for each rule using `conda:`:
 
 ```python
 rule generate_stats:
-    output: "results/{sample}.bam"
-    input: "results/{sample}.stats.txt"
+    output: "results/{sample}.stats.txt"
+    input: "results/{sample}.bam"
     log: "results/{sample}.flagstat.log"
     message: "Generating stats for sample {wildcards.sample}"
     threads: workflow.cores * 0.5
@@ -336,8 +336,8 @@ Or by using `envmodules`, _e.g._ in compute clusters:
 
 ```python
 rule generate_stats:
-    output: "results/{sample}.bam"
-    input: "results/{sample}.stats.txt"
+    output: "results/{sample}.stats.txt"
+    input: "results/{sample}.bam"
     log: "results/{sample}.flagstat.log"
     message: "Generating stats for sample {wildcards.sample}"
     threads: workflow.cores * 0.5
@@ -443,8 +443,8 @@ rule all:
       expand("results/{sample}.stats.txt", sample = config["samples"])
 
 rule generate_stats:
-    output: "results/{sample}.bam"
-    input: "results/{sample}.stats.txt"
+    output: "results/{sample}.stats.txt"
+    input: "results/{sample}.bam"
     log: "results/{sample}.flagstat.log"
     message: "Generating stats for sample {wildcards.sample}"
     threads: workflow.cores * 0.5
@@ -481,8 +481,8 @@ rule all:
         "results/sample3.stats.txt"
 
 rule generate_stats:
-    output: "results/{sample}.bam"
-    input: "results/{sample}.stats.txt"
+    output: "results/{sample}.stats.txt"
+    input: "results/{sample}.bam"
     log: "results/{sample}.flagstat.log"
 ...
 ```
@@ -503,8 +503,8 @@ rule all:
         expand("results/{sample}.stats.txt", sample = config["samples"])
 
 rule generate_stats:
-    output: "results/{sample}.bam"
-    input: "results/{sample}.stats.txt"
+    output: "results/{sample}.stats.txt"
+    input: "results/{sample}.bam"
     log: "results/{sample}.flagstat.log"
 ...
 ```
@@ -529,8 +529,8 @@ rule all:
         expand("results/{sample}.stats.txt", sample = config["samples"])
 
 rule generate_stats:
-    output: "results/{sample}.bam"
-    input: "results/{sample}.stats.txt"
+    output: "results/{sample}.stats.txt"
+    input: "results/{sample}.bam"
     log: "results/{sample}.flagstat.log"
 ...
 ```

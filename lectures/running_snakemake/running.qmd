@@ -800,7 +800,8 @@ has this role when submitting jobs to a cluster scheduler.
 
 A workflow can take a long time to run. A workflow submitted in a
 login shell will terminate once we logout. Therefore, it is advised to
-submit a workflow in a *background session*, either
+submit a workflow in a *background session*, using a so-called *terminal
+multiplexer* such as either
 [screen](https://www.gnu.org/software/screen/manual/screen.html) or
 [tmux](https://tmuxguide.readthedocs.io/en/latest/tmux/tmux.html).
 
@@ -809,13 +810,13 @@ A named `tmux` session can be initiated as
 ```{bash }
 #| label: tmux
 #| eval: false
-tmux -s mysession
+tmux -S mysession
 ```
 
 Inside the session, use a prefix (default `Ctrl-b`; many change to
-`Ctrl-a` which is default in `screen`) with key to launch command. For
-instance, `Ctrl-b d` will detach (exit) from the session. See the
-[tmux
+`Ctrl-a` which is default in `screen`) with key to launch `tmux`
+commands. For instance, `Ctrl-b d` will detach (exit) from the
+session. See the [tmux
 documentation](https://tmuxguide.readthedocs.io/en/latest/tmux/tmux.html)
 for further info.
 

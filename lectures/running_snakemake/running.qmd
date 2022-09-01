@@ -810,7 +810,7 @@ A named `tmux` session can be initiated as
 ```{bash }
 #| label: tmux
 #| eval: false
-tmux -S mysession
+tmux new -s mysession
 ```
 
 Inside the session, use a prefix (default `Ctrl-b`; many change to
@@ -872,9 +872,6 @@ job submission. If only there were such scripts already available!
 
 :::
 
-
-
-
 ## snakemake-profiles
 
 [Snakemake Profiles](https://github.com/Snakemake-Profiles/doc) are
@@ -882,6 +879,7 @@ collections of reusable configuration profiles for various computing
 environments. The [slurm snakemake
 profile](https://github.com/Snakemake-Profiles/slurm) provides the
 scripts we requested on the previous slide.
+
 
 ::: {.fragment}
 
@@ -891,59 +889,109 @@ The profiles are [cookiecutter
 templates](https://cookiecutter.readthedocs.io/en/1.7.2/) and can be
 installed as follows:
 
-```{bash }
-#| label: cookiecutter-profile-install
-#| eval: false
-$ cookiecutter https://github.com/Snakemake-Profiles/slurm.git
-profile_name [slurm]: myprofile
-sbatch_defaults []: --account=account --error=logs/slurm/%x-%j.err --output=logs/slurm/%x-%j.out"
-cluster_sidecar_help [Use cluster sidecar. NB! Requires snakemake >= 7.0! Enter to continue...]:
-Select cluster_sidecar:
-1 - yes
-2 - no
-Choose from 1, 2 [1]: 1
-cluster_name []: rackham
-cluster_config_help [The use of cluster-config is discouraged. Rather, set snakemake CLI options in the profile configuration file (see snakemake documentation on best practices). Enter to continue...]:
-cluster_config []:
-```
-
 :::
-
-
-## snakemake slurm profile
 
 :::: {.columns}
 
 ::: {.column width="50%"}
 
-`Profile directory contents:`
+::: {.fragment}
+
+```{bash }
+#| label: cookiecutter-profile-install
+#| eval: false
+$ cookiecutter https://github.com/Snakemake-Profiles/slurm.git
+profile_name [slurm]: myprofile
+Select use_singularity:
+1 - False
+2 - True
+Choose from 1, 2 [1]:
+Select use_conda:
+1 - False
+2 - True
+Choose from 1, 2 [1]:
+jobs [500]:
+restart_times [0]:
+max_status_checks_per_second [10]:
+max_jobs_per_second [10]:
+latency_wait [5]:
+Select print_shell_commands:
+1 - False
+2 - True
+Choose from 1, 2 [1]:
+sbatch_defaults []: --account=account
+cluster_sidecar_help [Use cluster sidecar. NB! Requires snakemake >= 7.0! Enter
+to continue...]:
+Select cluster_sidecar:
+1 - yes
+2 - no
+Choose from 1, 2 [1]:
+cluster_name []:
+cluster_jobname [%r_%w]:
+cluster_logpath [logs/slurm/%r/%j-%w]:
+cluster_config_help [The use of cluster-config is discouraged. Rather, set snakemake CLI options in the profile configuration file (see snakemake documentation
+on best practices). Enter to continue...]:
+cluster_config []:
+```
+:::
+:::
+
+::: {.column width="50%"}
+
+::: {.fragment}
+
+
+`Profile directory contents`:
 ```{bash }
 #| label: slurm-profile-tree
 #| echo: false
-tree myprofile
+tree myprofile | head -n -2
 ```
 
-`myprofile/settings.json`:
-```{bash code=readLines("myprofile/settings.json") }
+
+:::
+
+:::
+
+::::
+
+
+	
+## snakemake slurm profile
+
+:::: {.columns}
+
+::: {.column width="50%"}
+```{r code=readLines("myprofile/settings.json") }
+#| filename: "myprofile/settings.json"
 #| label: slurm-settings
 #| eval: false
+#| cache: false
 ```
 
+
+
+```{r code=readLines("myprofile/config.yaml") }
+#| filename: "myprofile/config.yaml"
+#| label: slurm-config
+#| eval: false
+```
 :::
 
 ::: {.column width="50%"}
 
 
 
-`myprofile/config.yaml`:
-```{bash code=readLines("myprofile/config.yaml") }
-#| label: slurm-config
+```{python code=readLines("myprofile/CookieCutter.py")[4:39]}
+#| filename: "myprofile/CookieCutter.py"
+#| label: slurm-cookiecutter-class
 #| eval: false
 ```
 
 :::
 
 ::::
+
 
 
 ::: {.fragment}
@@ -960,82 +1008,59 @@ snakemake -s ex7.smk --profile myprofile -j 10 --ri -k -F
 
 :::
 
+## New features - time formatting and sbatch parameters
 
-
-## snakemake slurm profile
-
-:::: {.columns}
-
-::: {.column width="50%"}
-
-`Profile directory contents:`
-```{bash }
-#| label: slurm-profile-tree2
-#| echo: false
-tree myprofile
-```
-
-`myprofile/settings.json`:
-```{bash  code=readLines("myprofile/settings.json") }
-#| label: slurm-settings2
+Previously could set e.g. `partition` in rule:
+```{python }
+#| label: set-partition-in-rule
+#| echo: true
 #| eval: false
+rule bwa_mem:
+    resources:
+        time = "00:10:00",
+        mem = 12000,
+        partition = "devel"
+```
+::: {.fragment}
+
+However, in many cases you would like to *constrain* on features
+defined on the HPC with the SLURM `--constraint` option. For example,
+UPPMAX defines the following features:
+
+```{bash }
+#| label: uppmax-sinfo-features
+#| echo: true
+#| eval: false
+sinfo -e -o "%P %m %c %.5a %f" | grep "ibsw2,\|ibsw16\|PARTITION" | grep "PARTITION\|node"
+```
+```{bash }
+#| label: uppmax-sinfo-features-results
+#| echo: true
+#| eval: false
+PARTITION MEMORY CPUS AVAIL AVAIL_FEATURES
+node 256000 20    up fat,mem256GB,ibsw2,usage_mail
+node 128000 20    up thin,mem128GB,ibsw2,usage_mail
+node 1000000 20    up fat,mem1TB,mem256GB,mem512GB,ibsw16,usage_mail
+node 128000 20    up thin,mem128GB,ibsw16,usage_mail
 ```
 
 :::
+::: {.fragment}
 
-::: {.column width="50%"}
+With the latest version of the slurm profile, you can do the following:
 
-
-Coming soon:
-
-`myprofile/config.yaml`:
-```{bash }
-#| label: slurm-config2
+```{python }
+#| label: set-constraint-in-rule
+#| echo: true
 #| eval: false
-#| code-line-numbers: "|25-26"
-restart-times: 3
-jobscript: "slurm-jobscript.sh"
-cluster: "slurm-submit.py"
-cluster-status: "slurm-status.py"
-cluster-sidecar: "slurm-sidecar.py"
-cluster-cancel: "scancel"
-max-jobs-per-second: 1
-max-status-checks-per-second: 10
-local-cores: 1
-latency-wait: 60
-
-# Example resource configuration
-default-resources:
-  - runtime=100
-  - mem_mb=6000
-  - disk_mb=10000
-# set-threads: map rule names to threads
-set-threads:
-  - single_core_rule=1
-  - multi_core_rule=10
-# set-resources: map rule names to resources in general
-set-resources:
-  - high_memory_rule:mem_mb=12000
-  - long_running_rule:runtime=1200
-  - high_memory_rule:partition=node
-  - high_memory_rule:constraint=fat
+rule gpu_stuff:
+    resources:
+        time="12h30m",
+        partition="node",
+        slurm="constraint=fat qos=gpuqos gres=gpu:2 gpus=4"
 ```
 
 :::
-
-::::
-
-
-
-##### Job submission #####
-
-
-Submit jobs with
-```{bash }
-#| label: slurm-profile-submit2
-#| eval: false
-snakemake -s ex7.smk --profile myprofile -j 10 --ri -k -F
-```
 
 
 

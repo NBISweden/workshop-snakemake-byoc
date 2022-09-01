@@ -1,5 +1,5 @@
 {
-    "SBATCH_DEFAULTS": "--account=account --error=logs/slurm/%x-%j.err --output=logs/slurm/%x-%j.out"",
-    "CLUSTER_NAME": "rackham",
+    "SBATCH_DEFAULTS": "--account=account",
+    "CLUSTER_NAME": "",
     "CLUSTER_CONFIG": ""
 }

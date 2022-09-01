@@ -570,7 +570,7 @@ listed (and set with arguments) with the `--default-resources` option:
 ```{bash }
 #| label: snakemake-default-resources
 #| class-output: scroll-400
-snakemake -f -n -p -s ex6.smk --default-resources
+snakemake -f -n -p -s ex6.smk --default-resources mem_mb=2000
 ```
 
 ::: {.fragment}
@@ -668,7 +668,7 @@ Similarly `--set-threads` allows setting rule-specific thread values:
 
 ```{bash }
 #| label:  snakemake-set-resources
-snakemake -F -n -s ex7.smk --default-resources --set-resources bwa_mem_wildcard:runtime=1000 \
+snakemake -F -n -s ex7.smk --default-resources mem_mb=2000 --set-resources bwa_mem_wildcard:runtime=1000 \
 		  bwa_mem_wildcard:mem_mb=6000 --set-threads bwa_mem_wildcard=4 -c 8
 ```
 
@@ -691,7 +691,7 @@ looks something like this:
 #| eval: false
 snakemake -s ex7.smk -F --ri -k \
           --use-conda --use-singularity --use-envmodules \
-		  --default-resources --set-resources bwa_mem_wildcard:runtime=1000 \
+		  --default-resources mem_mb=2000 --set-resources bwa_mem_wildcard:runtime=1000 \
 		  bwa_mem_wildcard:mem_mb=6000 samtools_merge_bam:runtime=100 \
 		  --set-threads bwa_mem_wildcard=4 -c 8
 ```
@@ -1007,7 +1007,7 @@ latency-wait: 60
 default-resources:
   - runtime=100
   - mem_mb=6000
-  - disk_mb=1000000
+  - disk_mb=10000
 # set-threads: map rule names to threads
 set-threads:
   - single_core_rule=1

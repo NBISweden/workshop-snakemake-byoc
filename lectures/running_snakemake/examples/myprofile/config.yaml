@@ -13,7 +13,7 @@ latency-wait: 60
 # default-resources:
 #   - runtime=100
 #   - mem_mb=6000
-#   - disk_mb=1000000
+#   - disk_mb=10000
 # # set-threads: map rule names to threads
 # set-threads:
 #   - single_core_rule=1

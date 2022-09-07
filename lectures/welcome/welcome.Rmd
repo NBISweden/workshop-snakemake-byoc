@@ -39,26 +39,26 @@ library("kableExtra")
 
 ---
 
-# Your Instructors
+# Your teachers
 
 .pull-left[
-<img src="john-sundh.jpg" width=40%/>
+<img src="john-sundh.jpg" width=35%/>
 <br>
-.small[John (instructor)]
+.small[John]
 
 <img src="per-unneberg.jpg"/>
 <br>
-.small[Per (instructor)]
+.small[Per]
 ]
 
 .pull-right[
-<img src="erik-fasterius.jpg" width=40%/>
+<img src="marcel-martin.jpg" width=35%/>
 <br>
-.small[Erik (instructor)]
+.small[Marcel]
 
-<img src="verena-kutschera.jpg" width=40%/>
+<img src="verena-kutschera.jpg" width=35%/>
 <br>
-.small[Verena (instructor & organizer)]
+.small[Verena]
 ]
 
 ---
@@ -70,37 +70,27 @@ library("kableExtra")
 
 * .green[Lectures]
     * Please stay muted
-    * If you have a question, please use the raise-your-hand function (via "Participants")
-    * We will share the lecture slides with you on Canvas
+    * If you have a question, unmute and speak up
 
 
 * .green[Breakout rooms]
     * Feel free to stay unmuted, unless there is a lot of background noise
 
----
-
-# Discussions forum
-
-* Please use the [Discussions](https://uppsala.instructure.com/courses/52153/discussion_topics) 
-  on Canvas during the workshop for communication
-
-.center[<img src="discussions.png"/>]
 
 ---
 
-# Discussions forum
+# Slack
 
-* We will post announcements and links to lecture slides in 
-  [General discussions](https://uppsala.instructure.com/courses/52153/discussion_topics/99402)
+* Please use the Slack workspace .green[nbissnakemakebyoc.slack.com]
+  during the workshop for communication
 
-* You can ask Snakemake questions to everyone in [Snakemake questions](https://uppsala.instructure.com/courses/52153/discussion_topics/99394)
+* You can ask Snakemake questions to everyone in #2022-snakemake-questions
 
-* There are also separate Discussion threads for each of the 
-  groups that you can use to communicate
+* There are also separate channels for each of the groups that you 
+  can use to communicate, e.g. to share code snippets and links
 
-* If you are having problems with your Zoom connection or other Zoom-related issues, 
-  you can reach us via [email](edu.byoc-snakemake@nbis.se) or in the 
-  [Zoom issues](https://uppsala.instructure.com/courses/52153/discussion_topics/99406) discussion
+* We will share the lecture slides with you in #general and 
+  Canvas ([Discussions > Lecture slides](https://uppsala.instructure.com/courses/70024/discussion_topics/178575))
 
 ---
 
@@ -124,7 +114,7 @@ library("kableExtra")
 
 # Breakout room feedback session (today)
 
-* Each of you .green[presents] their project to your group (incl. your instructor)
+* Each of you .green[presents] their project to your group (incl. your teacher)
 
 * You have .green[30 minutes], incl. questions and feedback from your group
 
@@ -136,13 +126,13 @@ library("kableExtra")
 
 # Breakout room coding sessions (days 2 and 3)
 
-* You will be in a .green[breakout room] with your group (incl. your instructor)
+* You will be in a .green[breakout room] with your group (incl. your teacher)
 
 * You will each .green[work individually] on your project
 
 * You can ask your group whenever you need help or feedback
 
-* Your instructor will try to help, but all participants are encouraged to .green[help each other]
+* Your teacher will try to help, but all participants are encouraged to .green[help each other]
 
 .center[<img src="john-schnobrich-FlPc9_VocJ4-unsplash.jpg" width=50%/>]
 
@@ -164,19 +154,16 @@ library("kableExtra")
 # Breakout room groups
 
 Whenever we open the breakout rooms, please move yourselves into your group room 
-(except for Verena's group who stays in the main room)
 
-.green[Breakout room 1: Erik F.]
-* Yueqing, Marti, Juanita, Nina
+.green[Breakout room 1: Marcel]
+* Daniela, Camille, Kang, Karin
 
 .green[Breakout room 2: John]
-* Mohamed, Pol, Ymke, Dries
+* Trine, Tianyi, Anna
 
 .green[Breakout room 3: Per]
-* Tom, Erik Z., Philipp, Hanna
+* Archana, Martyna, Begüm Serra, Magnus
 
-.green[main room: Verena]
-* Nima, Andreas, Hao, Gabriel
 
 ---
 

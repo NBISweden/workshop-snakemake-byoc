@@ -1,0 +1,7 @@
+name: scatter-gather
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - snakemake

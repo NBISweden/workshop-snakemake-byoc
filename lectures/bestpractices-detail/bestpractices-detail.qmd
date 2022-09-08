@@ -1,0 +1,948 @@
+---
+title: Best practices in detail
+subtitle: An overview of best practices, wrappers, schemas, report, config files, and more
+author: Per Unneberg
+date: "2 September, 2022"
+institute: NBIS
+from: markdown+emoji
+format:
+  revealjs:
+    theme:
+      - white
+      - ../custom.scss
+    self-contained: false
+    toc: false
+    toc-depth: 1
+    slide-level: 2
+    slide-number: true
+    preview-links: true
+    chalkboard: true
+    # Multiple logos not possible; would need to make custom logo combining both logos
+    footer: Snakemake BYOC 2022 - Best practices
+    logo: https://nbis.se/assets/img/logos/nbislogo-green.svg
+    smaller: true
+    highlight-style: gruvbox
+    fig-height: 3
+    fig-width: 3
+execute:
+  echo: true
+  warning: false
+  cache: false
+  include: true
+  autodep: true
+  eval: true
+  error: true
+knitr:
+  opts_chunk:
+    code-fold: false
+    tidy: false
+    fig-format: svg
+---
+
+## Setup  {.unnumbered .unlisted}
+
+
+
+```{r }
+#| label: setup
+#| echo: false
+#| eval: true
+#| cache: false
+library(ggplot2)
+library(viridis)
+bw <- theme_bw(base_size=24) %+replace% theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))
+theme_set(bw)
+snakemake_version <- system("snakemake --version", intern=TRUE)
+knitr::knit_hooks$set(inline = function(x) {
+                      prettyNum(x, big.mark=",")
+                  })
+```
+
+- Examples based on more advanced snakefiles and code to run
+- All snakefiles and code are available in code repository
+  [https://github.com/NBISweden/snakemake_best_practice/](https://github.com/NBISweden/snakemake_best_practice/)
+- Code has been run with Snakemake version `r snakemake_version`
+
+The best practice example workflow is a mapping and basic qc workflow
+where snakemake best practices have been applied. 
+
+
+::: {.fragment}
+
+#### Objective
+
+The objective of the lecture is to provide an overview of some
+advanced features and how to structure your code. Hopefully it can
+give you some ideas for developing your workflow. The material can be
+a bit overwhelming so see it as a smörgåsbord where you can pick
+things to your liking.
+
+:::
+
+# Snakemake best practices
+
+
+## [Snakemake best practices summary](https://snakemake.readthedocs.io/en/stable/snakefiles/best_practices.html)
+
+::: {.incremental}
+
+Linting
+: Snakemake (>=5.11) comes with a code quality checker (a so called
+  linter). It is highly recommended to run the linter before
+  publishing any workflow, asking questions on Stack Overflow or
+  filing issues on Github.
+
+Formatting
+: There is an automatic formatter for Snakemake workflows, called
+  Snakefmt, which should be applied to any Snakemake workflow before
+  publishing it.
+
+Testing
+: It is a good idea to add some minimal test data and configure Github
+  Actions for continuously testing the workflow on each new commit.
+
+Structure
+: Stick to a standardized structure.
+
+Configuration
+: Configuration of a workflow should be handled via config files and,
+  if needed, tabular configuration like sample sheets (either via
+  Pandas or PEPs). Use such configuration for metadata and experiment
+  information, **not for runtime specific configuration like threads,
+  resources and output folders**. For those, just rely on Snakemake’s
+  CLI arguments like --set-threads, --set-resources,
+  --set-default-resources, and --directory.
+
+Filenames
+: Try to keep filenames short, but informative.
+
+Rules and functions
+: Try to keep Python code like helper functions separate from rules.
+
+Wrappers
+: Make use of Snakemake wrappers whenever possible
+
+:::
+
+::: {.notes}
+
+- not necessary to follow these guidelines - suggestions
+- there is however a need to comply with format to publish workflow in
+  snakemake workflow collection
+- order of importance: structure, filenames > test > configuration > lint/format > wrappers 
+- if only snakemake were python
+
+:::
+
+## A best practice repo - standardized structure
+
+
+Clone the repo (`git clone
+git@github.com:NBISweden/snakemake_best_practice.git`) and list
+contents:
+
+:::: {.columns}
+
+::: {.column width="40%"}
+
+
+<div style="font-size:150%">
+
+```{bash }
+#| label: snakemake-byoc-2021-bp-overview-dir
+#| cache: true
+#| eval: true
+#| echo: false
+tree -a -F -L 2 -I '.snakemake|LICENSE|.git|resources*references.fasta|resources*README.md|Dockerfile|environment.yaml|.gitignore|.gitattributes|.editorconfig|.pre-commit-config.yaml|config*config.yaml|config*samples.tsv|config*reads.tsv|.ipynb_checkpoints|.myprofile|logs|reports|results|interim|*.~undo-tree~|*.png|*.zip|*.html|.github' ../../snakemake_best_practice | sed -e "s/\.\.\/\.\.\///g" | grep -v directories
+```
+
+</div>
+
+
+:::
+
+::: {.column width="60%"}
+
+::: {.incremental}
+
+.test
+: Designated test directory containing a small data set which ideally
+  should suffice to run all or parts of the workflow. Useful for
+  test-drived development.
+
+README.md
+: Describe what the workflow does and how to use it
+
+workflow
+: Contains top-level `Snakefile` that includes rules files stored in
+  the `rules` sub-directory. NB: this is the main entry point to the
+  workflow.
+
+workflow/envs
+: conda environment files loaded by rules
+
+workflow/notebooks
+: notebooks that can be called by the workflow
+
+workflow/report
+: workflow report templates
+
+workflow/rules
+: workflow rules
+
+workflow/schemas
+: schema files that describe and define configuration file and data formats
+
+workflow/scripts
+: scripts called by workflow
+
+
+:::
+
+:::
+
+::::
+
+
+
+::: {.notes}
+
+Emphasize that **structure** is one of the important aspects
+
+:::
+
+
+
+## What does it do?
+
+The repo should contain a README.md describing briefly what the
+workflow does. Here are some excerpts:
+
+```{r code=readLines("../README.md")[c(1:25)]}
+#| label: snakemake-byoc-2021-bp-readme
+#| eval: false
+#| highlight: false
+```
+
+::: {.fragment}
+
+```{r code=readLines("../README.md")[c(106:112)]}
+#| label: snakemake-byoc-2021-bp-readme-tail
+#| eval: false
+#| highlight: false
+#| attr-source: startFrom="106"
+```
+
+
+:::
+
+::: {.fragment}
+
+Use a test data set for test driven development of the workflow. It
+also gives a new user a quick idea of how to organize input files and
+configuration.
+
+
+:::
+
+
+
+
+## Dry-run the test suite
+
+```{bash }
+#| label: snakemake-byoc-2021-dry-run-echo
+#| eval: false
+cd snakemake_best_practice/.test
+snakemake -s ../workflow/Snakefile -n -q -F
+```
+
+```{bash }
+#| label: snakemake-byoc-2021-dry-run
+#| echo: false
+snakemake -s ../workflow/Snakefile -n -q -F
+```
+
+## Draw the workflow
+
+```{bash }
+#| label: dry-run-fig-command
+#| echo: true
+#| eval: false
+snakemake -s ../workflow/Snakefile --rulegraph | dot | display
+```
+
+```{bash }
+#| label: dry-run-fig
+#| fig-format: svg
+#| output: asis
+#| echo: false
+snakemake -s ../workflow/Snakefile --rulegraph | dot -T svg | grep -v "<!DOCTYPE" | grep -v "dtd"
+```
+
+# Rules
+
+## Snakefile
+
+```{python code=readLines("../workflow/Snakefile")} 
+#| label: Snakefile
+#| eval: false
+#| code-line-numbers: "|21-22|28-30|51-53"
+```
+
+::: {.absolute top=50 left=-200 }
+
+```{bash }
+#| label: snakemake-byoc-2021-Snakefile-margin-tree
+#| cache: false
+#| eval: true
+#| echo: false
+#| results: asis
+echo "<pre><code class=\"sstree\" style=\"max-height: 1000px;\">"
+tree -a -N -F -L 2 -I '.snakemake|LICENSE|.git|resources*references.fasta|resources*README.md|Dockerfile|environment.yaml|.gitignore|.gitattributes|.editorconfig|.pre-commit-config.yaml|config*config.yaml|config*samples.tsv|config*reads.tsv|.ipynb_checkpoints|.myprofile|logs|reports|results|interim|*.~undo-tree~|*.png|*.zip|*.html|.github' ../../snakemake_best_practice | sed -z "s/\n/<br \/>\n/g;s/Snakefile/<span class=\"green\">Snakefile<\/span>/;s/\.\.\/\.\.\///" | head -n -2
+echo "</pre></code>"
+```
+:::
+
+
+::: {.notes}
+
+- explain pseudo-targets 
+- point out the two common idioms for collecting targets:
+1. expand
+2. input functions
+
+:::
+
+## Stuff common to all snakefiles
+
+::: {.absolute top=50 left=-200 }
+
+```{bash }
+#| label: snakemake-byoc-2022-common-margin-tree
+#| cache: false
+#| eval: true
+#| echo: false
+#| results: asis
+echo "<pre><code class=\"sstree\" style=\"max-height: 1000px;\">"
+tree -a -N -F -L 3 -I '.snakemake|LICENSE|.git|resources*references.fasta|resources*README.md|Dockerfile|environment.yaml|.gitignore|.gitattributes|.editorconfig|.pre-commit-config.yaml|config*config.yaml|config*samples.tsv|config*reads.tsv|.ipynb_checkpoints|.myprofile|logs|reports|results|interim|*.~undo-tree~|*.png|*.zip|*.html|.github' -P "*.smk" ../../snakemake_best_practice | sed -z "s/\n/<br \/>\n/g;s/common.smk/<span class=\"green\">common.smk<\/span>/;s/\.\.\/\.\.\///" | head -n -2
+echo "</pre></code>"
+```
+:::
+
+<div style="font-size:80%">
+
+
+```{python code=readLines("../workflow/rules/common.smk")}
+#| filename: workflow/rules/common.smk
+#| label: common-smk
+#| eval: false
+#| code-line-numbers: "|15-16|21-22|31-32|40-42"
+```
+</div>
+
+
+
+
+## Rules
+	
+::: {.absolute top=50 left=-200 }
+
+```{bash }
+#| label: snakemake-byoc-2022-qc-margin-tree
+#| cache: false
+#| eval: true
+#| echo: false
+#| results: asis
+echo "<pre><code class=\"sstree\" style=\"max-height: 1000px;\">"
+tree -a -N -F -L 3 -I '.snakemake|LICENSE|.git|resources*references.fasta|resources*README.md|Dockerfile|environment.yaml|.gitignore|.gitattributes|.editorconfig|.pre-commit-config.yaml|config*config.yaml|config*samples.tsv|config*reads.tsv|.ipynb_checkpoints|.myprofile|logs|reports|results|interim|*.~undo-tree~|*.png|*.zip|*.html|.github' -P "*.smk" ../../snakemake_best_practice | sed -z "s/\n/<br \/>\n/g;s/qc.smk/<span class=\"green\">qc.smk<\/span>/;s/\.\.\/\.\.\///" | head -n -2
+echo "</pre></code>"
+```
+:::
+
+```{python code=readLines("../workflow/rules/qc.smk")[46:60]}
+#| filename: workflow/rules/qc.smk
+#| label: qc-smk-rule-example
+#| eval: false
+#| attr-source: startFrom="46"
+#| code-line-numbers: "|8-9"
+```
+
+
+::: {.fragment}
+
+
+::: {.absolute top=350 left=-200 }
+
+```{bash }
+#| label: snakemake-byoc-2022-samtools-env-margin-tree
+#| cache: false
+#| eval: true
+#| echo: false
+#| results: asis
+echo "<pre><code class=\"sstree\" style=\"max-height: 1000px;\">"
+tree -a -N -F -L 3 -I '.snakemake|LICENSE|.git|resources*references.fasta|resources*README.md|Dockerfile|environment.yaml|.gitignore|.gitattributes|.editorconfig|.pre-commit-config.yaml|config*config.yaml|config*samples.tsv|config*reads.tsv|.ipynb_checkpoints|.myprofile|logs|reports|results|interim|*.~undo-tree~|*.png|*.zip|*.html|.github' -P "samtools.yaml|R.yaml|multiqc.yaml|jupyter.yaml|bwa.yaml" ../../snakemake_best_practice | sed -z "s/\n/<br \/>\n/g;s/samtools.yaml/<span class=\"green\">samtools.yaml<\/span>/;s/\.\.\/\.\.\///" | head -n -2
+echo "</pre></code>"
+```
+:::
+
+```{python code=readLines("../workflow/envs/samtools.yaml") }
+#| filename: workflow/envs/samtools.yaml
+#| label: samtools-conda-env
+#| eval: false
+#| attr-source: startFrom="46"
+```
+
+:::	
+
+
+# Questions?  {.unnumbered .unlisted}
+
+# Additional topics {.unnumbered .unlisted}
+
+- scripts and wrappers
+- input functions and pseudo rules
+- configuration and schemas
+- reports
+- coding practices
+
+# Scripts and wrappers
+
+
+::: {.notes}
+
+
+`script` directive:
+
+- point to external script
+- path relative to **file containing the directive**
+
+:::
+
+## R script
+
+
+
+```{python code=readLines("../workflow/rules/qc.smk")[63:81]}
+#| filename: workflow/rules/qc.smk
+#| label: qc_plot_samtools_coverage
+#| attr-source: startFrom="63"
+#| eval: false
+#| code-line-numbers: "18-19"
+```
+
+
+```{r code=readLines("../workflow/scripts/plot_coverage.R") }
+#| filename: workflow/scripts/plot_coverage.R
+#| label: snakemake-byoc-2021-r-script
+#| eval: false 
+```
+S4 attributes map to rule directives (e.g. `snakemake@input[["png"]]`)
+
+## rmarkdown scripts
+
+
+```{python code=readLines("../workflow/rules/qc.smk")[118:129] }
+#| filename: workflow/rules/qc.smk
+#| label: qc_rmarkdown
+#| attr-source: startFrom="118"
+#| eval: false
+#| code-line-numbers: "11-12"
+```
+
+<div style="font-size:80%;">
+
+```{r code=readLines("../workflow/scripts/rmarkdown.Rmd") }
+#| filename: workflow/scripts/rmarkdown.Rmd
+#| label: rmarkdown-script
+#| eval: false 
+```
+</div>
+
+
+
+## python script
+
+<div style="font-size:80%;">
+```{python code=readLines("../workflow/rules/qc.smk")[84:99] }
+#| filename: workflow/rules/qc.smk
+#| label: qc_plot_samtools_coverage_collate
+#| attr-source: startFrom="84"
+#| eval: false
+#| code-line-numbers: "15-16"
+```
+</div>
+
+<div style="font-size:80%;">
+
+```{python code=readLines("../workflow/scripts/plot_coverage.py") }
+#| filename: workflow/scripts/plot_coverage.py
+#| label: snakemake-byoc-2021-python-script
+#| eval: false
+```
+</div>
+
+Rule directives accessible via `snakemake` object (e.g. `snakemake.input.txt`)
+
+
+## jupyter notebook integration
+
+```{python code=readLines("../workflow/rules/qc.smk")[102:115] }
+#| filename: workflow/rules/qc.smk
+#| label:  jupyter-notebook-rule
+#| eval: false
+#| attr-sources: startFrom="102"
+#| code-line-numbers: "13-14"
+```
+Generate output in `.tests` with 
+```{bash }
+#| label: jupyter-notebook-output
+#| eval: false
+snakemake --use-conda -s ../workflow/Snakefile reports/qc/notebook.html -j 1
+```
+
+::: {.fragment}
+
+To edit, start `jupyter-notebook` and open `workflow/notebooks/notebook.py.ipynb`:
+
+```{bash }
+#| label: start-jupyter-notebook
+#| eval: false
+jupyter-notebook workflow/notebooks/notebook.py.ipynb
+```
+
+:::
+
+## Wrappers
+
+`wrapper` directive: 
+
+- Reusable wrapper scripts around e.g. command-line tools
+- [The Snakemake Wrappers
+  repository](https://snakemake-wrappers.readthedocs.io/en/stable/)
+  contains a collection of reusable wrappers.
+- accession format: `{version}/bio/{tool}/{command}`
+
+### Example ###
+
+
+
+```{python code=readLines("../workflow/rules/qc.smk")[22:43] }
+#| filename: workflow/rules/qc.smk
+#| label: qc-fastqc-wrapper
+#| eval: false
+#| attr-source: startFrom="22"
+#| code-line-numbers: "21-22"
+```
+[fastqc wrapper documentation](https://snakemake-wrappers.readthedocs.io/en/stable/wrappers/fastqc.html)
+
+
+
+
+# Input functions and pseudo-rules
+## Input functions
+
+Instead of specifying strings or lists of strings as input files,
+snakemake can also make use of functions that return single or lists
+of input files. Function **must** accept a single argument that
+corresponds to the wildcards object which is generated by the rule.
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+::: {.fragment}
+
+```{python code=readLines("../workflow/rules/inputfunctions.smk")[1:39]}
+#| filename: workflow/rules/inputfunctions.smk
+#| label: inputfunctions-smk
+#| eval: false
+#| code-line-numbers: "|10-21"
+```
+
+:::
+
+
+:::
+
+::: {.column width="50%"}
+::: {.fragment}
+
+
+```{python code=readLines("../workflow/rules/mapping.smk")[34:73]}
+#| filename: workflow/rules/mapping.smk
+#| label: inputfunctions-mapping-smk
+#| eval: false
+#| code-line-numbers: "|19-21"
+```
+
+:::
+
+:::
+
+::::
+
+## Pseudo-target functions
+
+
+::: {.fragment}
+
+Input functions also come in handy for **pseudo-targets** (i.e. rules
+with only the `input` keyword). In this example the functions generate
+workflow output target file names in different ways.
+
+:::
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+::: {.fragment}
+
+
+```{python code=readLines("../workflow/rules/inputfunctions.smk")[41:76]}
+#| filename: workflow/rules/inputfunctions.smk
+#| label: inputfunctions-smk-2
+#| eval: false
+#| attr-source: startFrom="41"
+#| class-output: "scroll-400"
+#| code-line-numbers: "|4-8"
+```
+:::
+
+:::
+
+::: {.column width="50%"}
+
+::: {.fragment}
+
+
+```{python code=readLines("../workflow/Snakefile")[39:42]}
+#| filename: workflow/Snakefile
+#| label: inputfunctions-snakefile-2
+#| eval: false
+#| class-output: "scroll-400"
+```
+
+:::
+
+:::
+
+::::
+
+
+# Configuration and schemas
+## Configuration and schemas
+
+The workflow can be configured with a configuration file:
+
+```{r code=readLines("../config/config.yaml") }
+#| filename: workflow/config/config.yaml
+#| label: configuration-example
+#| eval: false
+#| highlight: false
+```
+
+::: {.fragment}
+
+
+
+```{r code=readLines("../config/samples.tsv") }
+#| filename: workflow/config/sample.tsv
+#| label: configuration-example-sample
+#| eval: false
+#| highlight: false
+
+```
+
+
+
+```{r code=readLines("../config/reads.tsv")[1:4] }
+#| filename: workflow/config/reads.tsv
+#| label: configuration-example-reads
+#| eval: false
+#| highlight: false
+```
+:::
+
+
+::: {.fragment}
+
+Question: is there a way to validate configuration files, require
+inputs and make sure they conform to some predefined format?
+
+:::
+
+
+## Configuration schemas to [https://json-schema.org/]():
+
+- describes your existing data formats
+- provides human- and machine-readable **documentation**
+- validates data input
+
+::: {.fragment}
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+
+
+
+
+
+```{r code=readLines("../workflow/schemas/samples.schema.yaml") }
+#| filename: workflow/schemas/samples.schema.yaml
+#| label: configuration-sample-schema
+#| eval: false
+#| highlight-style: false
+#| code-line-numbers: "|7-18|21-24"
+```
+
+:::
+
+::: {.column width="50%"}
+
+
+
+```{r code=readLines("../config/samples.tsv") }
+#| filename: workflow/config/sample.tsv
+#| label: configuration-example-sample
+#| eval: false
+#| highlight: false
+
+```
+
+:::
+
+::::
+
+:::
+
+## Configuration schemas
+
+<div style="font-size:65%">
+
+
+
+```{r code=readLines("../workflow/schemas/config.schema.yaml") }
+#| filename: workflow/schemas/config.schema.yaml
+#| label: configuration-config-schema
+#| eval: false
+#| highlight: false
+```
+
+::: {.fragment}
+
+Recall validation step in `workflow/rules/common.smk`:
+
+```{python code=readLines("../workflow/rules/common.smk")[15:20] }
+#| filename: workflow/rules/common.smk
+#| label: configuration-config-schema-validation
+#| eval: false
+#| attr-source: startFrom="15"
+```
+
+:::
+</div>
+
+
+
+# Reports
+## Reports
+
+From snakemake 5.1 and on, generate detailed self-contained HTML
+reports that encompass runtime statistics, provenance information,
+workflow topology and results
+
+## The report directive
+
+```{python code=readLines("../workflow/Snakefile")[13:13] }
+#| filename: workflow/Snakefile
+#| label: snakemake-report
+#| eval: false
+#| attr-source: startFrom="13"
+```
+
+Workflow report template defined by `workflow/report/workflow.rst`.
+
+
+::: {.fragment}
+
+Use `report` flag to target results for inclusion in report, which
+could optionally point to an rst file for captioning.
+
+
+
+```{python code=readLines("../workflow/rules/qc.smk")[63:81] }
+#| filename: workflow/rules/qc.smk
+#| label: r-plot-report
+#| eval: false
+#| attr-source: startFrom="63"
+#| code-line-numbers: "|4-8"
+```
+:::
+
+## Workflow rst template files
+
+Template files are [restructured text
+format](https://docutils.sourceforge.io/docs/user/rst/quickstart.html)
+(rst) files.
+
+
+
+```{r code=readLines("../workflow/report/workflow.rst") }
+#| filename: workflow/report/workflow.rst
+#| label: snakemake-workflow-rst
+#| eval: false
+#| highlight: false
+```
+
+
+
+```{r code=readLines("../workflow/report/coverage.rst") }
+#| filename: workflow/report/coverage.rst
+#| label: snakemake-coverage-rst
+#| eval: false
+#| highlight: false
+```
+
+::: {.fragment}
+
+### Creating the report ###
+
+
+```{bash }
+#| label: snakemake-create-report
+#| eval: true
+#| cache: true
+snakemake -s ../workflow/Snakefile --report report.html
+```
+:::
+
+
+# Coding practices
+## Coding practices and hints
+
+##### snakemake --lint #####
+
+A linter is a code quality checker that analyzes your code and
+highlights issues that need to be resolved to follow best practices.
+
+```{bash }
+#| label: snakemake-lint-echo
+#| echo: true
+#| eval: false
+snakemake --lint
+```
+
+
+
+```{bash }
+#| label: snakemake-lint
+#| class-output: "scroll-300"
+#| echo: false
+snakemake -s ../workflow/Snakefile --lint
+```
+
+##### snakefmt #####
+
+[snakefmt](https://github.com/snakemake/snakefmt) is an automated code
+formatter that should be applied to the workflow prior to publication.
+
+```{bash }
+#| label: snakemake-fmt-echo
+#| echo: true
+#| eval: false
+snakefmt --check --compact-diff
+```
+```{bash }
+#| label: snakemake-fmt
+#| echo: false
+#| eval: true
+snakefmt --check --compact-diff  ../workflow/Snakefile
+```
+
+
+## Pre-commit - for the git power user
+
+[Git hooks](https://git-scm.com/docs/githooks) can
+be used to identify simple issues before submission to code review.
+
+[Pre-commit](https://pre-commit.com) is
+a "framework for managing and maintaining multi-language pre-commit
+hooks".
+
+##### Write a config file #####
+
+<div style="font-size:80%;">
+
+
+
+```{r pre-commit-config, code=readLines("../.pre-commit-config.yaml"), eval=FALSE, highlight=FALSE }
+#| filename: .pre-commit-config.yaml
+#| label: pre-commit-config
+#| eval: false
+#| highlight: false
+```
+
+</div>
+
+##### Usage #####
+
+
+Install git hooks
+
+```{bash }
+#| label: pre-commit
+#| eval: false
+pre-commit install
+```
+
+and see how many warnings you get when you try to commit!
+
+## Github actions for continuous integration
+
+[Snakemake github
+action](https://github.com/snakemake/snakemake-github-action) allows
+running the test suite on github to make sure commits and pull
+requests don't break the workflow.
+
+
+
+<div style="font-size:80%;">
+
+```{r code=readLines("../.github/workflows/main.yaml") }
+#| filename: .github/workflows/main.yaml
+#| label: github-actions
+#| eval: false
+#| highlight: false
+```
+
+</div>
+
+<!-- ## On project file structure vs workflow file structure -->
+
+<!-- Example from my config which is loosely modelled on the -->
+<!-- [drivendata](http://drivendata.github.io/cookiecutter-data-science/) -->
+<!-- setup and similar to the NBIS reproducibility file structure: -->
+
+<!-- ```{bash  } -->
+<!-- #| label: project-file-structure -->
+<!-- #| cache: true -->
+<!-- #| echo: false -->
+<!-- tree -a -d -L 2 -I '.snakemake|.git' project -->
+<!-- ``` -->
+
+<!-- Different snakemake workflows live in `opt` (see [File System Hierachy -->
+<!-- standard](https://www.pathname.com/fhs/pub/fhs-2.3.html) for choice of -->
+<!-- name). Launching from project root could then look like -->
+
+<!-- ```{bash } -->
+<!-- #| label: project-structure-launch -->
+<!-- #| eval: false -->
+<!-- snakemake -s opt/datasources-smk/workflow/Snakefile -j 1 -->
+<!-- ``` -->
+
+
+

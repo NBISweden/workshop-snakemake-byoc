@@ -1,0 +1,55 @@
+/* SCSS custom modifications for NBIS presentations using quarto, revealjs and rmarkdown */
+
+/*-- scss:defaults --*/
+
+/*-- scss:rules --*/
+
+.scroll-1000 {
+    max-height: 1000px;
+    overflow-y: auto;
+    background-color: inherit;
+}
+.scroll-400  {
+    max-height: 400px;
+    overflow-y: auto;
+    background-color: inherit;
+}
+.scroll-300  {
+    max-height: 300px;
+    overflow-y: auto;
+    background-color: inherit;
+}
+.scroll-200  {
+    max-height: 200px;
+    overflow-y: auto;
+    background-color: inherit;
+}
+
+pre.out {
+  background-color: lightgreen;
+}
+pre.sourceCode.src {
+  background-color: lightblue;
+}
+
+.green { color: #85be42; font-weight: bold }
+
+code.tree {
+    line-height: 8px;
+    font-size: 18px;
+}
+
+code.stree {
+    line-height: 6.6px;
+    font-size: 12px;
+}
+
+code.sstree {
+    line-height: 5.6px;
+    font-size: 10px;
+}
+
+
+code.large {
+    font-size: 20px;
+}

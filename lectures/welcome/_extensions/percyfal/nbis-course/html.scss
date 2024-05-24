@@ -1,0 +1,29 @@
+/*-- scss:uses --*/
+@use 'templates/colors' as cl;
+@use 'templates/callout' as co;
+@use 'templates/course';
+@import 'templates/nbis';
+
+/*-- scss:variables --*/
+
+/*-- scss:rules --*/
+
+/* sizes */
+.largest {
+  font-size: 1.953em;
+}
+.larger {
+  font-size: 1.563em;
+}
+.large {
+  font-size: 1.25em;
+}
+.small {
+  font-size: 0.8em;
+}
+.smallr {
+  font-size: 0.64em;
+}
+.smallest {
+  font-size: 0.512em;
+}

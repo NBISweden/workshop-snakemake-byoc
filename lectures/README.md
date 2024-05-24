@@ -18,12 +18,6 @@ the command line:
 Rscript -e 'rmarkdown::render(<Rmd-file>, "xaringan::moon_reader")'
 ```
 
-The HTML files can be converted to PDF with this command:
-
-```bash
-Rscript -e 'library(webshot); webshot(<HTML>, <PDF>)'
-```
-
 ### revealjs lectures
 
 Lectures in subfolders `smkprofile` and `wc-schema` are created with [revealjs](https://revealjs.com) and can be rendered as follows:
@@ -31,3 +25,18 @@ Lectures in subfolders `smkprofile` and `wc-schema` are created with [revealjs](
 ```bash
 Rscript -e 'rmarkdown::render(<Rmd-file>)'
 ```
+
+### Quarto lectures
+
+```
+quarto render <qmd-file>
+```
+
+## HTML to PDF conversion
+
+For both Rmarkdown- and quarto-based lectures in HTML format, the tool 
+`https://github.com/astefanutti/decktape` with their docker image were tested 
+and worked well. 
+
+Note that for Rmarkdown-based lecture slides, the `template.css` needed to 
+be placed in the same directory as the Rmd- and HTML-file.

@@ -11,6 +11,8 @@ conda activate lectures
 
 ## Rendering
 
+### Rmarkdown
+
 Lectures in **Rmarkdown** format can be rendered using the following from
 the command line:
 
@@ -20,7 +22,8 @@ Rscript -e 'rmarkdown::render(<Rmd-file>, "xaringan::moon_reader")'
 
 ### revealjs lectures
 
-Lectures in subfolders `smkprofile` and `wc-schema` are created with [revealjs](https://revealjs.com) and can be rendered as follows:
+Lectures in subfolders `smkprofile` and `wc-schema` are created with 
+[revealjs](https://revealjs.com) and can be rendered as follows:
 
 ```bash
 Rscript -e 'rmarkdown::render(<Rmd-file>)'
@@ -35,8 +38,7 @@ quarto render <qmd-file>
 ## HTML to PDF conversion
 
 For both Rmarkdown- and quarto-based lectures in HTML format, the tool 
-`https://github.com/astefanutti/decktape` with their docker image were tested 
-and worked well. 
+`https://github.com/astefanutti/decktape` was tested. 
 
-Note that for Rmarkdown-based lecture slides, the `template.css` needed to 
+Note that for Rmarkdown-based lecture slides, the `template.css` has to 
 be placed in the same directory as the Rmd- and HTML-file.

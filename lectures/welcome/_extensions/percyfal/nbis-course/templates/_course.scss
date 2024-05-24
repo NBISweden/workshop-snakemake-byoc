@@ -1,0 +1,114 @@
+/*-- scss:use --*/
+@use 'colors' as cl;
+@use 'nbis' as nb;
+
+/*-- scss:rules --*/
+
+.organisers-parent {
+  display: grid;
+  gap: 1em;
+  grid-template-columns: repeat(5, 1fr);
+}
+
+.organisers-child {
+  text-align: center;
+}
+
+.organisers-child img {
+  height: 150px;
+  width: 150px;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.circular-image img {
+  height: 150px;
+  width: 150px;
+  object-fit: cover;
+  border-radius: 90%;
+}
+/* link colour */
+a, table a{
+  color: nb.$link-color;
+  text-decoration: underline;
+}
+
+a:hover, table a:hover {
+  color: var(--color-primary);
+  text-decoration: underline;
+}
+
+a:focus, table a:focus{
+  color: var(--color-primary-dark);
+  text-decoration: underline;
+}
+
+/* table even shading colour */
+.even {
+    background-color: var(--color-code-bg);
+}
+
+/* schedule table */
+.table-schedule {
+  display: inline-block;
+  padding: 25px;
+  border-radius: 4px;
+  -webkit-box-shadow: 1px 1px 6px var(--color-shadow);
+  -moz-box-shadow: 1px 1px 6px var(--color-shadow);
+  box-shadow: 1px 1px 6px var(--color-shadow);
+  margin-bottom: 20px;
+}
+
+.table-schedule td, .table-schedule th {
+  border: none !important;
+}
+
+// Table entries
+.topic {
+  margin-right: 5px;
+}
+.topic-highlight {
+  color:white;
+  font-weight:bold;
+  border-radius:4px;
+  padding:4px;
+  background: cl.$grape25;
+}
+.day-highlight {
+  color:white;
+  border-radius:4px;
+  padding-right:4px;
+  padding-left:4px;
+  background: cl.$lime;
+  margin-left:9px;
+  margin-right:7px;
+}
+.table-date {
+  font-size:110%;
+  font-weight: bold;
+  padding-top:10px;
+  padding-bottom:5px;
+  margin-top:10px;
+}
+
+@media only screen and (max-width: 575px) {
+  .landing {
+    grid-template-columns: 100%;
+    text-align: center;
+  }
+
+  .landing-update {
+    text-align: center;
+  }
+
+  .landing-right {
+    padding: 2em;
+  }
+}
+@media print {
+  .logo-button {
+    display: none!important;
+  }
+}
+
+/*-- scss:end --*/

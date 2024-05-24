@@ -1,0 +1,66 @@
+/*-- scss:defaults --*/
+// Custom callout styles for exercises, answers, and hints
+/*-- scss:uses --*/
+@use 'colors';
+@import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css");
+
+
+/*-- scss:variables --*/
+$callout-color-exercise: colors.$lime;
+$callout-color-exercise-bg: colors.$lime25;
+$callout-color-answer: colors.$grape;
+$callout-color-answer-bg: colors.$grape25;
+$callout-color-hint: colors.$aqua;
+$callout-color-hint-bg: colors.$aqua25;
+
+
+/*-- scss:rules --*/
+
+// Exercise callout styling
+div.callout-exercise {
+    border-left-color: $callout-color-exercise !important;
+}
+
+div.callout-exercise.callout-style-default > .callout-header {
+    background-color: $callout-color-exercise-bg !important;
+}
+
+.callout-exercise > .callout-header::before {
+  font-family: "Font Awesome 5 Free";
+  content: "\f303";
+  font-weight: 900;
+  margin-right: 10px;
+}
+
+// Answer callout styling
+div.callout-answer {
+    border-left-color: $callout-color-answer !important;
+}
+
+div.callout-answer.callout-style-default > .callout-header {
+    background-color: $callout-color-answer-bg !important;
+}
+
+.callout-answer > .callout-header::before {
+  font-family: "Font Awesome 5 Free";
+  content: "\f002 ";
+  font-weight: 900;
+  margin-right: 10px;
+}
+
+
+// Hint callout styling
+div.callout-hint {
+    border-left-color: $callout-color-hint !important;
+}
+
+div.callout-hint.callout-style-default > .callout-header {
+    background-color: $callout-color-hint-bg !important;
+}
+
+.callout-hint > .callout-header::before {
+  font-family: "Font Awesome 5 Free";
+  content: "\f12e";
+  font-weight: 900;
+  margin-right: 10px;
+}

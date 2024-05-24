@@ -1,0 +1,23 @@
+title: Nbiscourse
+author: Per Unneberg
+version: 1.0.0
+quarto-required: ">=1.4.0"
+contributes:
+  formats:
+    html:
+      toc: true
+      theme:
+        - html.scss
+    revealjs:
+      theme:
+        - revealjs.scss
+      title-slide-attributes:
+        data-background-image: logo.svg
+        data-background-size: 500px
+        data-background-position: top left
+      template-partials:
+        - partials/title-slide.html
+      institute: NBIS
+  filters:
+    - filters/callout.lua
+    - filters/button.lua

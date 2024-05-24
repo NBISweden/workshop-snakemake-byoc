@@ -15,10 +15,6 @@ revealjs-plugins:
   - nbishome
 ---
 
-## Welcome to the Snakemake BYOC workshop!
-
-![](achievement-agreement-arms-1068523.jpg)
-
 ## Your teachers
 
 :::: {.columns}
@@ -79,25 +75,6 @@ Verena Kutschera
 ![](achievement-agreement-arms-1068523.jpg)
 
 
-## Breakout room feedback session (today)
-
-- Each of you **presents** their project to your group (incl. your teacher) 
-- You have **30 minutes**, incl. questions and feedback 
-- This will hopefully help you to find a **starting point** to work on your project 
-
-![](windows-p74ndnYWRY4-unsplash.jpg){width=50%}
-
-
-## Breakout room coding sessions (every day)
-
-- You will be in a **breakout room** with your group (incl. your teacher)
-- You will each **work individually** on your project
-- You can ask your group whenever you need help or feedback
-- Your teacher will try to help, but all participants are encouraged to **help each other**
-
-![](john-schnobrich-FlPc9_VocJ4-unsplash.jpg){width=50%}
-
-
 ## Schedule
 
 **Monday, 27 May**
@@ -114,6 +91,36 @@ Verena Kutschera
 |               |   - Feedback session                                  |
 |               |   - Coding session                                    |
 | 12.50 - 13.00 | Wrap-up day 1                                         |
+
+
+## Breakout rooms
+
+- During most of the workshop, you will be in breakout rooms
+- We have placed you in **small groups** based on your replies 
+in the application form
+- Each group has their **own teacher**
+
+![](john-schnobrich-FlPc9_VocJ4-unsplash.jpg){width=50%}
+
+
+## Feedback session (today)
+
+- You will be in a **breakout room** with your group (incl. your teacher)
+- Each of you **presents** their project for the workshop
+- You have **30 minutes**, incl. questions and feedback 
+- This will hopefully help you to find a **starting point** to work on your pipeline 
+
+![](windows-p74ndnYWRY4-unsplash.jpg){width=50%}
+
+
+## Coding sessions (every day)
+
+- You will be in a **breakout room** with your group (incl. your teacher)
+- You will each **work individually** on your project
+- You can ask your group whenever you need help or feedback
+- Your teacher will try to help, but all participants are encouraged to **help each other**
+
+![](john-schnobrich-FlPc9_VocJ4-unsplash.jpg){width=50%}
 
 
 ## Schedule
@@ -162,9 +169,9 @@ Verena Kutschera
 
 ## Workshop resources
 
-- We will share the lecture slides with you 
-- You will get a workshop certificate 
-- We kindly ask you to fill out a feedback form at the end of the 
+- We will share the **lecture slides** with you 
+- You will get a workshop **certificate**
+- We kindly ask you to fill out a **feedback form** at the end of the 
 workshop 
 
 

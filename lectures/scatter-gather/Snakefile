@@ -23,11 +23,11 @@ rule scatter:
     conda:
         "envs/seqkit.yml"
     params:
-        parts = splits,
+        splits = splits,
         outdir = lambda wildcards, output: os.path.dirname(output[0])
     shell:
         """ 
-        seqkit split --by-part-prefix {wildcards.sample}. -p {params.parts} -O {params.outdir} {input} > {log} 2>&1
+        seqkit split --by-part-prefix {wildcards.sample}. -p {params.splits} -O {params.outdir} {input} > {log} 2>&1
         """
 
 rule rc:

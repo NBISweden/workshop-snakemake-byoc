@@ -428,7 +428,7 @@ rule generate_stats:
 On compute clusters, you can also specify packages to load with `envmodules:`
 
 ::: {data-id="code2"}
-```{.python code-line-numbers="2-4"}
+```{.python code-line-numbers="3-5"}
 rule generate_stats:
     ...
     envmodules: 

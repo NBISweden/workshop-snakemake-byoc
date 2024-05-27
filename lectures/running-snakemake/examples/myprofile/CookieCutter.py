@@ -1,8 +1,8 @@
 #
 # Based on lsf CookieCutter.py
 #
-import os
 import json
+import os
 
 d = os.path.dirname(__file__)
 with open(os.path.join(d, "settings.json")) as fh:

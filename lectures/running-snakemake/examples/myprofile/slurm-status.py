@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 import json
+import logging
 import os
 import re
-import requests
-import subprocess as sp
 import shlex
+import subprocess as sp
 import sys
 import time
-import logging
+
+import requests
 from CookieCutter import CookieCutter
 
 logger = logging.getLogger(__name__)
@@ -26,8 +27,13 @@ def get_status_direct(jobid):
     cluster = CookieCutter.get_cluster_option()
     for i in range(STATUS_ATTEMPTS):
         try:
-            sacct_res = sp.check_output(shlex.split(f"sacct {cluster} -P -b -j {jobid} -n"))
-            res = {x.split("|")[0]: x.split("|")[1] for x in sacct_res.decode().strip().split("\n")}
+            sacct_res = sp.check_output(
+                shlex.split(f"sacct {cluster} -P -b -j {jobid} -n")
+            )
+            res = {
+                x.split("|")[0]: x.split("|")[1]
+                for x in sacct_res.decode().strip().split("\n")
+            }
             break
         except sp.CalledProcessError as e:
             logger.error("sacct process error")
@@ -37,7 +43,9 @@ def get_status_direct(jobid):
             pass
         # Try getting job with scontrol instead in case sacct is misconfigured
         try:
-            sctrl_res = sp.check_output(shlex.split(f"scontrol {cluster} -o show job {jobid}"))
+            sctrl_res = sp.check_output(
+                shlex.split(f"scontrol {cluster} -o show job {jobid}")
+            )
             m = re.search(r"JobState=(\w+)", sctrl_res.decode())
             res = {jobid: m.group(1)}
             break

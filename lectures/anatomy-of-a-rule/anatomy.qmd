@@ -1,0 +1,524 @@
+---
+title: "Anatomy of a Snakefile"
+subtitle: "Snakemake BYOC NBIS course"
+date: 2024-05-27
+format:
+  revealjs:
+    theme:
+      - white
+      - ../custom.scss
+     # - ../revealjs.css
+    embed-resources: true
+    toc: false
+    toc-depth: 1
+    slide-level: 2
+    slide-number: true
+    #preview-links: true
+    #chalkboard: true
+    # Multiple logos not possible; would need to make custom logo combining both logos
+    footer: Snakemake BYOC 2024 - Reproducible Research
+    logo: https://nbis.se/nbislogo-green.svg
+    smaller: true
+    highlight-style: gruvbox
+---
+
+## Basic structure of a rule
+
+```{.python}
+rule:
+    output: "results/sample1.stats.txt"
+    shell:
+        """
+        echo -e "sample1\t50%" > {output}
+        """
+```
+## Basic structure of a rule
+
+```{.bash code-line-numbers="false"}
+$ snakemake -c 1
+Assuming unrestricted shared filesystem usage.
+Building DAG of jobs...
+Using shell: /bin/bash
+Provided cores: 1 (use --cores to define parallelism)
+Rules claiming more threads will be scaled down.
+Job stats:
+job      count
+-----  -------
+1            1
+total        1
+
+Select jobs to execute...
+Execute 1 jobs...
+
+[Fri May 17 23:47:24 2024]
+localrule 1:
+    output: results/sample1.stats.txt
+    jobid: 0
+    reason: Missing output files: results/sample1.stats.txt
+    resources: tmpdir=/var/folders/wb/jf9h8kw11b734gd98s6174rm0000gp/T
+
+[Fri May 17 23:47:24 2024]
+Finished job 0.
+1 of 1 steps (100%) done
+Complete log: .snakemake/log/2024-05-17T234724.252920.snakemake.log
+```
+
+## Basic structure of a rule
+
+More commonly, rules are named and have both input and output:
+
+```{.python}
+rule generate_stats:
+    output: "results/sample1.stats.txt"
+    input: "results/sample1.bam"
+    shell:
+        """
+        samtools flagstat {input} > {output}
+        """
+```
+
+## Basic structure of a rule
+
+Rules are linked by their input and output files:
+
+```{.python}
+rule a:
+    output: "a.txt"
+    shell:
+        "echo 'a' > a.txt"
+rule b:
+    input: "a.txt"
+    output: "b.txt"
+    shell:
+        "cat a.txt > b.txt"
+```
+
+## Basic structure of a rule
+
+You can also link rules explicitly:
+
+```{.python code-line-numbers="2,7"}
+rule a:
+    output: "a.txt"
+    shell:
+        "echo 'a' > a.txt"
+
+rule b:
+    input: rules.a.output
+    output: "b.txt"
+    shell:
+        "cat {input} > {output}"
+```
+
+but then the rule that supplies the file must be define before the rule that uses it.
+
+## Wildcards {auto-animate=true} 
+
+Wildcards generalize a workflow. Imagine you have not just sample1 but samples 1..100.
+
+Instead of writing 100 rules...
+
+```{.python code-line-numbers="false"}
+rule generate_stats_sample1:
+    output: "results/sample1.stats.txt"
+    input: "results/sample1.bam"
+...
+rule generate_stats_sample100:
+    output: "results/sample100.stats.txt"
+    input: "results/sample100.bam"
+```
+
+## Wildcards {auto-animate=true}
+
+...we can introduce one or more `wildcards` which Snakemake can match to several text strings using regular expressions. 
+
+In our example, we replace the actual sample ids with the
+wildcard `sample`:
+
+```python
+rule generate_stats:
+    output: "results/{sample}.stats.txt"
+    input: "results/{sample}.bam"
+    shell:
+        """
+        samtools flagstat {input} > {output}
+        """
+```
+
+## Wildcards
+
+Rules can have multiple wildcards...
+
+```{.python}
+rule generate_stats:
+    output: "results/{sample}_{lane}.stats.txt"
+    input: "results/{sample}_{lane}.bam"
+    shell:
+      """
+      samtools flagstats {input} > {output}
+      """
+```
+
+## Wildcards
+
+...but all the wildcards **must** be present in the output section.
+
+::: {.fragment}
+**Will work:**
+```{.python}
+rule generate_stats:
+    output: "results/{sample}_{lane}.stats.txt"
+    input: "results/{sample}.bam"
+```
+:::
+
+::: {.fragment}
+<span style="color:red">Won't work</span>.
+```{.python}
+rule generate_stats:
+    output: "results/{sample}.stats.txt"
+    input: "results/{sample}_{lane}.bam"
+```
+
+```{.bash code-line-numbers="false"}
+Wildcards in input files cannot be determined from output files: 'lane'
+```
+:::
+
+## Rule ambiguities {auto-animate=true}
+
+Ambiguities can arise when two rules produce the same output:
+
+```{.python}
+rule generate_stats:
+    output: "results/{sample}.stats.txt"
+    input: "results/{sample}.bam"
+    shell:
+        """
+        samtools flagstat {input} > {output}
+        """
+
+rule print_stats:
+    output: "results/{sample}.stats.txt"
+    input: "results/{sample}.log"
+    shell:
+        """
+        grep "% alignment" {input} > {output}
+        """
+      
+rule make_report:
+    output: "results/{sample}.report.pdf"
+    input: "results/{sample}.stats.txt"
+```
+
+## Rule ambiguities {auto-animate=true}
+
+```{.bash code-line-numbers="false"}
+$ snakemake -c 1 -n results/sample1.report.pdf
+Building DAG of jobs...
+AmbiguousRuleException:
+Rules generate_stats and print_stats are ambiguous for the file 
+results/sample1.stats.txt.
+```
+
+## Rule ambiguities
+
+This can be handled in a number of ways:
+
+::: {.fragment}
+- by changing the output file name of one of the rules
+:::
+
+::: {.fragment}
+- or via the `ruleorder` directive:
+```{.python}
+ruleorder: generate_stats > print_stats
+```
+:::
+
+::: {.fragment}
+- or by specifically referring to the output of a certain rule:
+```{.python}
+rule make_report:
+    output: "results/{sample}.report.pdf"
+    input: rules.generate_stats.output
+```
+:::
+
+## Logging
+
+Logfiles and messages add descriptions and help with debugging:
+
+```{.python}
+rule generate_stats:
+    output: "results/{sample}.stats.txt"
+    input: "results/{sample}.bam"
+    log: "results/{sample}.flagstat.log"
+    message: "Generating stats for sample {wildcards.sample}"
+    shell:
+        """
+        samtools flagstat {input} > {output} 2>{log}
+        """
+```
+:::{.callout-tip}
+
+Log files are not deleted by snakemake if there's an error.
+
+:::
+
+## Resources {auto-animate=true}
+
+Compute resources can be set with **threads** and **resources**:
+
+```{.python}
+rule generate_stats:
+    output: "results/{sample}.stats.txt"
+    input: "results/{sample}.bam"
+    log: "results/{sample}.flagstat.log"
+    message: "Generating stats for sample {wildcards.sample}"
+    threads: 4
+    resources:
+        mem_mb=100
+    shell:
+        """
+        samtools flagstat --threads {threads} {input} > {output} 2>{log}
+        """
+```
+
+## Resources {auto-animate=true}
+
+It's also possible to set threads based on the cores given to snakemake (_e.g._ `--cores 8` or `-c 8`).
+
+```{.python code-line-numbers="6"}
+rule generate_stats:
+    output: "results/{sample}.stats.txt"
+    input: "results/{sample}.bam"
+    log: "results/{sample}.flagstat.log"
+    message: "Generating stats for sample {wildcards.sample}"
+    threads: workflow.cores * 0.5 
+    resources:
+        mem_mb=100
+    shell:
+        """
+        samtools flagstat --threads {threads} {input} > {output} 2>{log}
+        """
+```
+
+## Resources {auto-animate=true}
+
+Resources can also be callables, allowing them to be set dynamically:
+
+```{.python code-line-numbers="8"}
+rule generate_stats:
+    output: "results/{sample}.stats.txt"
+    input: "results/{sample}.bam"
+    log: "results/{sample}.flagstat.log"
+    message: "Generating stats for sample {wildcards.sample}"
+    threads: workflow.cores * 0.5 
+    resources:
+        mem_mb=lambda wildcards: 1000 if wildcards.sample == "sample1-large" else 100
+    shell:
+        """
+        samtools flagstat --threads {threads} {input} > {output} 2>{log}
+        """
+```
+
+## Parameters {auto-animate=true auto-animate-restart=true}
+
+Non-file rule parameters can be set with the **params** directive:
+
+```{.python}
+rule generate_stats:
+    output: "results/{sample}.stats.txt"
+    input: "results/{sample}.bam"
+    log: "results/{sample}.flagstat.log"
+    message: "Generating stats for sample {wildcards.sample}"
+    threads: workflow.cores * 0.5
+    resources:
+        mem_mb=100
+    params:
+        verbosity = 2
+    shell:
+        """
+        samtools flagstat --verbosity {params.verbosity} \
+          --threads {threads} {input} > {output} 2>{log}
+        """
+```
+
+## Software environments {auto-animate=true}
+
+Software environments can be set for each rule using the `conda:` directive:
+
+::: {data-id="code1"}
+```{.python code-line-numbers="11"}
+rule generate_stats:
+    output: "results/{sample}.stats.txt"
+    input: "results/{sample}.bam"
+    log: "results/{sample}.flagstat.log"
+    message: "Generating stats for sample {wildcards.sample}"
+    threads: workflow.cores * 0.5
+    resources:
+        mem_mb=100
+    params:
+        verbosity = 2
+    conda: "envs/samtools.yml"
+    shell:
+        """
+        samtools flagstat --verbosity {params.verbosity} \
+          --threads {threads} {input} > {output} 2>{log}
+        """
+```
+:::
+
+## Software environments {auto-animate=true auto-animate-easing=None}
+
+::: {data-id="code1"}
+```{.python code-line-numbers="3"}
+rule generate_stats:
+    ...
+    conda: "envs/samtools.yml"
+    ...
+```
+:::
+
+Contents of `envs/samtools.yml`
+
+```yaml
+name: samtools
+channels:
+  - bioconda
+dependencies:
+  - samtools=1.15.1
+```
+
+:::{.fragment}
+To make Snakemake use the conda environment, specify `--software-deployment-method conda` (or `--sdm conda`) on the command line. For Snakemake versions before 8.0, use `--use-conda`.
+:::
+
+## Software environments {auto-animate=true auto-animate-restart=true}
+
+On compute clusters, you can also specify packages to load with `envmodules:`
+
+::: {data-id="code2"}
+```{.python code-line-numbers="12-14"}
+rule generate_stats:
+    output: "results/{sample}.stats.txt"
+    input: "results/{sample}.bam"
+    log: "results/{sample}.flagstat.log"
+    message: "Generating stats for sample {wildcards.sample}"
+    threads: workflow.cores * 0.5
+    resources:
+        mem_mb=100
+    params:
+        verbosity = 2
+    conda: "envs/samtools.yml"
+    envmodules: 
+        "bioinfo-tools",
+        "samtools"
+    shell:
+        """
+        samtools flagstat --verbosity {params.verbosity} \
+          --threads {threads} {input} > {output} 2>{log}
+        """
+```
+:::
+
+## Software environments {auto-animate=true auto-animate-easing=None auto-animate-delay=0}
+
+On compute clusters, you can also specify packages to load with `envmodules:`
+
+::: {data-id="code2"}
+```{.python code-line-numbers="3-5"}
+rule generate_stats:
+    ...
+    envmodules: 
+        "bioinfo-tools",
+        "samtools"
+    ...
+```
+:::
+
+To make Snakemake use envmodules, specify `--use-envmodules` on the command line.
+
+## Config files
+
+**Config files** allow you to configure workflows without having to change the underlying code.
+
+:::{.fragment}
+
+Config files should be in `YAML` or `JSON` format
+
+::: {.panel-tabset}
+
+### YAML
+
+```{.yaml code-line-numbers="false"}
+samples: ["sample1", "sample2", "sample3"]
+verbosity: 2
+```
+
+### JSON
+
+```{.json code-line-numbers="false"}
+{
+  "samples": [
+    "sample1",
+    "sample2",
+    "sample3"
+  ],
+  "verbosity": 2
+}
+```
+:::
+:::
+
+## Config files
+
+Specify one or more config files on the command line with:
+
+```{.bash code-line-numbers="false"}
+snakemake --configfile config.yml -j 1
+```
+
+:::{.fragment}
+or directly in a snakefile, _e.g._:
+```{.python code-line-numbers="false"}
+configfile: "config.yml""
+```
+:::
+
+## Config files
+
+The config parameters are available as a dictionary inside your snakefiles and can be accessed from within rules:
+
+```{.python code-line-numbers="3,14"}
+rule all:
+    input:
+        expand("results/{sample}.stats.txt", sample = config["samples"])
+
+rule generate_stats:
+    output: "results/{sample}.stats.txt"
+    input: "results/{sample}.bam"
+    log: "results/{sample}.flagstat.log"
+    message: "Generating stats for sample {wildcards.sample}"
+    threads: workflow.cores * 0.5
+    resources:
+        mem_mb=100
+    params:
+        verbosity = config["verbosity"]
+    conda: "envs/samtools.yml"
+    envmodules: 
+        "bioinfo-tools",
+        "samtools"
+    shell:
+        """
+        samtools flagstat --verbosity {params.verbosity} \
+          --threads {threads} {input} > {output} 2>{log}
+        """
+```
+
+## What else?
+
+Snakemake is constantly being updated with new features. Check out the [documentation](https://snakemake.readthedocs.io/), and specifically the section about [writing rules](https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html).
+
+## Questions?

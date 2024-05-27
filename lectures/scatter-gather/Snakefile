@@ -3,11 +3,11 @@ import os
 samples = ["sample1", "sample2"]
 
 splits = 5
-scatteritems = range(1, splits+1)
+scatteritems = [f"{split:03d}" for split in list(range(1, splits+1))]
 
 wildcard_constraints:
-    scatteritems = "\d+",
-    sample = "[\w\d\-\.]+"
+    scatteritems = "\\d+",
+    sample = "\\w+"
 
 rule all:
     input:
@@ -23,24 +23,25 @@ rule scatter:
     conda:
         "envs/seqkit.yml"
     params:
-        parts = splits,
+        splits = splits,
         outdir = lambda wildcards, output: os.path.dirname(output[0])
     shell:
         """ 
-        seqkit split -p {params.parts} -O {params.outdir} {input} > {log} 2>&1
-        rename 's/part_0*//' {params.outdir}/{wildcards.sample}.*.fastq
+        seqkit split --by-part-prefix {wildcards.sample}. -p {params.splits} -O {params.outdir} {input} > {log} 2>&1
         """
 
-rule reversecomplement:
+rule rc:
     output:
         "rc/{sample}/{sample}.{scatteritem}.rc.fastq"
     input:
         "splits/{sample}/{sample}.{scatteritem}.fastq"
+    log:
+        "logs/{sample}.{scatteritem}.rc.log"
     conda:
         "envs/seqkit.yml"
     shell:
         """
-        seqkit seq --reverse --complement {input} > {output}
+        seqkit seq --seq-type DNA --reverse --complement {input} > {output} 2> {log}
         """
 
 rule gather:
@@ -49,4 +50,6 @@ rule gather:
     input:
         expand("rc/{{sample}}/{{sample}}.{scatteritem}.rc.fastq", scatteritem = scatteritems)
     shell:
-        "cat {input} > {output}"
+        """
+        cat {input} > {output}
+        """

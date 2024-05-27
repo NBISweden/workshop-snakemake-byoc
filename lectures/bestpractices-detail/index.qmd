@@ -23,8 +23,8 @@ knitr::knit_hooks$set(inline = function(x) {
                   })
 ```
 
-- Examples based on more advanced snakefiles and code to run
-- All snakefiles and code are available in code repository
+- Examples based on more advanced Snakefiles and code to run
+- All Snakefiles and code are available in code repository
   [https://github.com/NBISweden/snakemake_best_practice/](https://github.com/NBISweden/snakemake_best_practice/)
 - Code has been run with Snakemake version `r snakemake_version`
 
@@ -277,7 +277,7 @@ echo "</pre></code>"
 
 :::
 
-## Stuff common to all snakefiles
+## Stuff common to all Snakefiles
 
 ::: {.absolute top=50 left=-200 }
 

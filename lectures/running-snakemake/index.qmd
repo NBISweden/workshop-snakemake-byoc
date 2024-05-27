@@ -1,11 +1,13 @@
 ---
-title: Running snakemake
-subtitle: Running snakemake locally and on the cluster, finetuning performance and setting resource usage
+title: Running Snakemake
+subtitle: Running Snakemake locally and on the cluster, finetuning performance and setting resource usage
 author: Per Unneberg
-date: "1 September, 2022"
+date: "29 May, 2024"
 format:
   nbis-course-revealjs:
-    footer: Snakemake BYOC - Running snakemake
+    footer: Snakemake BYOC - Running Snakemake
+  nbis-course-logo-revealjs:
+    footer: Snakemake BYOC - Running Snakemake
 ---
 
 ## Setup  {.unnumbered .unlisted}
@@ -29,10 +31,16 @@ theme_set(bw)
 snakemake_version <- system("snakemake --version", intern=TRUE)
 ```
 
-- Examples with snakefiles and code to run in `examples` subdirectory
+<!-- markdownlint-disable MD013 -->
+
+- Examples with Snakefiles and code to run in
+  [examples](https://download-directory.github.io?url=https://github.com/NBISweden/workshop-snakemake-byoc/tree/main/lectures/running_snakemake/examples)
+  subdirectory (click to download)
 - Snakefiles are named `ex#.smk`
 - Code has been run with Snakemake version `r snakemake_version`
 - Rules run `bwa mem` to map two samples to a reference
+
+<!-- markdownlint-enable MD013 -->
 
 :::: {.columns}
 
@@ -74,7 +82,7 @@ ls -1 *.smk
 
 ## Example 1 - ex1.smk
 
-Let's start by writing a snakefile that runs an alignment with `bwa`.
+Let's start by writing a Snakefile that runs an alignment with `bwa`.
 The command we want to run is
 
 ```{bash }
@@ -102,7 +110,7 @@ command
 
 ::: {.fragment}
 
-Putting these in a snakefile yields:
+Putting these in a Snakefile yields:
 
 ``` {python code=readLines("ex1.smk") }
 #| eval: false
@@ -114,7 +122,7 @@ Putting these in a snakefile yields:
 ## Example 1 - ex1.smk
 
 We first perform a dry run (option `--dry-run`, short option `-n`) to
-print (`--printshellcmds/-p`) the default rule in the snakefile
+print (`--printshellcmds/-p`) the default rule in the Snakefile
 `ex1.smk` which we point to using option `--snakefile/-s`:
 
 ::: {.fragment}
@@ -130,7 +138,7 @@ snakemake --snakefile ex1.smk --dry-run --printshellcmds
 ## Example 1 - ex1.smk
 
 We first perform a dry run (option `--dry-run`, short option `-n`) to
-print (`--printshellcmds/-p`) the default rule in the snakefile
+print (`--printshellcmds/-p`) the default rule in the Snakefile
 `ex1.smk` which we point to using option `--snakefile/-s`:
 
 ```{bash  }
@@ -153,7 +161,7 @@ snakemake -s ex1.smk -n -p
 ## Example 1 - ex1.smk
 
 We first perform a dry run (option `--dry-run`, short option `-n`) to
-print (`--printshellcmds/-p`) the default rule in the snakefile
+print (`--printshellcmds/-p`) the default rule in the Snakefile
 `ex1.smk` which we point to using option `--snakefile/-s`:
 
 ```{bash  }
@@ -171,7 +179,7 @@ snakemake -s ex1.smk -n -p
 
 Note the reason the rule was run[^reason]
 
-[^reason]: for snakemake <7.12 use the `--reason/-r` option
+[^reason]: for Snakemake <7.12 use the `--reason/-r` option
 
 ::: {.notes}
 
@@ -194,16 +202,17 @@ snakemake -s ex1.smk -c 1
 ```{bash }
 #| label: snakemake-rerun-workflow-rm
 #| cache: true
+#| eval: true
 #| echo: false
 rm -f bam/*.bam
 snakemake -s ex1.smk -c 1
 ```
 
-[^cores]: Required for snakemake >= 5.11.0
+[^cores]: Required for Snakemake >= 5.11.0
 
-## Example 2 - ex2.smk
+## Example 2 - ex2.smk  {style="font-size: .8em;"}
 
-The current snakefile consists only of one rule that also is specific
+The current Snakefile consists only of one rule that also is specific
 to the `CHS.HG00512` sample. First, let's generalize the bwa rule
 using wildcards:
 
@@ -214,7 +223,7 @@ using wildcards:
 
 ::: {.fragment}
 
-Now, running snakemake as before results in an error:
+Now, running Snakemake as before results in an error:
 
 :::
 
@@ -243,14 +252,14 @@ snakemake -s ex2.smk -q -n bam/PUR.HG00731.bam
 ::: {.fragment}
 
 Alternatively - and better - add a *pseudo-rule* (typically called
-`all`) at the *top* of the snakefile, since if no target is provided
-at the command line, snakemake will use the first rule it encounters.
+`all`) at the *top* of the Snakefile, since if no target is provided
+at the command line, Snakemake will use the first rule it encounters.
 
 :::
 
-## Example 3 - ex3.smk
+## Example 3 - ex3.smk {style="font-size: .7em;"}
 
-With the previous in mind, the new snakefile becomes
+With the previous in mind, the new Snakefile becomes
 
 ``` {python code=readLines("ex3.smk") }
 #| label: bwa_mem_wildcard_all
@@ -264,6 +273,7 @@ Running the default target (implicitly `all`) gives:
 
 ```{bash }
 #| class-output: "scroll-300"
+#| eval: true
 snakemake -s ex3.smk -n -p
 ```
 
@@ -316,7 +326,7 @@ to inadvertently rerun everything from scratch.
 
 :::
 
-## Example 3 - ex3.smk: other handy options
+## Example 3 - ex3.smk: other handy options {style="font-size: .7em;"}
 
 ##### Rerun-incomplete and keep-going
 
@@ -329,7 +339,7 @@ When resuming a workflow it can be handy to add the
 snakemake -s ex3.smk -c 2 --ri -k
 ```
 
-`--rerun-incomplete` takes care of unfinished jobs, e.g. slurm
+`--rerun-incomplete` takes care of unfinished jobs, e.g. Slurm
 timeouts. If a job fails, `--keep-going` will try to finish as many
 jobs as possible before terminating the workflow.
 
@@ -345,7 +355,8 @@ jobs as possible before terminating the workflow.
 
 ::: {.fragment}
 
-`--rulegraph` is a convenient way of getting an overview of the workflow
+`--rulegraph` is a convenient way of getting an overview of the
+workflow
 
 ``` {bash }
 #| eval: false
@@ -356,7 +367,7 @@ snakemake -s ex3.smk --rulegraph | dot | display
 #| fig-format: svg
 #| output: asis
 #| echo: false
- snakemake -s ex3.smk --rulegraph | dot -T svg | grep -v "<!DOCTYPE" | grep -v "dtd"
+snakemake -s ex3.smk --rulegraph | dot -T svg | grep -v "<!DOCTYPE" | grep -v "dtd"
 ```
 
 :::
@@ -385,7 +396,7 @@ snakemake -s ex3.smk --dag | dot -T svg | grep -v "<!DOCTYPE" | grep -v "dtd"
 
 :::
 
-::: {.column width="30%"}
+::: {.column width="25%"}
 
 ::: {.fragment}
 
@@ -400,7 +411,9 @@ snakemake -s ex3.smk --filegraph | dot | display
 #| fig-format: svg
 #| output: asis
 #| echo: false
-snakemake -s ex3.smk --filegraph | dot -T svg | grep -v "<!DOCTYPE" | grep -v "dtd"
+snakemake -s ex3.smk --filegraph | dot -T svg | grep -v "<!DOCTYPE" | \
+    grep -v "dtd" | \
+    sed -e "s/width=\"217pt\" height=\"304pt\"/width=\"150pt\" height=\"200pt\"/g"
 ```
 
 :::
@@ -409,7 +422,7 @@ snakemake -s ex3.smk --filegraph | dot -T svg | grep -v "<!DOCTYPE" | grep -v "d
 
 ::::
 
-## Distribution and reproducibility - ex4.smk
+## Distribution and reproducibility - ex4.smk {style="font-size: .8em;"}
 
 ##### Isolated software environments
 
@@ -432,7 +445,7 @@ said software environment. First update the
 snakemake -F -s ex4.smk -j 2 --use-conda
 ```
 
-## Distribution and reproducibility - ex5.smk
+## Distribution and reproducibility - ex5.smk {style="font-size: .8em;"}
 
 ##### Running in containers
 
@@ -453,12 +466,12 @@ which is activated with the `--use-singularity` option:
 snakemake -F -s ex5.smk -j 2 --use-singularity
 ```
 
-## Distribution and reproducibility - ex6.smk
+## Distribution and reproducibility - ex6.smk {style="font-size: .8em;"}
 
 ##### Environment modules
 
 Use the `envmodules` keyword to define environment modules available
-at your local HPC (e.g. uppmax)
+at your local HPC (e.g. UPPMAX)
 
 ``` {python code=readLines("ex6.smk") }
 #| label: conda-environment-1
@@ -474,7 +487,7 @@ and activate with `--use-envmodules`:
 snakemake -F -s ex6.smk -j 2 --use-envmodules
 ```
 
-More on this later as we discuss uppmax and SLURM.
+More on this later as we discuss UPPMAX and SLURM.
 
 NB: this is most likely **not** portable to other systems.
 
@@ -487,7 +500,7 @@ snakemake -h
 
 # Resources
 
-## About resources
+## About resources {style="font-size: .8em;"}
 
 Rules can define arbitrary resources with the resources keyword.
 However, instead of adding it to the rule, we will see how resources
@@ -506,7 +519,7 @@ snakemake -s ex6.smk bam/CHS.HG00512.bam -n
 
 Note the `tmpdir` resources in the output. This is one of four
 *standard resources*, the other three being `mem_mb`, `disk_mb`, and
-`runtime`. The resources names are names to the snakemake scheduler,
+`runtime`. The resources names are names to the Snakemake scheduler,
 and are used by the scheduler to determine which jobs can be executed
 at the same time. This allows us to fine-tune resource requirements,
 in particularly useful on a HPC cluster.
@@ -517,7 +530,7 @@ in particularly useful on a HPC cluster.
 
 ::: {.callout-important}
 
-Resources are defined per job, not thread. IOW, on uppmax you may need
+Resources are defined per job, not thread. IOW, on UPPMAX you may need
 to adjust `mem_mb` to `threads * 6000` for regular compute nodes and
 so on.
 
@@ -558,7 +571,7 @@ specified resources
 
 :::
 
-## Adding threads and resources to workflow - ex7.smk
+## Adding threads and resources to workflow - ex7.smk {style="font-size: .7em;"}
 
 Now that we will be fine-tuning resources and threads per rule we add
 another rule `samtools_merge_bam` that will merge our bam files, the
@@ -619,7 +632,7 @@ workflow output now is a merged bam file!
 
 <!-- ::: -->
 
-## Setting rule-specific resources
+## Setting rule-specific resources {style="font-size: .8em;"}
 
 Default resources are one-size-fits-all settings that would apply to
 all rules. However, in many workflows, there are certain rules that
@@ -708,7 +721,7 @@ snakemake -s ex7.smk --profile local -n -p -F -c 8
 
 # Cluster execution
 
-## Working on uppmax
+## Working on UPPMAX
 
 Sofar we have looked at local jobs. What if we want to submit jobs at
 a HPC? Here we focus on SLURM.
@@ -748,9 +761,9 @@ Downside: can only make use of one node at a time.
 
 :::
 
-## The snakemake job scheduler
+## The Snakemake job scheduler
 
-When running jobs locally using limited number of threads, snakemake
+When running jobs locally using limited number of threads, Snakemake
 needs to decide what job to run when. These decisions are made by an
 internal *job scheduler*. As we will see, the internal scheduler still
 has this role when submitting jobs to a cluster scheduler.
@@ -832,11 +845,11 @@ job submission. If only there were such scripts already available!
 
 :::
 
-## snakemake-profiles
+## Snakemake profiles (Snakemake version <8) {style="font-size: .7em;"}
 
 [Snakemake Profiles](https://github.com/Snakemake-Profiles/doc) are
 collections of reusable configuration profiles for various computing
-environments. The [slurm snakemake
+environments. The [Slurm Snakemake
 profile](https://github.com/Snakemake-Profiles/slurm) provides the
 scripts we requested on the previous slide.
 
@@ -881,7 +894,7 @@ Select print_shell_commands:
 2 - True
 Choose from 1, 2 [1]:
 sbatch_defaults []: --account=account
-cluster_sidecar_help [Use cluster sidecar. NB! Requires snakemake >= 7.0! Enter
+cluster_sidecar_help [Use cluster sidecar. NB! Requires Snakemake >= 7.0! Enter
 to continue...]:
 Select cluster_sidecar:
 1 - yes
@@ -905,7 +918,7 @@ cluster_config []:
 
 ::: {.fragment}
 
-`Profile directory contents`:
+###### Profile directory contents
 
 ```{bash }
 #| label: slurm-profile-tree
@@ -919,18 +932,22 @@ tree myprofile | head -n -2
 
 ::::
 
-## snakemake slurm profile
+## Snakemake Slurm profile {style="font-size: .6em;"}
 
 :::: {.columns}
 
 ::: {.column width="50%"}
 
-```{r code=readLines("myprofile/settings.json"), filename="myprofile/settings.json" }
+<!-- markdownlint-disable MD013 -->
+
+```{python code=readLines("myprofile/settings.json"), filename="myprofile/settings.json" }
 #| label: slurm-settings
 #| eval: false
 #| echo: true
 #| cache: false
 ```
+
+<!-- markdownlint-enable MD013 -->
 
 ```{r code=readLines("myprofile/config.yaml"), filename="myprofile/config.yaml" }
 #| label: slurm-config
@@ -970,7 +987,7 @@ snakemake -s ex7.smk --profile myprofile -j 10 --ri -k -F
 
 :::
 
-## New features - time formatting and sbatch parameters
+## New features - time formatting and sbatch parameters {style="font-size: .8em;"}
 
 Previously could set e.g. `partition` in rule:
 
@@ -1013,7 +1030,7 @@ node 128000 20    up thin,mem128GB,ibsw16,usage_mail
 
 ::: {.fragment}
 
-With the latest version of the slurm profile, you can do the
+With the latest version of the Slurm profile, you can do the
 following:
 
 ```{python }
@@ -1028,5 +1045,9 @@ rule gpu_stuff:
 ```
 
 :::
+
+## Snakemake version 8
+
+Breaking changes.
 
 # Questions?  {.unnumbered .unlisted}

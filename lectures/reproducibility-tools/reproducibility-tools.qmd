@@ -129,7 +129,7 @@ To use the tools in the environment, **activate** it:
   ```bash
   $ conda activate mapping
   $ samtools --version
-  samtools 1.15.1
+  samtools 1.20
   ```
 
 * Install a tool into an existing environment:
@@ -172,7 +172,6 @@ To use the tools in the environment, **activate** it:
   channels:
     - conda-forge
     - bioconda
-    - defaults
   dependencies:
     - bwa=0.7.17
   ```
@@ -188,24 +187,25 @@ To use the tools in the environment, **activate** it:
 
 ## Snakemake + Conda
 
+. . .
+
 ### Option one: A single environment for the entire workflow
 
-* Write an environment file (`environment.yaml`) that includes **all tools used by the workflow**:
+::: {.incremental}
+
+* Write an environment file (`environment.yaml`) that includes **all tools used by the workflow** (see [best practice example](https://github.com/NBISweden/snakemake_best_practice)):
 
   ```yaml
   name: best-practice-smk
   channels:
     - conda-forge
     - bioconda
-    - default
   dependencies:
     - snakemake=6.8.0   # ← Snakemake is part of the environment
   ...
     - multiqc=1.11   # ← Version numbers for reproducibility
     - samtools=1.13
   ```
-
-. . .
 
 * Create the environment, activate it and run the workflow within it:
 
@@ -215,14 +215,13 @@ To use the tools in the environment, **activate** it:
   $ snakemake
   ```
 
-. . .
-
 * Possibly helpful: `conda export -n envname > environment.yaml`
 
-source: [best practice example](https://github.com/NBISweden/snakemake_best_practice)
-
+:::
 
 ## Snakemake + Conda
+
+. . .
 
 ### Option two: Rule-specific environments
 
@@ -300,6 +299,8 @@ modified from: [best practice example](https://github.com/NBISweden/snakemake_be
 
 ## Containers
 
+. . .
+
 ### Docker nomenclature
 
 ::: {.incremental}
@@ -311,6 +312,8 @@ modified from: [best practice example](https://github.com/NBISweden/snakemake_be
 * **DockerHub** is an online service for sharing Docker images
 
 :::
+
+## Containers
 
 ### Docker vs Singularity
 
@@ -326,15 +329,10 @@ modified from: [best practice example](https://github.com/NBISweden/snakemake_be
 
 ## Running Snakemake jobs in containers
 
-Snakemake can run a jobs in a container using Singularity
+::: {.incremental}
 
 * Ensure your system has Singularity installed
-
-. . .
-
 * Find a Docker or Singularity image with the tool to run (<https://biocontainers.pro/> or [DockerHub](https://hub.docker.com/))
-
-. . .
 
 * Add the `container:` directive to your rule:
 
@@ -344,8 +342,6 @@ Snakemake can run a jobs in a container using Singularity
       shell:
           "minimap2 --version"
   ```
-
-. . .
 
 * Start your workflow on the command line with `--use-singularity`
 
@@ -361,6 +357,7 @@ Snakemake can run a jobs in a container using Singularity
   ...
   ```
 
+:::
 
 ## Containers – advanced topics
 

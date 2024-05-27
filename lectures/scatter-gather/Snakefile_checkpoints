@@ -1,21 +1,20 @@
 import os
+import random
 
 samples = ["sample1", "sample2"]
-
-splits = 5
-scatteritems = [f"{split:03d}" for split in list(range(1, splits+1))]
 
 wildcard_constraints:
     scatteritems = "\\d+",
     sample = "\\w+"
 
+
 rule all:
     input:
         expand("{sample}.rc.fastq", sample = samples)
 
-rule scatter:
+checkpoint scatter:
     output:
-        expand("splits/{{sample}}/{{sample}}.{scatteritem}.fastq", scatteritem = scatteritems)
+        directory("splits/{sample}")
     input:
         "data/{sample}.fastq"
     log:
@@ -23,11 +22,10 @@ rule scatter:
     conda:
         "envs/seqkit.yml"
     params:
-        splits = splits,
-        outdir = lambda wildcards, output: os.path.dirname(output[0])
+        splits = random.randint(1,10)
     shell:
         """ 
-        seqkit split --by-part-prefix {wildcards.sample}. -p {params.splits} -O {params.outdir} {input} > {log} 2>&1
+        seqkit split --by-part-prefix {wildcards.sample}. -p {params.splits} -O {output} {input} > {log} 2>&1
         """
 
 rule rc:
@@ -44,11 +42,19 @@ rule rc:
         seqkit seq --seq-type DNA --reverse --complement {input} > {output} 2> {log}
         """
 
+def aggregate_input(wildcards):
+    checkpoint_output = checkpoints.scatter.get(sample=wildcards.sample).output[0]
+    scatteritems = glob_wildcards(os.path.join(checkpoint_output,"{sample}.{scatteritem}.fastq")).scatteritem
+    input = expand("rc/{sample}/{sample}.{scatteritem}.rc.fastq",
+           sample=wildcards.sample,
+           scatteritem=scatteritems)
+    return input
+
 rule gather:
     output:
         "{sample}.rc.fastq"
     input:
-        expand("rc/{{sample}}/{{sample}}.{scatteritem}.rc.fastq", scatteritem = scatteritems)
+        aggregate_input
     shell:
         """
         cat {input} > {output}

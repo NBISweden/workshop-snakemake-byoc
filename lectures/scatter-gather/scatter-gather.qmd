@@ -1,0 +1,579 @@
+---
+title: "Scatter/gather-operations in Snakemake"
+subtitle: "Snakemake BYOC NBIS course"
+date: 2024-05-27
+format:
+  revealjs:
+    theme:
+      - white
+      - ../custom.scss
+    embed-resources: true
+    toc: false
+    toc-depth: 1
+    slide-level: 2
+    slide-number: true
+    #preview-links: true
+    #chalkboard: true
+    # Multiple logos not possible; would need to make custom logo combining both logos
+    footer: Snakemake BYOC 2024 - Reproducible Research
+    logo: https://nbis.se/nbislogo-green.svg
+    smaller: true
+    highlight-style: gruvbox
+---
+
+
+```{r Setup, echo = FALSE, message = FALSE}
+# Knitr setup
+knitr::opts_chunk$set(message = FALSE,
+                      warning = FALSE)
+
+# Load packages
+library("dplyr")
+library("kableExtra")
+```
+
+## What does scatter/gather mean?
+
+:::{.fragment}
+**Scatter**: turn input into several pieces of output
+:::
+
+:::{.fragment}
+**Gather**: bring together (aggregate) results from the different pieces
+:::
+
+:::{.fragment}
+
+Snakemake now has built-in support for scatter/gather processes via the `scattergather` directive. Described further in the documentation: [Defining scatter-gather processes](https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#defining-scatter-gather-processes). Currently not very flexible though.
+:::
+
+## When are scatter-gather processes handy?
+
+:::{.incremental}
+- demultiplexing sequencing runs
+
+  - multiple samples per plate
+  - split plates into separate files per sample
+
+- extract reads from bam files
+
+  - reads mapped to several genomes
+  - split sequences per genome
+
+- parallelize analyses
+
+  - split input into smaller chunks and run analyses in parallell
+
+:::
+
+
+## A basic example
+
+```{.python code-line-numbers="|1|3-11|13-21|23-31"}
+DATASETS = ["a", "b", "c"]
+
+rule scatter:
+    output:
+        expand('{dataset}.txt', dataset=DATASETS)
+    input:
+        data = 'data.tar.gz'
+    shell:
+        """
+        tar xvf {input}
+        """
+
+rule uppercase:
+    input:
+        "{dataset}.txt"
+    output:
+        "{dataset}.uppercase.txt"
+    shell:
+        """
+        tr [a-z] [A-Z] < {input} > {output}
+        """
+
+rule gather:
+    output:
+        "aggregated.txt"
+    input:
+        expand("{dataset}.uppercase.txt", dataset=DATASETS)
+    shell:
+        """
+        cat {input} > {output}
+        """
+```
+
+## Filegraph
+
+```{dot}
+digraph snakemake_dag {
+    graph[bgcolor=white, margin=0];
+    node[shape=box, style=rounded, fontname=sans,                 fontsize=10, penwidth=2];
+    edge[penwidth=2, color=grey];
+0 [ shape=none, margin=0, label=<<table border="2" color="#D95757" cellspacing="3" cellborder="0">
+<tr><td>
+<b><font point-size="18">gather</font></b>
+</td></tr>
+<hr/>
+<tr><td align="left"> <b><font point-size="14">&#8618; input</font></b> </td></tr>
+<tr>
+<td align="left"><font face="monospace">a.uppercase.txt            </font></td>
+</tr>
+<tr>
+<td align="left"><font face="monospace">b.uppercase.txt</font></td>
+</tr>
+<tr>
+<td align="left"><font face="monospace">c.uppercase.txt</font></td>
+</tr>
+<hr/>
+<tr><td align="right"> <b><font point-size="14">output &rarr;</font></b> </td> </tr>
+<tr>
+<td align="left"><font face="monospace">aggregated.txt</font></td></tr>
+</table>>]
+1 [ shape=none, margin=0, label=<<table border="2" color="#ADD957" cellspacing="3" cellborder="0">
+<tr><td>
+<b><font point-size="18">uppercase</font></b>
+</td></tr>
+<hr/>
+<tr><td align="left"> <b><font point-size="14">&#8618; input</font></b> </td></tr>
+<tr>
+<td align="left"><font face="monospace">{dataset}.txt</font></td>
+</tr>
+<hr/>
+<tr><td align="right"> <b><font point-size="14">output &rarr;</font></b> </td> </tr>
+<tr>
+<td align="left"><font face="monospace">{dataset}.uppercase.txt                 </font></td></tr>
+</table>>]
+2 [ shape=none, margin=0, label=<<table border="2" color="#57D9AD" cellspacing="3" cellborder="0">
+<tr><td>
+<b><font point-size="18">scatter</font></b>
+</td></tr>
+<hr/>
+<tr><td align="left"> <b><font point-size="14">&#8618; input</font></b> </td></tr>
+<tr>
+<td align="left"><font face="monospace">data.tar.gz          </font></td>
+</tr>
+<hr/>
+<tr><td align="right"> <b><font point-size="14">output &rarr;</font></b> </td> </tr>
+<tr>
+<td align="left"><font face="monospace">a.txt</font></td></tr>
+<tr>
+<td align="left"><font face="monospace">b.txt</font></td></tr>
+<tr>
+<td align="left"><font face="monospace">c.txt</font></td></tr>
+</table>>]
+	1 -> 0
+	2 -> 1
+}            
+```
+
+## Another example: splitting files for parallelization
+
+## Splitting files for parallelization {auto-animate="true" auto-animate-easing=None}
+
+::: {data-id="files"}
+- one fastq file per sample
+```
+data
+├── sample1.fastq
+└── sample2.fastq
+```
+:::
+
+## Splitting files for parallelization {auto-animate="true" auto-animate-easing=None}
+
+- split into several files (scatter)
+
+::: {data-id="files"}
+```
+splits
+├── sample1
+│   ├── sample1.001.fastq
+│   ├── sample1.002.fastq
+│   ├── sample1.003.fastq
+|   ├── sample1.004.fastq
+│   └── sample1.005.fastq
+├── sample2
+|   ├── sample2.001.fastq
+|   ├── sample2.002.fastq
+|   ├── sample2.003.fastq
+|   ├── sample2.004.fastq
+└   └── sample2.005.fastq
+```
+:::
+
+## Splitting files for parallelization {auto-animate="true" auto-animate-easing=None}
+
+- process individual files (parallelization)
+
+::: {data-id="files"}
+```
+rc
+├── sample1
+│   ├── sample1.001.rc.fastq
+│   ├── sample1.002.rc.fastq
+│   ├── sample1.003.rc.fastq
+|   ├── sample1.004.rc.fastq
+│   └── sample1.005.rc.fastq
+├── sample2
+|   ├── sample2.001.rc.fastq
+|   ├── sample2.002.rc.fastq
+|   ├── sample2.003.rc.fastq
+|   ├── sample2.004.rc.fastq
+└   └── sample2.005.rc.fastq
+```
+:::
+
+## Splitting files for parallelization {auto-animate="true" auto-animate-easing=None}
+
+- aggregate results (gather)
+
+::: {data-id="files"}
+```
+├── sample1.rc.fastq
+└── sample2.rc.fastq
+```
+:::
+
+## Splitting files for parallelization
+
+We start with defining the number of splits
+
+```{python, echo=TRUE}
+splits = 5
+scatteritems = [f"{split:03d}" for split in list(range(1, splits+1))]
+scatteritems
+```
+
+## Splitting files for parallelization
+
+We also impose some constraints on the wildcards:
+
+```{.python}
+wildcard_constraints:
+    scatteritems = "\\d+",
+    sample = "\\w+"
+```
+
+Here, scatteritems can be any number of digits, and sample can be any number of word characters (`[a-zA-Z0-9_]`).
+
+## Splitting files for parallelization
+
+Then define a rule to scatter each sample fastq
+
+```{python code=readLines("Snakefile")[15:31]}
+#| echo: true
+#| eval: false
+```
+
+Here `scatteritem` is not a wildcard because it is expanded using the `scatteritems` list.
+
+## Splitting files for parallelization
+
+Next, a rule to do something with the split files per sample
+
+```{python code=readLines("Snakefile")[32:45]}
+#| echo: true
+#| eval: false
+```
+
+Here both `scatteritem` and `sample` are wildcards. The rule is generalized to work on any value for these wildcards.
+
+## Splitting files for parallelization
+
+Then a rule to gather the results per sample
+
+```{python code=readLines("Snakefile")[46:55]}
+#| echo: true
+#| eval: false
+```
+
+Here `scatteritem` is not a wildcard, but `sample` is. The rule can gather split files for any sample.
+
+## Splitting files for parallelization
+
+Finally we put everything together, and define a pseudo rule 'all' that takes as input the gathered results for
+all samples.
+
+```{python code=readLines("Snakefile")[11:15]}
+#| echo: true
+#| eval: false
+```
+
+## 
+
+```{dot}
+digraph snakemake_dag {
+    graph[bgcolor=white, margin=0];
+    node[shape=box, style=rounded, fontname=sans,                 fontsize=24, penwidth=4];
+    edge[penwidth=2, color=grey];
+        0[label = "all", color = "0.00 0.6 0.85", style="rounded"];
+        1[label = "gather", color = "0.50 0.6 0.85", style="rounded"];
+        2[label = "rc\nscatteritem: 001", color = "0.33 0.6 0.85", style="rounded"];
+        3[label = "scatter\nsample: sample1", color = "0.17 0.6 0.85", style="rounded"];
+        4[label = "rc\nscatteritem: 002", color = "0.33 0.6 0.85", style="rounded"];
+        5[label = "rc\nscatteritem: 003", color = "0.33 0.6 0.85", style="rounded"];
+        6[label = "rc\nscatteritem: 004", color = "0.33 0.6 0.85", style="rounded"];
+        7[label = "rc\nscatteritem: 005", color = "0.33 0.6 0.85", style="rounded"];
+        8[label = "gather", color = "0.50 0.6 0.85", style="rounded"];
+        9[label = "rc\nscatteritem: 001", color = "0.33 0.6 0.85", style="rounded"];
+        10[label = "scatter\nsample: sample2", color = "0.17 0.6 0.85", style="rounded"];
+        11[label = "rc\nscatteritem: 002", color = "0.33 0.6 0.85", style="rounded"];
+        12[label = "rc\nscatteritem: 003", color = "0.33 0.6 0.85", style="rounded"];
+        13[label = "rc\nscatteritem: 004", color = "0.33 0.6 0.85", style="rounded"];
+        14[label = "rc\nscatteritem: 005", color = "0.33 0.6 0.85", style="rounded"];
+        1 -> 0
+        8 -> 0
+        2 -> 1
+        4 -> 1
+        5 -> 1
+        6 -> 1
+        7 -> 1
+        3 -> 2
+        3 -> 4
+        3 -> 5
+        3 -> 6
+        3 -> 7
+        9 -> 8
+        11 -> 8
+        12 -> 8
+        13 -> 8
+        14 -> 8
+        10 -> 9
+        10 -> 11
+        10 -> 12
+        10 -> 13
+        10 -> 14
+}            
+```
+
+This example workflow is available at the course GitHub repository: [workshop-snakemake-byoc/tree/main/lectures/scatter-gather/Snakefile](https://github.com/NBISweden/workshop-snakemake-byoc/tree/main/lectures/scatter-gather/Snakefile)
+
+# Dynamic output
+
+# Data-dependent conditional execution {transition="slide" transition-speed="slow"}
+
+# Checkpoints {transition="slide" transition-speed="slow"}
+
+## Checkpoints
+
+If the output of a rule is not known in advance, Snakemake can re-evaluate the workflow using **checkpoints**.
+
+:::{.fragment}
+Several use-cases, _e.g._ clustering into an unknown number of clusters.
+:::
+
+:::{.fragment}
+Let's try this with the previous example by implementing a random number of splits.
+:::
+
+## Checkpoints {auto-animate="true"}
+
+Before: number of splits defined ahead of time
+
+```{python code=readLines("Snakefile")[0:15]}
+#| echo: true
+#| eval: false
+```
+
+## Checkpoints {auto-animate="true"}
+
+Now: Number of splits will be random
+
+```{python code=readLines("Snakefile_checkpoints")[0:14]}
+#| echo: true
+#| eval: false
+```
+
+## Checkpoints {auto-animate="true" auto-animate-restart="true"}
+
+Before: The scatter rule expanded the output files
+
+```{.python code-line-numbers="3,11"}
+rule scatter:
+    output:
+        expand("splits/{{sample}}/{{sample}}.{scatteritem}.fastq", scatteritem = scatteritems)
+    input:
+        "data/{sample}.fastq"
+    log:
+        "logs/{sample}.scatter.log"
+    conda:
+        "envs/seqkit.yml"
+    params:
+        splits = splits,
+        outdir = lambda wildcards, output: os.path.dirname(output[0])
+    shell:
+        """ 
+        seqkit split --by-part-prefix {wildcards.sample}. -p {params.splits} -O {params.outdir} {input} > {log} 2>&1
+        """
+```
+
+## Checkpoints {auto-animate="true"}
+
+Now: The scatter rule becomes a checkpoint with unknown number of output files
+
+```{.python code-line-numbers="3,11"}
+checkpoint scatter:
+    output:
+        directory("splits/{sample}")
+    input:
+        "data/{sample}.fastq"
+    log:
+        "logs/{sample}.scatter.log"
+    conda:
+        "envs/seqkit.yml"
+    params:
+        splits = random.randint(1,10)
+    shell:
+        """ 
+        seqkit split --by-part-prefix {wildcards.sample}. -p {params.splits} -O {output} {input} > {log} 2>&1
+        """
+```
+
+## Checkpoints
+
+The `rc` rule is left unchanged
+
+```{python code=readLines("Snakefile")[32:45]}
+#| echo: true
+#| eval: false
+```
+
+## Checkpoints {auto-animate="true"}
+
+Before: The gather rule expanded the input files
+
+```{.python code-line-numbers="5"}
+rule gather:
+    output:
+        "{sample}.rc.fastq"
+    input:
+        expand("rc/{{sample}}/{{sample}}.{scatteritem}.rc.fastq", scatteritem = scatteritems)
+    shell:
+        """
+        cat {input} > {output}
+        """
+```
+
+## Checkpoints {auto-animate="true"}
+
+Now: we use an input function and the built-in `glob_wildcards`
+
+```{.python code-line-numbers="1-7,13"}
+def aggregate_input(wildcards):
+    checkpoint_outdir = checkpoints.scatter.get(sample=wildcards.sample).output[0]
+    scatteritems = glob_wildcards(os.path.join(checkpoint_outdir,"{sample}.{scatteritem}.fastq")).scatteritem
+    input = expand("rc/{sample}/{sample}.{scatteritem}.rc.fastq",
+           sample=wildcards.sample,
+           scatteritem=scatteritems)
+    return input
+
+rule gather:
+    output:
+        "{sample}.rc.fastq"
+    input:
+        aggregate_input
+    shell:
+        """
+        cat {input} > {output}
+        """
+```
+
+## Checkpoints {auto-animate="true"}
+
+```{.python code-line-numbers="2"}
+def aggregate_input(wildcards):
+    checkpoint_outdir = checkpoints.scatter.get(sample=wildcards.sample).output[0]
+    scatteritems = glob_wildcards(os.path.join(checkpoint_outdir,"{sample}.{scatteritem}.fastq")).scatteritem
+    input = expand("rc/{sample}/{sample}.{scatteritem}.rc.fastq",
+           sample=wildcards.sample,
+           scatteritem=scatteritems)
+    return input
+```
+
+- Get the output directory of the scatter checkpoint for the sample (`checkpoint_outdir='splits/sample1'`)
+
+## Checkpoints {auto-animate="true"}
+
+```{.python code-line-numbers="3" code=}
+def aggregate_input(wildcards):
+    checkpoint_outdir = checkpoints.scatter.get(sample=wildcards.sample).output[0]
+    scatteritems = glob_wildcards(os.path.join(checkpoint_outdir,"{sample}.{scatteritem}.fastq")).scatteritem
+    input = expand("rc/{sample}/{sample}.{scatteritem}.rc.fastq",
+           sample=wildcards.sample,
+           scatteritem=scatteritems)
+    return input
+```
+
+- Use `glob_wildcards` to infer the scatteritem wildcard based on existing files 
+- If `splits=3`, `scatteritems=["001", "002", "003"]`
+
+## Checkpoints {auto-animate="true"}
+
+```{.python code-line-numbers="4"}
+def aggregate_input(wildcards):
+    checkpoint_outdir = checkpoints.scatter.get(sample=wildcards.sample).output[0]
+    scatteritems = glob_wildcards(os.path.join(checkpoint_outdir,"{sample}.{scatteritem}.fastq")).scatteritem
+    input = expand("rc/{sample}/{sample}.{scatteritem}.rc.fastq",
+           sample=wildcards.sample,
+           scatteritem=scatteritems)
+    return input
+```
+- The sample wildcard is known (`sample='sample1'`)
+
+## Checkpoints {auto-animate="true"}
+
+```{.python code-line-numbers="6"}
+def aggregate_input(wildcards):
+    checkpoint_outdir = checkpoints.scatter.get(sample=wildcards.sample).output[0]
+    scatteritems = glob_wildcards(os.path.join(checkpoint_outdir,"{sample}.{scatteritem}.fastq")).scatteritem
+    input = expand("rc/{sample}/{sample}.{scatteritem}.rc.fastq",
+           sample=wildcards.sample,
+           scatteritem=scatteritems)
+    return input
+```
+
+- `scatteritem` is expanded using the inferred `scatteritems` list
+
+## Checkpoints {auto-animate="true" .code.sstree}
+
+```{.python code-line-numbers="7"}
+def aggregate_input(wildcards):
+    checkpoint_outdir = checkpoints.scatter.get(sample=wildcards.sample).output[0]
+    scatteritems = glob_wildcards(os.path.join(checkpoint_outdir,"{sample}.{scatteritem}.fastq")).scatteritem
+    input = expand("rc/{sample}/{sample}.{scatteritem}.rc.fastq",
+           sample=wildcards.sample,
+           scatteritem=scatteritems)
+    return input
+```
+
+- returned input becomes:
+
+```{.python code-line-numbers="false"}
+["rc/sample1/sample1.001.rc.fastq", 
+"rc/sample1/sample1.002.rc.fastq", 
+"rc/sample1/sample1.003.rc.fastq"]
+```
+
+##
+
+```{dot}
+digraph snakemake_dag {
+    graph[bgcolor=white, margin=0];
+    node[shape=box, style=rounded, fontname=sans,                 fontsize=10, penwidth=2];
+    edge[penwidth=2, color=grey];
+        0[label = "all", color = "0.33 0.6 0.85", style="rounded"];
+        1[label = "gather", color = "0.50 0.6 0.85", style="rounded"];
+        2[label = "scatter\nsample: sample1", color = "0.00 0.6 0.85", style="rounded"];
+        3[label = "gather", color = "0.50 0.6 0.85", style="rounded"];
+        4[label = "scatter\nsample: sample2", color = "0.00 0.6 0.85", style="rounded"];
+        1 -> 0
+        3 -> 0
+        2 -> 1
+        4 -> 3
+}
+```
+
+This example workflow is available at the course GitHub repository: [workshop-snakemake-byoc/tree/main/lectures/scatter-gather/Snakefile_checkpoints](https://github.com/NBISweden/workshop-snakemake-byoc/tree/main/lectures/scatter-gather/Snakefile_checkpoints)
+
+## Questions?

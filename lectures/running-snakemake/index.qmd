@@ -1046,8 +1046,87 @@ rule gpu_stuff:
 
 :::
 
-## Snakemake version 8
+# Snakemake version 8
 
-Breaking changes.
+## Snakemake version 8 updates
+
+#### Workflow changes
+
+- `dynamic` deprecated $\rightarrow$ `checkpoint` directive
+- `version` deprecated $\rightarrow$ `conda`, `container` integration
+- `subworkflow` removed $\rightarrow$ `module` directive
+
+##### Remote providers
+
+<!-- markdownlint-disable MD013 -->
+
+Remote providers have been removed in favor of [storage
+plugins](https://snakemake.readthedocs.io/en/stable/snakefiles/storage.html#storage-support)
+
+<!-- markdownlint-enable MD013 -->
+
+#### CLI changes
+
+##### Software deployment
+
+`--use-conda`, `--use-singularity` deprecated $\rightarrow$ use
+`--software-deployment-method conda`, `--software-deployment-method
+apptainer`, or `--software-deployment-method conda apptainer` for both
+
+##### Execution backends
+
+<!-- markdownlint-disable MD013 -->
+
+Execution backends have been moved to [execution
+plugins](https://snakemake.github.io/snakemake-plugin-catalog/index.html).
+For instance, the `slurm` plugin would be called as `--executor
+slurm`.
+
+<!-- markdownlint-enable MD013 -->
+
+## Snakemake and Slurm {style="font-size: .8em;"}
+
+#### Setup
+
+```{bash }
+#| label: snakemake-v8-plugin-install
+#| echo: true
+#| eval: false
+pip install snakemake-executor-plugin-cluster-generic
+pip install snakemake-executor-plugin-slurm
+```
+
+#### Configuration
+
+```{yaml }
+#| label: snakemake-executor-plugin-config
+#| echo: true
+#| eval: false
+default-resources:
+    slurm_partition: "<your default partition>"
+    slurm_account:   "<your account>
+
+set-resources:
+    <rulename>:
+        slurm_partition: "<other partition>" # deviating partition for this rule
+        runtime: 60 # 1 hour
+        slurm_extra: "'--nice=150'"
+        mem_mb_per_cpu: 1800
+        cpus_per_task: 40
+```
+
+#### Command
+
+```{bash }
+#| label: snakemake-executor-slurm-command
+#| echo: true
+#| eval: false
+snakemake --workflow-profile <path> \
+        -j unlimited \ # assuming an unlimited number of jobs
+        --default-resources slurm_account=<account> \
+        slurm_partition=<default partition> \
+        --configfile config/config.yaml \
+        --directory <path> # assuming a data path not relative to the workflow
+```
 
 # Questions?  {.unnumbered .unlisted}

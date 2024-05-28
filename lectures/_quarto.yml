@@ -68,4 +68,4 @@ knitr:
       dvisvgm.opts: --font-format=woff
       template: tikzfig.tex
 extensions:
-  path: nbis-course-quarto
+ path: nbis-course-quarto

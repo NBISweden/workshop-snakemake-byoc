@@ -3,6 +3,11 @@ title: Best practices in detail
 subtitle: An overview of best practices, wrappers, schemas, report, config files, and more
 author: Per Unneberg
 date: "29 May, 2024"
+format:
+  nbis-course-revealjs:
+    footer: Snakemake BYOC - Best practices
+  nbis-course-logo-revealjs:
+    footer: Snakemake BYOC - Best practices
 ---
 
 ## Setup  {.unnumbered .unlisted}
@@ -19,13 +24,13 @@ bw <- theme_bw(base_size=24) %+replace%
 theme_set(bw)
 snakemake_version <- system("snakemake --version", intern=TRUE)
 knitr::knit_hooks$set(inline = function(x) {
-                      prettyNum(x, big.mark=",")
-                  })
+  prettyNum(x, big.mark=",")
+})
 ```
 
 - Examples based on more advanced Snakefiles and code to run
 - All Snakefiles and code are available in code repository
-  [https://github.com/NBISweden/snakemake_best_practice/](https://github.com/NBISweden/snakemake_best_practice/)
+[https://github.com/NBISweden/snakemake_best_practice/](https://github.com/NBISweden/snakemake_best_practice/)
 - Code has been run with Snakemake version `r snakemake_version`
 
 The best practice example workflow is a mapping and basic qc workflow
@@ -73,8 +78,8 @@ Configuration
   Pandas or PEPs). Use such configuration for metadata and experiment
   information, **not for runtime specific configuration like threads,
   resources and output folders**. For those, just rely on Snakemake’s
-  CLI arguments like --set-threads, --set-resources,
-  --set-default-resources, and --directory.
+  CLI arguments like `--set-threads`, `--set-resources`,
+  `--set-default-resources`, and `--directory`.
 
 Filenames
 : Try to keep filenames short, but informative.
@@ -107,7 +112,7 @@ contents:
 
 ::: {.column width="40%"}
 
-<div style="font-size:150%">
+<div style="font-size:80%">
 
 <!-- markdownlint-disable MD013 -->
 
@@ -116,7 +121,7 @@ contents:
 #| cache: true
 #| eval: true
 #| echo: false
-tree -a -F -L 2 -I '.snakemake|LICENSE|.git|resources*references.fasta|resources*README.md|Dockerfile|environment.yaml|.gitignore|.gitattributes|.editorconfig|.pre-commit-config.yaml|config*config.yaml|config*samples.tsv|config*reads.tsv|.ipynb_checkpoints|.myprofile|logs|reports|results|interim|*.~undo-tree~|*.png|*.zip|*.html|.github' ../../snakemake_best_practice | sed -e "s/\.\.\/\.\.\///g" | grep -v directories
+tree -a -F -L 2 -I '.snakemake|LICENSE|.git|resources*references.fasta|resources*README.md|Dockerfile|environment.yaml|.gitignore|.gitattributes|.editorconfig|.pre-commit-config.yaml|config*config.yaml|config*samples.tsv|config*reads.tsv|.ipynb_checkpoints|.myprofile|logs|reports|results|interim|*.~undo-tree~|*.png|*.zip|*.html|.github' | sed -e "s/\.\.\/\.\.\///g" | grep -v directories
 ```
 
 <!-- markdownlint-enable MD013 -->
@@ -172,7 +177,7 @@ Emphasize that **structure** is one of the important aspects
 
 :::
 
-## What does it do?
+## What does it do? {style="font-size: 0.75em; "}
 
 The repo should contain a README.md describing briefly what the
 workflow does. Here are some excerpts:
@@ -180,6 +185,7 @@ workflow does. Here are some excerpts:
 ```{r code=readLines("README.md")[c(1:25)]}
 #| label: snakemake-byoc-2021-bp-readme
 #| eval: false
+#| echo: true
 #| highlight: false
 ```
 
@@ -188,6 +194,7 @@ workflow does. Here are some excerpts:
 ```{r code=readLines("README.md")[c(106:112)]}
 #| label: snakemake-byoc-2021-bp-readme-tail
 #| eval: false
+#| echo: true
 #| highlight: false
 #| attr-source: startFrom="106"
 ```
@@ -202,20 +209,20 @@ configuration.
 
 :::
 
-## Dry-run the test suite
+## Dry-run the test suite  {style="font-size: 0.8em; "}
 
 ```{bash }
 #| label: snakemake-byoc-2021-dry-run-echo
 #| eval: false
-cd .test
-snakemake -s ../workflow/Snakefile -n -q -F
+#| echo: false
+snakemake -s workflow/Snakefile --directory .test -n -F --quiet rules
 ```
 
 ```{bash }
 #| label: snakemake-byoc-2021-dry-run
 #| echo: false
-cd .test
-snakemake -s ../workflow/Snakefile -n -q -F
+#| eval: true
+snakemake -s workflow/Snakefile --directory .test -n -F --quiet rules
 ```
 
 ## Draw the workflow
@@ -239,16 +246,11 @@ snakemake -s ../workflow/Snakefile --rulegraph | dot -T svg | \
 
 # Rules
 
-## Snakefile
+## Snakefile {style="font-size: 0.7em; "}
 
-```{python code=readLines("workflow/Snakefile")}
-#| label: Snakefile
-#| echo: true
-#| eval: false
-#| code-line-numbers: "|21-22|28-30|51-53"
-```
+:::: {.columns}
 
-::: {.absolute top=50 left=-200 }
+::: {.column width="20%"}
 
 <!-- markdownlint-disable MD013 -->
 
@@ -267,6 +269,19 @@ echo "</pre></code>"
 
 :::
 
+::: {.column width="80%"}
+
+```{python code=readLines("workflow/Snakefile")}
+#| label: Snakefile
+#| echo: true
+#| eval: false
+#| code-line-numbers: "|21-22|28-30|51-53"
+```
+
+:::
+
+::::
+
 ::: {.notes}
 
 - explain pseudo-targets
@@ -279,7 +294,9 @@ echo "</pre></code>"
 
 ## Stuff common to all Snakefiles
 
-::: {.absolute top=50 left=-200 }
+:::: {.columns}
+
+::: {.column width="20%"}
 
 <!-- markdownlint-disable MD013 -->
 
@@ -290,7 +307,7 @@ echo "</pre></code>"
 #| echo: false
 #| results: asis
 echo "<pre><code class=\"sstree\" style=\"max-height: 1000px;\">"
-tree -a -N -F -L 3 -I '.snakemake|LICENSE|.git|resources*references.fasta|resources*README.md|Dockerfile|environment.yaml|.gitignore|.gitattributes|.editorconfig|.pre-commit-config.yaml|config*config.yaml|config*samples.tsv|config*reads.tsv|.ipynb_checkpoints|.myprofile|logs|reports|results|interim|*.~undo-tree~|*.png|*.zip|*.html|.github' -P "*.smk" ../../snakemake_best_practice | sed -z "s/\n/<br \/>\n/g;s/common.smk/<span class=\"green\">common.smk<\/span>/;s/\.\.\/\.\.\///" | head -n -2
+tree -a -N -F -L 3 -I '.snakemake|LICENSE|.git|resources*references.fasta|resources*README.md|Dockerfile|environment.yaml|.gitignore|.gitattributes|.editorconfig|.pre-commit-config.yaml|config*config.yaml|config*samples.tsv|config*reads.tsv|.ipynb_checkpoints|.myprofile|logs|reports|results|interim|*.~undo-tree~|*.png|*.zip|*.html|.github' -P "*.smk" | sed -z "s/\n/<br \/>\n/g;s/common.smk/<span class=\"green\">common.smk<\/span>/;s/\.\.\/\.\.\///" | head -n -2
 echo "</pre></code>"
 ```
 
@@ -298,19 +315,28 @@ echo "</pre></code>"
 
 :::
 
+::: {.column width="80%"}
+
 <div style="font-size:80%">
 
-```{.python filename="workflow/rules/common.smk"}
+```{python code=readLines("workflow/rules/common.smk") }
 #| label: common-smk
 #| eval: false
+#| echo: true
 #| code-line-numbers: "|15-16|21-22|31-32|40-42"
 ```
 
 </div>
 
+:::
+
+::::
+
 ## Rules
 
-::: {.absolute top=50 left=-200 }
+:::: {.columns}
+
+::: {.column width="20%"}
 
 <!-- markdownlint-disable MD013 -->
 
@@ -329,6 +355,8 @@ echo "</pre></code>"
 
 :::
 
+::: {.column width="80%"}
+
 ```{python code=readLines("workflow/rules/qc.smk")[46:60]}
 #| label: qc-smk-rule-example
 #| echo: true
@@ -337,9 +365,15 @@ echo "</pre></code>"
 #| code-line-numbers: "|8-9"
 ```
 
+:::
+
+::::
+
 ::: {.fragment}
 
-::: {.absolute top=350 left=-200 }
+:::: {.columns}
+
+::: {.column width="20%"}
 
 <!-- markdownlint-disable MD013 -->
 
@@ -358,12 +392,18 @@ echo "</pre></code>"
 
 :::
 
+::: {.column width="80%"}
+
 ```{python code=readLines("workflow/envs/samtools.yaml") }
 #| label: samtools-conda-env
 #| echo: true
 #| eval: false
 #| attr-source: startFrom="46"
 ```
+
+:::
+
+::::
 
 :::
 
@@ -388,7 +428,7 @@ echo "</pre></code>"
 
 :::
 
-## R script
+## R script {style="font-size: .8em;"}
 
 ```{python code=readLines("workflow/rules/qc.smk")[63:81]}
 #| label: qc_plot_samtools_coverage
@@ -406,7 +446,7 @@ echo "</pre></code>"
 
 S4 attributes map to rule directives (e.g. `snakemake@input[["png"]]`)
 
-## rmarkdown scripts
+## rmarkdown scripts {style="font-size: .8em;"}
 
 <!-- markdownlint-disable MD013 -->
 
@@ -486,7 +526,7 @@ jupyter-notebook workflow/notebooks/notebook.py.ipynb
 
 :::
 
-## Wrappers
+## Wrappers {style="font-size: .8em;"}
 
 `wrapper` directive:
 
@@ -524,7 +564,7 @@ corresponds to the wildcards object which is generated by the rule.
 
 ::: {.fragment}
 
-```{python code=readLines("workflow/rules/inputfunctions.smk")[1:39]}
+```{python code=readLines("workflow/rules/inputfunctions.smk")[1:39], filename="inputfunctions.smk"}
 #| label: inputfunctions-smk
 #| echo: true
 #| eval: false
@@ -539,7 +579,7 @@ corresponds to the wildcards object which is generated by the rule.
 
 ::: {.fragment}
 
-```{python code=readLines("workflow/rules/mapping.smk")[34:73]}
+```{python code=readLines("workflow/rules/mapping.smk")[34:73], filename="mapping.smk"}
 #| label: inputfunctions-mapping-smk
 #| echo: true
 #| eval: false
@@ -637,7 +677,11 @@ inputs and make sure they conform to some predefined format?
 
 :::
 
-## Configuration schemas to [https://json-schema.org/](https://json-schema.org)
+<!-- markdownlint-disable MD013 -->
+
+## Configuration schemas to [https://json-schema.org/](https://json-schema.org)  {style="font-size: .9em;"}
+
+<!-- markdownlint-enable MD013 -->
 
 - describes your existing data formats
 - provides human- and machine-readable **documentation**
@@ -679,7 +723,7 @@ inputs and make sure they conform to some predefined format?
 
 :::
 
-## Configuration schemas
+## Configuration schemas {style="font-size: .75em;"}
 
 <div style="font-size:65%">
 
@@ -751,7 +795,7 @@ could optionally point to an rst file for captioning.
 
 :::
 
-## Workflow rst template files
+## Workflow rst template files {style="font-size: 0.8em;"}
 
 Template files are [restructured text
 format](https://docutils.sourceforge.io/docs/user/rst/quickstart.html)
@@ -790,6 +834,29 @@ format](https://docutils.sourceforge.io/docs/user/rst/quickstart.html)
 cd .test
 snakemake -s ../workflow/Snakefile --report report.html
 ```
+
+:::
+
+## The report
+
+```{bash }
+#| label: copy-report
+#| echo: false
+#| eval: true
+cp .test/report.html ../bestpractices-detail/
+```
+
+:::{.center}
+
+<!-- markdownlint-disable MD013 -->
+
+```{=html}
+<div id="wrap">
+    <iframe id="smkreport" style="width: 1000px; height: 600px;" src="report.html" title="Snakemake report"></iframe>
+</div>
+```
+
+<!-- markdownlint-enable MD013 -->
 
 :::
 
@@ -835,7 +902,7 @@ snakefmt --check --compact-diff
 snakefmt --check --compact-diff  workflow/Snakefile
 ```
 
-## Pre-commit - for the git power user
+## Pre-commit - for the git power user {style="font-size: 0.8em;"}
 
 [Git hooks](https://git-scm.com/docs/githooks) can be used to identify
 simple issues before submission to code review.
@@ -866,7 +933,16 @@ Install git hooks
 pre-commit install
 ```
 
-and see how many warnings you get when you try to commit!
+and run
+
+```{bash }
+#| label: pre-commit-run
+#| echo: true
+#| eval: false
+pre-commit
+```
+
+and see how many warnings/errors you get!
 
 ## Github actions for continuous integration
 

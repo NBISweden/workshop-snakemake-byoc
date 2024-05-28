@@ -272,7 +272,7 @@ With the previous in mind, the new Snakefile becomes
 Running the default target (implicitly `all`) gives:
 
 ```{bash }
-#| class-output: "scroll-300"
+#| class-output: "scroll-200"
 #| eval: true
 snakemake -s ex3.smk -n -p
 ```
@@ -702,7 +702,7 @@ directory called `local` to represent a local profile. The minimum
 content of that directory is then a file `config.yaml` with (in this
 case) the following contents:
 
-```{r code=readLines("local/config.yaml") }
+```{yaml code=readLines("local/config.yaml") }
 #| label: snakemake-local-profile
 #| eval: false
 ```
@@ -949,7 +949,7 @@ tree myprofile | head -n -2
 
 <!-- markdownlint-enable MD013 -->
 
-```{r code=readLines("myprofile/config.yaml"), filename="myprofile/config.yaml" }
+```{yaml code=readLines("myprofile/config.yaml"), filename="myprofile/config.yaml" }
 #| label: slurm-config
 #| eval: false
 #| echo: true

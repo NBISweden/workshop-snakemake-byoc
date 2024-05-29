@@ -109,7 +109,7 @@ library("kableExtra")
 
 * Cluster execution with slurm (e.g. UPPMAX): 
     * `config/slurm/` folder with configuration files for the slurm profile and for 
-    the deprecated cluster configuration (`--cluster` still exists in Snakemake v7 
+    the deprecated cluster configuration (`--cluster-config` still exists in Snakemake v7 
     but not in v8 anymore)
 
 ---

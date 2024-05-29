@@ -7,10 +7,9 @@ import logging
 import os
 
 import requests
-from snakemake.utils import read_job_properties
-
 import slurm_utils
 from CookieCutter import CookieCutter
+from snakemake.utils import read_job_properties
 
 logger = logging.getLogger(__name__)
 
@@ -60,7 +59,9 @@ sbatch_options.update(slurm_utils.parse_sbatch_defaults(CLUSTER))
 sbatch_options.update(cluster_config["__default__"])
 
 # 3) Convert resources (no unit conversion!) and threads
-sbatch_options.update(slurm_utils.convert_job_properties(job_properties, RESOURCE_MAPPING))
+sbatch_options.update(
+    slurm_utils.convert_job_properties(job_properties, RESOURCE_MAPPING)
+)
 
 # 4) cluster_config for particular rule
 sbatch_options.update(cluster_config.get(job_properties.get("rule"), {}))

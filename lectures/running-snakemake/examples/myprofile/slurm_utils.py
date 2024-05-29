@@ -3,15 +3,15 @@ import argparse
 import math
 import os
 import re
+import shlex
 import subprocess as sp
 import sys
 from datetime import timedelta
+from io import StringIO
 from os.path import dirname
 from time import time as unix_time
 from typing import Union
 from uuid import uuid4
-import shlex
-from io import StringIO
 
 from CookieCutter import CookieCutter
 from snakemake import io
@@ -32,7 +32,8 @@ def _convert_units_to_mb(memory):
     m = regex.match(memory)
     if m is None:
         logger.error(
-            (f"unsupported memory specification '{memory}';" "  allowed suffixes: [K|M|G|T]")
+            f"unsupported memory specification '{memory}';"
+            "  allowed suffixes: [K|M|G|T]"
         )
         sys.exit(1)
     factor = siunits[m.group(2)]
@@ -99,7 +100,7 @@ def format(_pattern, _quote_all=False, **kwargs):  # noqa: A001
 def format_wildcards(string, job_properties):
     """Format a string with variables from the job."""
 
-    class Job(object):
+    class Job:
         def __init__(self, job_properties):
             for key in job_properties:
                 setattr(self, key, job_properties[key])
@@ -120,9 +121,9 @@ def format_wildcards(string, job_properties):
     try:
         return format(string, **_variables)
     except NameError as ex:
-        raise WorkflowError("NameError with group job {}: {}".format(job.jobid, str(ex)))
+        raise WorkflowError(f"NameError with group job {job.jobid}: {str(ex)}")
     except IndexError as ex:
-        raise WorkflowError("IndexError with group job {}: {}".format(job.jobid, str(ex)))
+        raise WorkflowError(f"IndexError with group job {job.jobid}: {str(ex)}")
 
 
 # adapted from ClusterExecutor.cluster_params function in snakemake.executor
@@ -287,7 +288,7 @@ class Time:
         elif isinstance(delta, str):
             return delta
         else:
-            raise ValueError("Time is in an unknown format '{}'".format(delta))
+            raise ValueError(f"Time is in an unknown format '{delta}'")
 
     @staticmethod
     def _from_str(duration: str) -> Union[timedelta, str]:
@@ -302,9 +303,7 @@ class Time:
             value = m.group("val")
             unit = m.group("unit").lower()
             if unit not in Time.units:
-                raise InvalidTimeUnitError(
-                    "Unknown unit '{}' in time {}".format(unit, duration)
-                )
+                raise InvalidTimeUnitError(f"Unknown unit '{unit}' in time {duration}")
 
             total += float(value) * Time.units[unit]
 
@@ -326,10 +325,7 @@ class JobLog:
 
     @property
     def wildcards_str(self) -> str:
-        return (
-            ".".join("{}={}".format(k, v) for k, v in self.wildcards.items())
-            or "unique"
-        )
+        return ".".join(f"{k}={v}" for k, v in self.wildcards.items()) or "unique"
 
     @property
     def rule_name(self) -> str:

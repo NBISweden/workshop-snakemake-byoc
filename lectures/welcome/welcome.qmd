@@ -5,14 +5,25 @@ author: Verena Kutschera
 institute: NBIS
 date: "25 May, 2026"
 format:
-  nbis-course-revealjs:
-    nbishome:
-      url: https://uppsala.instructure.com/courses/118016
-      position:
-        left: 130px
-        bottom: 14px
-revealjs-plugins:
-  - nbishome
+    revealjs:
+        theme:
+            - white
+            - ../custom.scss
+        self-contained: false
+        toc: false
+        toc-depth: 1
+        slide-level: 2
+        slide-number: true
+        #preview-links: true
+        #chalkboard: true
+        # Multiple logos not possible; would need to make custom logo combining both logos
+        footer: Snakemake BYOC 2026 - Welcome lecture
+        logo: https://nbis.se/nbislogo-green-orange.svg
+        smaller: true
+        highlight-style: gruvbox
+        fig-height: 3
+        fig-width: 3
+        code-line-numbers: false
 ---
 
 ## Your teachers
@@ -68,7 +79,7 @@ Verena Kutschera
 in the application form
 - Each group has their **own teacher**
 
-![](john-schnobrich-FlPc9_VocJ4-unsplash.jpg){width=50%}
+![](john-schnobrich-FlPc9_VocJ4-unsplash.jpg){fig-align="center" width=50%}
 
 
 ## Feedback session (today)
@@ -80,7 +91,7 @@ your teacher)
 - This will hopefully help you to find a **starting point** 
 to work on your pipeline 
 
-![](windows-p74ndnYWRY4-unsplash.jpg){width=50%}
+![](windows-p74ndnYWRY4-unsplash.jpg){fig-align="center" width=50%}
 
 
 ## Coding sessions (every day)
@@ -92,7 +103,7 @@ your teacher)
 - Your teacher will try to help, but all participants are 
 encouraged to **help each other**
 
-![](john-schnobrich-FlPc9_VocJ4-unsplash.jpg){width=50%}
+![](john-schnobrich-FlPc9_VocJ4-unsplash.jpg){fig-align="center" width=50%}
 
 
 ## Schedule

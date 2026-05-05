@@ -15,8 +15,8 @@ contributes:
         data-background-image: logo.svg
         data-background-size: 500px
         data-background-position: top left
-      template-partials:
-        - partials/title-slide.html
+      #template-partials:
+      #  - partials/title-slide.html
       institute: NBIS
   filters:
     - filters/callout.lua

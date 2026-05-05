@@ -2,22 +2,40 @@
 title: An Example Snakemake Workflow
 footer: Snakemake BYOC workshop
 author: Verena Kutschera
-institute: NBIS
 date: "25 May, 2026"
 format:
-  nbis-course-revealjs:
-    nbishome:
-      url: https://uppsala.instructure.com/courses/118016
-      position:
-        left: 130px
-        bottom: 14px
-revealjs-plugins:
-  - nbishome
+    revealjs:
+        theme:
+            - white
+            - ../custom.scss
+        self-contained: false
+        toc: false
+        toc-depth: 1
+        slide-level: 2
+        slide-number: true
+        #preview-links: true
+        #chalkboard: true
+        # Multiple logos not possible; would need to make custom logo combining both logos
+        footer: Snakemake BYOC 2026 - Example Workflow
+        logo: https://nbis.se/nbislogo-green-orange.svg
+        smaller: true
+        highlight-style: gruvbox
+        fig-height: 3
+        fig-width: 3
+        code-line-numbers: false
+execute:
+    echo: true
+    #warning: false
+    #cache: false
+    #include: true
+    #autodep: true
+    eval: false
+    #error: true
 ---
 
 ## The GenErode pipeline
 
-![](GenErode_illustration.jpg){fig-align="center" width="90%"}
+![](GenErode_illustration.jpg){fig-align="center" width="80%"}
 
 :::{.center}
 <https://github.com/NBISweden/GenErode>
@@ -27,32 +45,42 @@ revealjs-plugins:
 
 ## The GenErode pipeline
 
-* Developed in a NBIS project with Love Dalén's lab (Centre for Palaeogenetics, SU & NRM)
+* Developed in a NBIS project with Love Dalén's lab (Centre 
+for Palaeogenetics, SU & NRM)
 
 :::{.fragment}
-* Compares population genomics statistics from historical and modern samples of endangered populations
+* Compares population genomics statistics from historical 
+and modern samples of endangered populations
 
-![](sumatran_rhino_3_2016-07-13.jpg){fig-align="center" width="40%"}
+::: {layout-ncol=2}
+![Sumatran rhinoceros (_Dicerorhinus sumatrensis_)](1-s2.0-S009286742101000X-gr1_lrg.jpg){width=250}
 
-:::{.center}
-[Sumatran rhinoceros (_Dicerorhinus sumatrensis_), critically endangered]{.tiny}
+![](sumatran_rhino_3_2016-07-13.jpg){width=400}
 :::
 :::
 
 :::{.fragment}
-* Data processing from fastq files to BAM & VCF files plus downstream population genomics analyses
+* Data processing from fastq files to BAM & VCF files plus 
+downstream population genomics analyses
 :::
 
 ## The GenErode pipeline
 
-:::{.incremental}
-* Started at Snakemake version 3.10 (!), current pipeline runs with Snakemake version 7.20.0 (latest version: 8.11.6)
+* Started at Snakemake version 3.10 (!), current pipeline 
+runs with Snakemake version 8.27.1 (soon to be updated)
 
+:::{.fragment}
 * Historical and modern samples are processed in parallel
+:::
 
-* Whole-genome resequencing data from historical/ancient samples needs special processing as DNA degrades over time
+:::{.fragment}
+* Whole-genome resequencing data from historical/ancient 
+samples needs special processing as DNA degrades over time
+:::
 
-* Some analyses or filtering steps are run separately for modern and historical samples, or only for historical samples
+:::{.fragment}
+* Some analyses or filtering steps are run separately for 
+modern and historical samples, or only for historical samples
 :::
 
 ## Analysis Tracks of the Workflow
@@ -65,20 +93,25 @@ revealjs-plugins:
 
 ## The Workflow Structure
 
-:::{.incremental}
-* Rules with the actual analyses in separate Snakefiles (in `workflow/rules/`)
-    * `workflow/rules/common.smk` contains Python code to create sample and readgroup ID 
-    dictionaries & lists from metadata tables and the config file
+* Rules with the actual analyses in separate Snakefiles 
+(in `workflow/rules/`)
+    * `workflow/rules/common.smk` contains Python code to 
+    create dictionaries & lists from metadata tables and 
+    the config file 
 
+:::{.fragment}
 * `Snakefile`
     * `include` of rule Snakefiles
-    * `all` rule collecting output files produced by the different rule Snakefiles
-    * Python and bash code to generate and edit the pipeline report with `snakemake --report`
+    * `all` rule collecting output files produced by the 
+    different rule Snakefiles
+    * Python and bash code to generate and edit the pipeline 
+    report with `snakemake --report`
+:::
 
-* Cluster execution with slurm (e.g. UPPMAX): 
-    * `config/slurm/` folder with configuration files for the slurm profile and for 
-    the deprecated cluster configuration (`--cluster-config` still exists in Snakemake v7 
-    but not in v8 anymore)
+:::{.fragment}
+* Cluster execution with slurm: 
+    * `config/slurm/` folder with profile YAML files for 
+    execution with the slurm plugin 
 :::
 
 ## The Workflow Structure
@@ -87,14 +120,13 @@ revealjs-plugins:
     * Sample IDs, readgroup IDs, sequencing technology, paths to fastq files
 
 :::{.fragment}
-* Example `historical_samples.txt` file (whitespace-separated)
+* Example `historical_samples.csv` file 
 
-| samplename_index_lane | readgroup_id | readgroup_platform | path_to_R1_fastq | path_to_R2_fastq |
-|---|---|---|---|---|
-| VK01_01_L2 | BHYOX3ALTH.L2.01 | illumina | data/S1/P01_2.R1.fq.gz | data/S1/P01_2.R2.fq.gz |
-| VK01_02_L2 | BHYOX3ALTH.L2.02 | illumina | data/S1/P02_2.R1.fq.gz | data/S1/P02_2.R2.fq.gz |
-
-* see `config/historical_samples_paths.txt` and `config/modern_samples_paths.txt`
+```{.python}
+samplename_index_lane, readgroup_id,     readgroup_platform, path_to_R1_fastq,    path_to_R2_fastq
+VK01_01_L2,            BHYOX3ALTH.L2.01, illumina,           data/P01_2.R1.fq.gz, data/P01_2.R2.fq.gz
+VK01_02_L2,            BHYOX3ALTH.L2.02, illumina,           data/P02_2.R1.fq.gz, data/P02_2.R2.fq.gz
+```
 :::
 
 ## The Workflow Structure
@@ -114,15 +146,6 @@ revealjs-plugins:
 # The file name will be reused by the pipeline and can have the file 
 # name extensions *.fasta, *.fa or *.fna.
 ref_path: ""
-#################################################################
-
-
-#################################################################
-# 2) Relative paths (from the main snakemake directory) to metadata 
-# files with sample information.
-# Example files can be found in "config/"
-historical_samples: "" # leave empty ("") if not run for historical samples.
-modern_samples: "" # leave empty ("") if not run for modern samples. 
 #################################################################
 ```
 :::
@@ -155,9 +178,6 @@ mapping: False
 
 > For many analysis steps, parameters can be specified in the config file
 
-> These parameters can be used in the workflow with the syntax `config["parameter_name"]`,
-  e.g. `config["hist_readlength"]`
-
 :::{.fragment}
 ```{.python}
 #####
@@ -180,10 +200,41 @@ mod_readlength: "30"
 
 ## How to choose which steps to run
 
-**Step 2**: Use some Python code, `include` and the rule `all` to figure out what the workflow will do
+> These parameters can be used in the workflow with the syntax `config["parameter_name"]`,
+e.g. `config["hist_readlength"]`
 
 :::{.fragment}
-* The main `Snakefile` contains an empty Python list `all_outputs` to collect output files from the included rule Snakefiles,
+```{.python}
+rule fastp_historical:
+    input:
+        R1="data/raw_reads_symlinks/historical/{sample}_{index}_{lane}_R1.fastq.gz",
+        R2="data/raw_reads_symlinks/historical/{sample}_{index}_{lane}_R2.fastq.gz",
+    output:
+        merged="results/historical/trimming/{sample}_{index}_{lane}_trimmed_merged.fastq.gz",
+    params:
+        readlength=config["hist_readlength"],
+    log:
+        "results/logs/1.1_fastq_processing/historical/{sample}_{index}_{lane}_fastp_historical.log",
+    threads: 4
+    container: "docker://quay.io/biocontainers/fastp:0.24.0--h125f33a_0"
+    shell:
+        """
+        fastp -i {input.R1} -I {input.R2} -p -c --merge \
+        --overlap_len_require 15 --overlap_diff_limit 1 \
+        --merged_out={output.merged} -w {threads} \
+        -l {params.readlength} 2> {log}
+        """
+```
+:::
+
+## How to choose which steps to run
+
+**Step 2**: Use some Python code, `include` and the rule 
+`all` to figure out what the workflow will do
+
+:::{.fragment}
+* The main `Snakefile` contains an empty Python list `all_outputs` 
+to collect output files from the included rule Snakefiles,
 
 ```{.python}
 all_outputs = []
@@ -191,7 +242,9 @@ all_outputs = []
 :::
 
 :::{.fragment}
-* the `include` variable to attach the rule Snakefiles corresponding to the analysis steps that were set to `True` in the config file, 
+* the `include` variable to attach the rule Snakefiles 
+corresponding to the analysis steps that were set to `True` 
+in the config file, 
 
 ```{.python}
 if config["fastq_processing"]:
@@ -200,7 +253,8 @@ if config["fastq_processing"]:
 :::
 
 :::{.fragment}
-* and the rule `all` that takes the output files from the list `all_outputs` as input
+* and the rule `all` that takes the output files from the 
+list `all_outputs` as input
 
 ```{.python}
 rule all:
@@ -210,10 +264,12 @@ rule all:
 
 ## How to choose which steps to run
 
-**Step 2**: Use some Python code, `include` and the rule `all` to figure out what the workflow will do
+**Step 2**: Use some Python code, `include` and the rule 
+`all` to figure out what the workflow will do
 
-* The rule Snakefile (`workflow/rules/1.1_fastq_processing.smk`) contains some Python code to add its 
-  final output files to the list `all_outputs` in the main `Snakefile`
+* The rule Snakefile (`workflow/rules/1.1_fastq_processing.smk`) 
+contains some Python code to add its final output files to 
+the list `all_outputs` in the main `Snakefile`
 
 :::{.fragment}
 ```{.python}
@@ -228,8 +284,14 @@ if os.path.exists(config["modern_samples"]):
 ```
 :::
 
-:::{.fragment}
-* `config["historical_samples"]` and `config["modern_samples"]` point to the config file where the paths to metadata files are specified:
+## How to choose which steps to run
+
+**Step 2**: Use some Python code, `include` and the rule 
+`all` to figure out what the workflow will do
+
+* `config["historical_samples"]` and `config["modern_samples"]` 
+point to the config file where the paths to metadata files 
+are specified
 
 ```{.python}
 #################################################################
@@ -240,14 +302,15 @@ historical_samples: "" # leave empty ("") if not run for historical samples.
 modern_samples: "" # leave empty ("") if not run for modern samples. 
 #################################################################
 ```
-:::
 
 ## How to choose which steps to run
 
-**Step 2**: Use some Python code, `include` and the rule `all` to figure out what the workflow will do
+**Step 2**: Use some Python code, `include` and the rule 
+`all` to figure out what the workflow will do
 
-* The rule Snakefile (`workflow/rules/1.1_fastq_processing.smk`) contains some Python code to add its 
-  final output files to the list `all_outputs` in the main `Snakefile`
+* The rule Snakefile (`workflow/rules/1.1_fastq_processing.smk`) 
+contains some Python code to add its final output files to the 
+list `all_outputs` in the main `Snakefile`
 
 ```{.python}
 import os
@@ -260,7 +323,10 @@ if os.path.exists(config["modern_samples"]):
     all_outputs.append("results/modern/trimming/stats/multiqc/multiqc_report.html")
 ```
 
-* By using the `if` statement to check for the presence of historical or modern metadata files, the workflow can also be run 
-  only for historical or only for modern samples
+> By using the `if` statement to check for the presence of 
+historical or modern metadata files, the workflow can also 
+be run only for historical or only for modern samples
 
 ## Questions?
+
+![](GenErode_illustration.jpg){fig-align="center" width="80%"}

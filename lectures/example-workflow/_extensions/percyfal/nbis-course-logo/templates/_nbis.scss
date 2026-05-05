@@ -1,0 +1,140 @@
+/*-- scss:uses --*/
+@use 'colors' as cl;
+@use 'callout' as co;
+@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono&family=Nunito:ital,wght@0,400;0,600;1,400;1,600&display=swap");
+
+
+/*-- scss:defaults --*/
+// Description: NBIS theme
+$primary: cl.$lime;
+$secondary: cl.$lime75;
+$link-color: cl.$teal50;
+$body-color: cl.$black;
+$code-block-bg: WhiteSmoke;
+
+$font-family-sans-serif: "Nunito", "Source Sans Pro", "Helvetica", "sans-serif";
+$font-family-monospace: "JetBrains Mono", "Ubuntu Mono", "Lucida Console",
+			"Courier", "monospace";
+
+
+$code-block-border-color: none !default;
+$code-bg: $code-block-bg; /* inline code */
+
+/*-- scss:variables --*/
+$font-size-root: 18px;
+$code-font-size: 14px;
+/* major second scale */
+$h1-font-size: 1.802rem;
+$h2-font-size: 1.602rem;
+$h3-font-size: 1.424rem;
+$h4-font-size: 1.266rem;
+$h5-font-size: 1.125rem;
+$h6-font-size: 1rem;
+$code-block-font-size: 0.95rem;
+
+/* site */
+$navbar-bg: white;
+$footer-bg: white;
+$footer-fg: DimGray;
+
+/*-- scss:rules --*/
+:root {
+  --color-primary: cl.$lime75;
+  --color-primary-dark: cl.$lime;
+}
+
+.highlight {
+  background-color: $secondary;
+  color: white;
+  font-size: 0.85em;
+  padding: 0.2em 0.3em;
+  border-radius: 4px;
+  vertical-align: baseline;
+  font-weight: bold;
+}
+
+pre.out {
+  background-color: cl.$lime;
+}
+pre.sourceCode.src {
+  background-color: cl.$teal25;
+}
+
+.label {
+  color: cl.$lime;
+  font-weight: bold;
+  background-color: white;
+  font-size: 1em;
+}
+
+code {
+  color: cl.$grape;
+  font-weight: bold;
+  background-color: white;
+}
+
+code.tree {
+  line-height: 8px;
+  font-size: 18px;
+}
+
+code.stree {
+  line-height: 6.6px;
+  font-size: 12px;
+}
+
+code.sstree {
+  line-height: 5.6px;
+  font-size: 10px;
+}
+
+code.large {
+  font-size: 20px;
+}
+
+.citation {
+  font-size: 1em;
+}
+
+.flushright {
+  float: right;
+}
+
+.translatey50 {
+  transform: translate(0, -50px);
+}
+
+.translatey100 {
+  transform: translate(0, -100px);
+}
+
+.center {
+  margin: auto;
+}
+
+.graynote {
+  color: cl.$mediumgray;
+  font-size: 0.7em;
+}
+
+dt {
+  font-weight: bold;
+  color: cl.$grape;
+}
+
+.software {
+  font-weight: bold;
+  font-style: italic;
+  color: cl.$teal50;
+}
+
+.dna {
+  font-weight: normal;
+  font-family: monospace;
+}
+
+.dna .italic {
+  font-weight: bold;
+  font-family: monospace;
+  color: cl.$aqua75;
+}

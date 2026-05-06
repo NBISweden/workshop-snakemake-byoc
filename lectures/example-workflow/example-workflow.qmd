@@ -53,13 +53,11 @@ for Palaeogenetics, SU & NRM)
 and modern samples of endangered populations
 
 ::: {layout-ncol=2}
-![Sumatran rhinoceros (_Dicerorhinus sumatrensis_)](1-s2.0-S009286742101000X-gr1_lrg.jpg){width=250}
+![Skull of Sumatran rhinoceros (_Dicerorhinus sumatrensis_) (Photo: Lee Kong Chian, Natural History Museum, Singapore, CC BY-SA 4.0)](250px-Sumatran_rhinoceros_(Dicerorhinus_sumatrensis),_Lee_Kong_Chian_Natural_History_Museum,_Singapore_-_20150808_(cropped).jpg){width=200}
 
-![](sumatran_rhino_3_2016-07-13.jpg){width=400}
-:::
+![Sumatran rhinoceros mother with juvenile (Photo: International Rhino Foundation, CC BY 2.0)](sumatran_rhino_3_2016-07-13.jpg){width=320}
 :::
 
-:::{.fragment}
 * Data processing from fastq files to BAM & VCF files plus 
 downstream population genomics analyses
 :::
@@ -330,3 +328,4 @@ be run only for historical or only for modern samples
 ## Questions?
 
 ![](GenErode_illustration.jpg){fig-align="center" width="80%"}
+

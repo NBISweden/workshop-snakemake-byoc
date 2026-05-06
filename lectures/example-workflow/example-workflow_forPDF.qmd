@@ -48,7 +48,6 @@ execute:
 * Developed in a NBIS project with Love Dalén's lab (Centre 
 for Palaeogenetics, SU & NRM)
 
-:::{.fragment}
 * Compares population genomics statistics from historical 
 and modern samples of endangered populations
 
@@ -60,26 +59,19 @@ and modern samples of endangered populations
 
 * Data processing from fastq files to BAM & VCF files plus 
 downstream population genomics analyses
-:::
 
 ## The GenErode pipeline
 
 * Started at Snakemake version 3.10 (!), current pipeline 
 runs with Snakemake version 8.27.1 (soon to be updated)
 
-:::{.fragment}
 * Historical and modern samples are processed in parallel
-:::
 
-:::{.fragment}
 * Whole-genome resequencing data from historical/ancient 
 samples needs special processing as DNA degrades over time
-:::
 
-:::{.fragment}
 * Some analyses or filtering steps are run separately for 
 modern and historical samples, or only for historical samples
-:::
 
 ## Analysis Tracks of the Workflow
 
@@ -97,27 +89,22 @@ modern and historical samples, or only for historical samples
     create dictionaries & lists from metadata tables and 
     the config file 
 
-:::{.fragment}
 * `Snakefile`
     * `include` of rule Snakefiles
     * `all` rule collecting output files produced by the 
     different rule Snakefiles
     * Python and bash code to generate and edit the pipeline 
     report with `snakemake --report`
-:::
 
-:::{.fragment}
 * Cluster execution with slurm: 
     * `config/slurm/` folder with profile YAML files for 
     execution with the slurm plugin 
-:::
 
 ## The Workflow Structure
 
 * Metadata files for historical and modern samples (separately)
     * Sample IDs, readgroup IDs, sequencing technology, paths to fastq files
 
-:::{.fragment}
 * Example `historical_samples.csv` file 
 
 ```{.python}
@@ -125,7 +112,6 @@ samplename_index_lane, readgroup_id,     readgroup_platform, path_to_R1_fastq,  
 VK01_01_L2,            BHYOX3ALTH.L2.01, illumina,           data/P01_2.R1.fq.gz, data/P01_2.R2.fq.gz
 VK01_02_L2,            BHYOX3ALTH.L2.02, illumina,           data/P02_2.R1.fq.gz, data/P02_2.R2.fq.gz
 ```
-:::
 
 ## The Workflow Structure
 
@@ -135,7 +121,6 @@ VK01_02_L2,            BHYOX3ALTH.L2.02, illumina,           data/P02_2.R1.fq.gz
     * Parameters for different rules
     * Lists with samples for optional analyses
 
-:::{.fragment}
 ```{.python}
 #################################################################
 # 1) Full path to reference genome assembly.
@@ -146,13 +131,11 @@ VK01_02_L2,            BHYOX3ALTH.L2.02, illumina,           data/P02_2.R1.fq.gz
 ref_path: ""
 #################################################################
 ```
-:::
 
 ## How to choose which steps to run
 
 **Step 1**: Use booleans in the config file (`config/config.yaml`) as on/off switches
 
-:::{.fragment}
 ```{.python}
 #####
 # FastQC on raw reads, adapter and quality trimming (incl. read merging 
@@ -170,13 +153,11 @@ fastq_processing: True
 mapping: False
 #####
 ```
-:::
 
 ## How to choose which steps to run
 
 > For many analysis steps, parameters can be specified in the config file
 
-:::{.fragment}
 ```{.python}
 #####
 # FastQC on raw reads, adapter and quality trimming (incl. read merging 
@@ -194,14 +175,12 @@ hist_readlength: "30" # recommended setting: 30 bp
 mod_readlength: "30"
 #####
 ```
-:::
 
 ## How to choose which steps to run
 
 > These parameters can be used in the workflow with the syntax `config["parameter_name"]`,
 e.g. `config["hist_readlength"]`
 
-:::{.fragment}
 ```{.python}
 rule fastp_historical:
     input:
@@ -218,23 +197,19 @@ rule fastp_historical:
         --merged_out={output.merged} 2> {log}
         """
 ```
-:::
 
 ## How to choose which steps to run
 
 **Step 2**: Use some Python code, `include` and the rule 
 `all` to figure out what the workflow will do
 
-:::{.fragment}
 * The main `Snakefile` contains an empty Python list `all_outputs` 
 to collect output files from the included rule Snakefiles,
 
 ```{.python}
 all_outputs = []
 ```
-:::
 
-:::{.fragment}
 * the `include` variable to attach the rule Snakefiles 
 corresponding to the analysis steps that were set to `True` 
 in the config file, 
@@ -243,9 +218,7 @@ in the config file,
 if config["fastq_processing"]:
     include: "workflow/rules/1.1_fastq_processing.smk"
 ```
-:::
 
-:::{.fragment}
 * and the rule `all` that takes the output files from the 
 list `all_outputs` as input
 
@@ -253,7 +226,6 @@ list `all_outputs` as input
 rule all:
     input: all_outputs,
 ```
-:::
 
 ## How to choose which steps to run
 
@@ -264,7 +236,6 @@ rule all:
 contains some Python code to add its final output files to 
 the list `all_outputs` in the main `Snakefile`
 
-:::{.fragment}
 ```{.python}
 import os
 if os.path.exists(config["historical_samples"]):
@@ -275,7 +246,6 @@ if os.path.exists(config["modern_samples"]):
     all_outputs.append("data/modern/stats/multiqc/multiqc_report.html")
     all_outputs.append("results/modern/trimming/stats/multiqc/multiqc_report.html")
 ```
-:::
 
 ## How to choose which steps to run
 

@@ -1,7 +1,20 @@
 ---
 title: "Anatomy of a Snakefile"
 subtitle: "Snakemake BYOC NBIS course"
-date: 2024-05-27
+date: 2026-05-25
+include-in-header:
+  - text: |
+      <style>
+      #title-slide .title {
+        font-size: 4.5em;
+      }
+      #title-slide .subtitle {
+        font-size: 2em;
+      }
+      #title-slide .date {
+        font-size: 1.5em;
+      }
+      </style>
 format:
   revealjs:
     theme:
@@ -16,10 +29,10 @@ format:
     #preview-links: true
     #chalkboard: true
     # Multiple logos not possible; would need to make custom logo combining both logos
-    footer: Snakemake BYOC 2024 - Reproducible Research
+    footer: Snakemake BYOC 2026 - Reproducible Research
     logo: https://nbis.se/nbislogo-green.svg
-    smaller: true
     highlight-style: gruvbox
+    fontsize: 18
 ---
 
 ## Basic structure of a rule

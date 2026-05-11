@@ -198,6 +198,39 @@ Wildcards in input files cannot be determined from output files: 'lane'
 ```
 :::
 
+
+## Aggregation {auto-animate=true}
+
+Strings or a list of strings can be passed as input.
+
+```{.python}
+SAMPLES=["sample1","sample2"]
+
+rule generate_stats:
+    input:
+        [f"results/{sample}.bam" for sample in SAMPLES]
+    output:
+        "results/aggregated.stats.txt",
+```
+
+Here the input is defined by a python list comprehension.
+
+## Aggregation {auto-animate=true}
+
+Strings or a list of strings can be passed as input.
+
+```{.python}
+SAMPLES=["sample1","sample2"]
+
+rule generate_stats:
+    input:
+        expand("results/{sample}.bam", sample=SAMPLES)
+    output:
+        "results/aggregated.stats.txt",
+```
+
+Snakemake also provides the `expand` helper function.
+
 ## Rule ambiguities {auto-animate=true}
 
 Ambiguities can arise when two rules produce the same output:

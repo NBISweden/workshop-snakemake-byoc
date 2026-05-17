@@ -2,13 +2,52 @@
 title: Best practices in detail
 subtitle: An overview of best practices, wrappers, schemas, report, config files, and more
 author: Per Unneberg
-date: "29 May, 2024"
+date: "27 May, 2026"
 format:
-  nbis-course-revealjs:
-    footer: Snakemake BYOC - Best practices
-  nbis-course-logo-revealjs:
-    footer: Snakemake BYOC - Best practices
+  nbis-quarto-revealjs:
+    footer: "Best practices"
 ---
+
+## Setup  {.unnumbered .unlisted}
+
+```{r }
+#| label: setup
+#| echo: false
+#| eval: true
+#| cache: false
+library(ggplot2)
+library(viridis)
+bw <- theme_bw(base_size=24) %+replace%
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))
+theme_set(bw)
+snakemake_version <- system("snakemake --version", intern=TRUE)
+knitr::opts_knit$set(root.dir = "project")
+knitr::knit_hooks$set(inline = function(x) {
+  prettyNum(x, big.mark=",")
+})
+```
+
+- Examples based on more advanced Snakefiles and code to run
+- All Snakefiles and code are available in code repository
+[https://github.com/NBISweden/snakemake_best_practice/](https://github.com/NBISweden/snakemake_best_practice/)
+- Code has been run with Snakemake version `r snakemake_version`
+
+The best practice example workflow is a mapping and basic qc workflow
+where snakemake best practices have been applied.
+
+::: {.fragment}
+
+#### Objective
+
+The objective of the lecture is to provide an overview of some
+advanced features and how to structure your code. Hopefully it can
+give you some ideas for developing your workflow. The material can be
+a bit overwhelming so see it as a smörgåsbord where you can pick
+things to your liking.
+
+:::
+
+````{comment}
 
 ## Setup  {.unnumbered .unlisted}
 
@@ -988,3 +1027,5 @@ requests don't break the workflow.
 <!-- #| eval: false -->
 <!-- snakemake -s opt/datasources-smk/workflow/Snakefile -j 1 -->
 <!-- ``` -->
+
+````

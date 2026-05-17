@@ -6,25 +6,13 @@ $code-block-bg: white;
 
 /*-- scss:rules --*/
 
-.scroll-1000 {
-    max-height: 1000px;
-    overflow-y: auto;
-    background-color: inherit;
-}
-.scroll-400  {
-    max-height: 400px;
-    overflow-y: auto;
-    background-color: inherit;
-}
-.scroll-300  {
-    max-height: 300px;
-    overflow-y: auto;
-    background-color: inherit;
-}
-.scroll-200  {
-    max-height: 200px;
-    overflow-y: auto;
-    background-color: inherit;
+// Increase maximum height of output code blocks (default: 400px)
+.reveal div.cell-output pre,
+.reveal div.cell-output-stdout pre,
+.reveal pre code {
+    max-height: 500px !important;
+    border: 2px solid $lime25 !important;
+    border-radius: 4px !important;
 }
 
 .green { color: #a7c947; font-weight: bold }

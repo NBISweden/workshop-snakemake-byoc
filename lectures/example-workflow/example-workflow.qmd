@@ -53,19 +53,19 @@ for Palaeogenetics, SU & NRM)
 and modern samples of endangered populations
 
 ::: {layout-ncol=2}
-![Skull of Sumatran rhinoceros (_Dicerorhinus sumatrensis_) (Photo: Lee Kong Chian, Natural History Museum, Singapore, CC BY-SA 4.0)](250px-Sumatran_rhinoceros_(Dicerorhinus_sumatrensis),_Lee_Kong_Chian_Natural_History_Museum,_Singapore_-_20150808_(cropped).jpg){width=200}
+![Skull of Sumatran rhinoceros (_Dicerorhinus sumatrensis_) (Photo: Lee Kong Chian, Natural History Museum, Singapore, CC BY-SA 4.0)](250px-Sumatran_rhinoceros_(Dicerorhinus_sumatrensis),_Lee_Kong_Chian_Natural_History_Museum,_Singapore_-_20150808_(cropped).jpg){width=150}
 
-![Sumatran rhinoceros mother with juvenile (Photo: International Rhino Foundation, CC BY 2.0)](sumatran_rhino_3_2016-07-13.jpg){width=320}
+![Sumatran rhinoceros mother with juvenile (Photo: International Rhino Foundation, CC BY 2.0)](sumatran_rhino_3_2016-07-13.jpg){width=270}
 :::
 
-* Data processing from fastq files to BAM & VCF files plus 
+* Data processing from fastq or BAM files to VCF files plus 
 downstream population genomics analyses
 :::
 
 ## The GenErode pipeline
 
 * Started at Snakemake version 3.10 (!), current pipeline 
-runs with Snakemake version 8.27.1 (soon to be updated)
+runs with Snakemake version 9.4.0
 
 :::{.fragment}
 * Historical and modern samples are processed in parallel
@@ -98,32 +98,35 @@ modern and historical samples, or only for historical samples
     the config file 
 
 :::{.fragment}
-* `Snakefile`
+* `workflow/Snakefile`
     * `include` of rule Snakefiles
-    * `all` rule collecting output files produced by the 
-    different rule Snakefiles
+    * python code to collect output files from the different 
+    rule Snakefiles as input for the rule `all` 
+    * `all` rule that is run when executing the workflow 
     * Python and bash code to generate and edit the pipeline 
-    report with `snakemake --report`
+    report with `snakemake --report` 
 :::
 
 :::{.fragment}
 * Cluster execution with slurm: 
-    * `config/slurm/` folder with profile YAML files for 
+    * `config/slurm/` folder with example YAML files for 
     execution with the slurm plugin 
 :::
 
 ## The Workflow Structure
 
 * Metadata files for historical and modern samples (separately)
-    * Sample IDs, readgroup IDs, sequencing technology, paths to fastq files
+    * Sample IDs, sequencing library IDs, lane numbers, 
+    readgroup IDs, sequencing technology, paths to fastq files, 
+    paths to BAM files
 
 :::{.fragment}
-* Example `historical_samples.csv` file 
+* Example `historical_samples.csv` file with fastq files as input 
 
 ```{.python}
-samplename_index_lane, readgroup_id,     readgroup_platform, path_to_R1_fastq,    path_to_R2_fastq
-VK01_01_L2,            BHYOX3ALTH.L2.01, illumina,           data/P01_2.R1.fq.gz, data/P01_2.R2.fq.gz
-VK01_02_L2,            BHYOX3ALTH.L2.02, illumina,           data/P02_2.R1.fq.gz, data/P02_2.R2.fq.gz
+samplename,library_id,lane,readgroup_id,readgroup_platform,path_to_R1_fastq_file,path_to_R2_fastq_file,path_to_processed_bam_file
+VK01,01,L2,BHYOX3ALTH.L2.01,illumina,data/P01_2.R1.fq.gz,data/P01_2.R2.fq.gz
+VK01,02,L2,BHYOX3ALTH.L2.02,illumina,data/P02_2.R1.fq.gz,data/P02_2.R2.fq.gz
 ```
 :::
 
@@ -145,6 +148,55 @@ VK01_02_L2,            BHYOX3ALTH.L2.02, illumina,           data/P02_2.R1.fq.gz
 # name extensions *.fasta, *.fa or *.fna.
 ref_path: ""
 #################################################################
+```
+:::
+
+## The Workflow Structure
+
+* For many analysis steps, parameters can be specified in the 
+config file
+
+:::{.fragment}
+```{.python}
+#####
+# FastQC on raw reads, adapter and quality trimming (incl. read merging 
+# for historical samples) using fastp, FastQC on trimmed reads.
+# Adapter sequences are automatically detected.
+# Automatic detection of NovaSeq or NextSeq samples and activation of
+# poly-G tail trimming.
+fastq_processing: True
+
+# Minimum read length.
+# Historical samples (after trimming and read merging)
+hist_readlength: "30" # recommended setting: 30 bp
+
+# Modern samples (after trimming)
+mod_readlength: "30"
+#####
+```
+:::
+
+## The Workflow Structure
+
+* These parameters are used in the workflow with the syntax 
+`config["parameter_name"]`, e.g. `config["hist_readlength"]`
+
+:::{.fragment}
+```{.python}
+rule fastp_historical:
+    input:
+        R1="data/historical/{sample}_{index}_{lane}_R1.fastq.gz",
+        R2="data/historical/{sample}_{index}_{lane}_R2.fastq.gz",
+    output:
+        merged="results/historical/trimming/{sample}_{index}_{lane}_trimmed_merged.fastq.gz",
+    params:
+        readlength=config["hist_readlength"],
+    shell:
+        """
+        fastp -i {input.R1} -I {input.R2} \
+        -l {params.readlength} \
+        --merged_out={output.merged} 2> {log}
+        """
 ```
 :::
 
@@ -174,151 +226,124 @@ mapping: False
 
 ## How to choose which steps to run
 
-> For many analysis steps, parameters can be specified in the config file
+**Step 2**: Add the output files from each rule Snakefile 
+to a Python list 
 
 :::{.fragment}
+* e.g. `workflow/rules/1.1_fastq_processing.smk` collects 
+its output files in a list called `fastq_proc_outputs` 
+
 ```{.python}
-#####
-# FastQC on raw reads, adapter and quality trimming (incl. read merging 
-# for historical samples) using fastp, FastQC on trimmed reads.
-# Adapter sequences are automatically detected.
-# Automatic detection of NovaSeq or NextSeq samples and activation of
-# poly-G tail trimming.
-fastq_processing: True
+import os
+# Code collecting output files from this part of the pipeline
+fastq_proc_outputs=[]
+if os.path.exists(config["historical_samples"]):
+    fastq_proc_outputs.append("data/raw_reads_symlinks/historical/stats/multiqc/multiqc_report.html")
+    fastq_proc_outputs.append("results/historical/trimming/stats/multiqc/multiqc_report.html")
 
-# Minimum read length.
-# Historical samples (after trimming and read merging)
-hist_readlength: "30" # recommended setting: 30 bp
-
-# Modern samples (after trimming)
-mod_readlength: "30"
-#####
+if os.path.exists(config["modern_samples"]):
+    fastq_proc_outputs.append("data/raw_reads_symlinks/modern/stats/multiqc/multiqc_report.html")
+    fastq_proc_outputs.append("results/modern/trimming/stats/multiqc/multiqc_report.html")
 ```
 :::
 
 ## How to choose which steps to run
 
-> These parameters can be used in the workflow with the syntax `config["parameter_name"]`,
-e.g. `config["hist_readlength"]`
+**Step 2**: Add the output files from each rule Snakefile 
+to a Python list 
+
+* `config["historical_samples"]` and `config["modern_samples"]` 
+point to the config file where the paths to metadata files 
+are specified
 
 :::{.fragment}
 ```{.python}
-rule fastp_historical:
-    input:
-        R1="data/historical/{sample}_{index}_{lane}_R1.fastq.gz",
-        R2="data/historical/{sample}_{index}_{lane}_R2.fastq.gz",
-    output:
-        merged="results/historical/trimming/{sample}_{index}_{lane}_trimmed_merged.fastq.gz",
-    params:
-        readlength=config["hist_readlength"],
-    shell:
-        """
-        fastp -i {input.R1} -I {input.R2} \
-        -l {params.readlength} \
-        --merged_out={output.merged} 2> {log}
-        """
+#################################################################
+# 2) Relative paths (from the main snakemake directory) to metadata 
+# files with sample information.
+# The pipeline accepts FastQ files or processed BAM files as input.
+# Example files can be found in "config/"
+historical_samples: "config/historical_samples.csv" # leave empty ("") if not run for historical samples.
+modern_samples: "" # leave empty ("") if not run for modern samples. 
+#################################################################
 ```
 :::
 
 ## How to choose which steps to run
 
-**Step 2**: Use some Python code, `include` and the rule 
-`all` to figure out what the workflow will do
+**Step 2**: Add the output files from each rule Snakefile 
+to a Python list 
+
+* By using the `if` statement to check for the presence of 
+historical or modern metadata files, the workflow can also 
+be run only for historical or only for modern samples 
 
 :::{.fragment}
-* The main `Snakefile` contains an empty Python list `all_outputs` 
-to collect output files from the included rule Snakefiles,
+```{.python}
+import os
+# Code collecting output files from this part of the pipeline
+fastq_proc_outputs=[]
+if os.path.exists(config["historical_samples"]):
+    fastq_proc_outputs.append("data/raw_reads_symlinks/historical/stats/multiqc/multiqc_report.html")
+    fastq_proc_outputs.append("results/historical/trimming/stats/multiqc/multiqc_report.html")
+
+if os.path.exists(config["modern_samples"]):
+    fastq_proc_outputs.append("data/raw_reads_symlinks/modern/stats/multiqc/multiqc_report.html")
+    fastq_proc_outputs.append("results/modern/trimming/stats/multiqc/multiqc_report.html")
+```
+:::
+
+## How to choose which steps to run
+
+**Step 3**: Add the output files from each rule Snakefile 
+as input to the rule `all`, corresponding to which analysis 
+steps were set to `True` in the config file 
+
+* The file `workflow/Snakefile` contains an empty Python list 
+`all_outputs` to collect the output file lists from the rule Snakefiles, 
 
 ```{.python}
 all_outputs = []
 ```
-:::
 
 :::{.fragment}
-* the `include` variable to attach the rule Snakefiles 
-corresponding to the analysis steps that were set to `True` 
-in the config file, 
+* `if` clauses to append the output file lists from the rule 
+Snakefiles to `all_outputs`, corresponding to which analysis 
+steps were set to `True` in the config file, 
 
 ```{.python}
 if config["fastq_processing"]:
-    include: "workflow/rules/1.1_fastq_processing.smk"
+    all_outputs.append(fastq_proc_outputs)
+```
+:::
+
+## How to choose which steps to run
+
+**Step 3**: Add the output files from each rule Snakefile 
+as input to the rule `all`, corresponding to which analysis 
+steps were set to `True` in the config file 
+
+:::{.fragment}
+
+* Python and Snakemake code to turn the list `all_outputs` 
+into a list of file paths instead of a list of lists, and 
+to remove duplicates from `all_outputs`,
+
+```{.python}
+all_outputs=flatten(all_outputs)
+all_outputs=list(set(all_outputs))
 ```
 :::
 
 :::{.fragment}
 * and the rule `all` that takes the output files from the 
-list `all_outputs` as input
+list `all_outputs` as input 
 
 ```{.python}
 rule all:
     input: all_outputs,
 ```
 :::
-
-## How to choose which steps to run
-
-**Step 2**: Use some Python code, `include` and the rule 
-`all` to figure out what the workflow will do
-
-* The rule Snakefile (`workflow/rules/1.1_fastq_processing.smk`) 
-contains some Python code to add its final output files to 
-the list `all_outputs` in the main `Snakefile`
-
-:::{.fragment}
-```{.python}
-import os
-if os.path.exists(config["historical_samples"]):
-    all_outputs.append("data/historical/stats/multiqc/multiqc_report.html")
-    all_outputs.append("results/historical/trimming/stats/multiqc/multiqc_report.html")
-
-if os.path.exists(config["modern_samples"]):
-    all_outputs.append("data/modern/stats/multiqc/multiqc_report.html")
-    all_outputs.append("results/modern/trimming/stats/multiqc/multiqc_report.html")
-```
-:::
-
-## How to choose which steps to run
-
-**Step 2**: Use some Python code, `include` and the rule 
-`all` to figure out what the workflow will do
-
-* `config["historical_samples"]` and `config["modern_samples"]` 
-point to the config file where the paths to metadata files 
-are specified
-
-```{.python}
-#################################################################
-# 2) Relative paths (from the main snakemake directory) to metadata 
-# files with sample information.
-# Example files can be found in "config/"
-historical_samples: "" # leave empty ("") if not run for historical samples.
-modern_samples: "" # leave empty ("") if not run for modern samples. 
-#################################################################
-```
-
-## How to choose which steps to run
-
-**Step 2**: Use some Python code, `include` and the rule 
-`all` to figure out what the workflow will do
-
-* The rule Snakefile (`workflow/rules/1.1_fastq_processing.smk`) 
-contains some Python code to add its final output files to the 
-list `all_outputs` in the main `Snakefile`
-
-```{.python}
-import os
-if os.path.exists(config["historical_samples"]):
-    all_outputs.append("data/historical/stats/multiqc/multiqc_report.html")
-    all_outputs.append("results/historical/trimming/stats/multiqc/multiqc_report.html")
-
-if os.path.exists(config["modern_samples"]):
-    all_outputs.append("data/modern/stats/multiqc/multiqc_report.html")
-    all_outputs.append("results/modern/trimming/stats/multiqc/multiqc_report.html")
-```
-
-> By using the `if` statement to check for the presence of 
-historical or modern metadata files, the workflow can also 
-be run only for historical or only for modern samples
 
 ## Questions?
 

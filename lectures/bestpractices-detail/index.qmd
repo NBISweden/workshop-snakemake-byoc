@@ -21,7 +21,7 @@ bw <- theme_bw(base_size=24) %+replace%
   theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))
 theme_set(bw)
 snakemake_version <- system("snakemake --version", intern=TRUE)
-knitr::opts_knit$set(root.dir = "project")
+# knitr::opts_knit$set(root.dir = "project")
 knitr::knit_hooks$set(inline = function(x) {
   prettyNum(x, big.mark=",")
 })
@@ -46,6 +46,241 @@ a bit overwhelming so see it as a smörgåsbord where you can pick
 things to your liking.
 
 :::
+
+## [Snakemake best practices summary](https://snakemake.readthedocs.io/en/stable/snakefiles/best_practices.html)
+
+::: {.fragment}
+
+Care about code quality
+: Run the linter before publishing any workflow, asking questions on
+  Stack Overflow or filing issues on Github.
+
+:::
+
+::: {.fragment}
+
+Care about code readability
+: 1. Apply the automatic formatter for Snakemake workflows, Snakefmt,
+    before publishing it.
+  2. Try to keep filenames short
+  3. Try to keep Python code like helper functions separate from rules
+  4. Use Snakemake's [semantic helper][semantic] functions to increase
+     readability
+
+[semantic]: https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#semantic-helpers
+
+:::
+
+::: {.fragment}
+
+Ensure portability
+: Annotate rules with versioned Conda or container environments.
+
+:::
+
+::: {.fragment}
+
+Generate interactive reports
+: Annotate final results for inclusion in Snakemake's automatic
+  interactive reports
+
+:::
+
+::: {.fragment}
+
+Enable configurability
+: Configuration of a workflow should be handled via config files and,
+  if needed, tabular configuration like sample sheets (either via
+  Pandas or PEPs). Use such configuration for metadata and experiment
+  information, **not for runtime specific configuration like threads,
+  resources and output folders**. For those, just rely on Snakemake’s
+  CLI arguments like `--set-threads`, `--set-resources`,
+  `--set-default-resources`, and `--directory`.
+
+:::
+
+::: {.fragment}
+
+Avoid duplication of efforts
+: Make use of Snakemake wrappers whenever possible
+
+:::
+
+::: {.fragment}
+
+Test your workflow continuously
+: It is a good idea to add some minimal test data and configure Github
+  Actions for continuously testing the workflow on each new commit.
+
+:::
+
+::: {.fragment}
+
+Follow the standards
+: Stick to a standardized structure.
+
+:::
+
+::: {.fragment}
+
+Simplify maintenance
+: Use Snakedeploy to simplify and automate the maintenance of your
+  workflows.
+
+:::
+
+::: {.notes}
+
+- not necessary to follow these guidelines - suggestions
+- there is however a need to comply with format to publish workflow in
+  snakemake workflow collection
+- order of importance: structure, filenames > test > configuration > lint/format > wrappers
+- if only snakemake were python
+
+:::
+
+## Use the linter
+
+::::: {.columns}
+
+:::: {.column width="50%"}
+
+``` {python code=readLines("linting1.smk"), filename="linting1.smk"}
+#| eval: false
+#| label: linting1_smk
+```
+
+::::
+
+:::: {.column width="50%"}
+
+::: {.fragment}
+
+```{bash }
+#| label: snakemake-lint-1
+#| echo: true
+#| eval: true
+snakemake --lint text -s linting1.smk
+```
+
+:::
+
+::::
+
+:::::
+
+## Use the linter
+
+::::: {.columns}
+
+:::: {.column width="50%"}
+
+``` {python code=readLines("linting2.smk"), filename="linting2.smk"}
+#| eval: false
+#| label: linting2_smk
+```
+
+::::
+
+:::: {.column width="50%"}
+
+::: {.fragment}
+
+```{bash }
+#| label: snakemake-lint-2
+#| echo: true
+#| eval: true
+snakemake --lint text -s linting2.smk
+```
+
+:::
+
+::::
+
+:::::
+
+## Use the code formatter
+
+::::: {.columns}
+
+:::: {.column width="50%"}
+
+``` {python code=readLines("linting2.smk"), filename="linting2.smk"}
+#| eval: false
+#| label: linting2_snakefmt_smk
+```
+
+::::
+
+:::: {.column width="50%"}
+
+::: {.fragment}
+
+```{bash }
+#| label: snakemake-fmt-1
+#| echo: true
+#| eval: true
+snakefmt --compact-diff linting2.smk
+```
+
+:::
+
+::::
+
+:::::
+
+::: {.fragment}
+
+::: {.callout-warning}
+
+`snakefmt` modifies files inplace so run with `--diff` or
+`--compact-diff` to view changes.
+
+:::
+
+:::
+
+## [Semantic helper][semantic] functions
+
+::: {.callout-note}
+
+New as of version 8.3.0
+
+:::
+
+::::: {.columns}
+
+:::: {.column width="50%"}
+
+::::
+
+:::: {.column width="50%"}
+
+``` {python code=readLines("semantic_helper.smk"), filename="semantic_helper.smk"}
+#| eval: false
+#| label: semantic_helper
+```
+
+::::
+
+:::::
+
+## Ensure portability with conda or container directive
+
+- show example; point out that linter will complain
+
+## Follow the standards and test your workflow
+
+Here point to the example repo; point out that it does testing
+
+Difficult for research projects that are always in some sort of test
+phase
+
+## Generate interactive reports
+
+## Snakemake wrappers
+
+## Comment
 
 ````{comment}
 

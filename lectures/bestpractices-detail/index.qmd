@@ -282,6 +282,7 @@ offer cleaner code. Check the docs for the full list of helpers!
 ``` {python code=readLines("semantic_helper.smk"), filename="semantic_helper.smk"}
 #| eval: false
 #| label: semantic_helper
+
 ```
 
 ::::
@@ -326,9 +327,10 @@ snakemake --lint text -s linting2.smk
 
 ## Follow the standards and test your workflow
 
-The repo (`git clone
-git@github.com:NBISweden/snakemake_best_practice.git`) contains a
-workflow that follows (some of) the best practice guidelines:
+The repo <https://github.com/NBISweden/snakemake_best_practice> (`git
+clone https://github.com/NBISweden/snakemake_best_practice.git`)
+contains a workflow that follows (some of) the best practice
+guidelines:
 
 ::::: {.columns}
 

@@ -1,7 +1,9 @@
 rule filter_variants:
     input:
         vcf="results/call/variants.vcf",
-        bed=branch(evaluate("{mask} == 'mask'"), then="results/mask.bed", otherwise=[]),
+        bed=branch(evaluate("{mask} == 'mask'"),
+                   then="results/mask.bed",
+                   otherwise=[]),
     output:
         vcf="results/filter/{mask}/variants.vcf",
     log:

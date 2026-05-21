@@ -1,4 +1,5 @@
-# Keys are mapped to CLI options, e.g., rerun-incomplete: true is
+# Keys are mapped to CLI options
+# For example, rerun-incomplete: true is
 # mapped to --rerun-incomplete
 rerun-incomplete: true
 keep-going: true
@@ -10,8 +11,11 @@ default-resources:
   - runtime=100
   - mem_mb=6000
   - disk_mb=1000
+
 set-threads:
-  - bwa_mem_wildcard=4
+  bwa_mem_wildcard: 4
+
 set-resources:
-  - bwa_mem_wildcard:runtime=1000
-  - bwa_mem_wildcard:mem_mb=6000
+  bwa_mem_wildcard:
+    runtime: 1000
+    mem_mb: 6000

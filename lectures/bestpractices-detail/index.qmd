@@ -242,15 +242,37 @@ snakefmt --compact-diff linting2.smk
 
 ## [Semantic helper][semantic] functions
 
-::: {.callout-note}
-
 New as of version 8.3.0
-
-:::
 
 ::::: {.columns}
 
 :::: {.column width="50%"}
+
+`collect`
+: alias for `expand`
+
+`lookup`
+: look up value in Python mapping (e.g., `config` object)
+
+`branch`
+: choose different input files based on a given conditional
+
+`evaluate`
+: evaluate an expression that contains wildcards
+
+`exists`
+: check whether a file exists
+
+`prepend_param`
+: prepend string to input files for commands that require repeated
+  flags for every filename
+
+`subpath`
+: access subpath of input or output file. Useful for commands that
+  require an output directory to be specified
+
+Previously could be done with `lambda` expressions - semantic helpers
+offer cleaner code. Check the docs for the full list of helpers!
 
 ::::
 
@@ -270,6 +292,69 @@ New as of version 8.3.0
 - show example; point out that linter will complain
 
 ## Follow the standards and test your workflow
+
+The repo (`git clone
+git@github.com:NBISweden/snakemake_best_practice.git`) contains a
+workflow that follows (some of) the best practice guidelines:
+
+::::: {.columns}
+
+:::: {.column width="50%"}
+
+<div style="font-size:80%">
+
+<!-- markdownlint-disable MD013 -->
+
+```{bash }
+#| label: snakemake-byoc-2026-bp-overview-dir
+#| cache: true
+#| eval: true
+#| echo: false
+cd project && tree -a -F -L 2 -I '.snakemake|LICENSE|.git|resources*references.fasta|resources*README.md|Dockerfile|environment.yaml|.gitignore|.gitattributes|.editorconfig|.pre-commit-config.yaml|config*config.yaml|config*samples.tsv|config*reads.tsv|.ipynb_checkpoints|.myprofile|logs|reports|results|interim|*.~undo-tree~|*.png|*.zip|*.html|.github|.gitkeep' | sed -e "s/\.\.\/\.\.\///g" | grep -v directories
+```
+
+<!-- markdownlint-enable MD013 -->
+
+</div>
+
+::::
+
+:::: {.column width="50%"}
+
+.test
+: Designated test directory containing a small data set which ideally
+  should suffice to run all or parts of the workflow. Useful for
+  test-drived development.
+
+README.md
+: Describe what the workflow does and how to use it
+
+workflow
+: Contains top-level `Snakefile` that includes rules files stored in
+  the `rules` sub-directory. NB: this is the main entry point to the
+  workflow.
+
+workflow/envs
+: conda environment files loaded by rules
+
+workflow/notebooks
+: notebooks that can be called by the workflow
+
+workflow/report
+: workflow report templates
+
+workflow/rules
+: workflow rules
+
+workflow/schemas
+: schema files that describe and define configuration file and data formats
+
+workflow/scripts
+: scripts called by workflow
+
+::::
+
+:::::
 
 Here point to the example repo; point out that it does testing
 

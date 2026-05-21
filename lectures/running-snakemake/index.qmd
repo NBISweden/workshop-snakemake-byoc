@@ -487,8 +487,7 @@ The standard resources can be given default values and be explicitely
 listed (and set with arguments) with the `--default-resources` option:
 
 ```{bash }
-snakemake -f -n -s bwa_mem.smk bam/CHS.HG00512.bam \
-          --default-resources mem_mb=2000 --quiet progress
+snakemake -f -n -s bwa_mem.smk bam/CHS.HG00512.bam --default-resources --quiet progress
 ```
 
 ::: {.fragment}
@@ -503,7 +502,25 @@ values.
 Point out that this can cause jobs to fail if they exceed the
 specified resources
 
+mb = megabyte = 1,000,000 bytes or 8,000,000 bits; decimal prefix
+
+mib = mebibyte = 2^20 bytes (1,048,576 bytes or 8,388,608 bits;
+binary prefix, for memory specifications, data transfer rates
+
 :::
+
+## Default resources can be given default values
+
+The standard resources can be given default values and be explicitely
+listed (and set with arguments) with the `--default-resources` option:
+
+```{bash }
+snakemake -f -n -s bwa_mem.smk bam/CHS.HG00512.bam \
+          --default-resources mem_mb=2000 --quiet progress
+```
+
+Resources related to `mem` and `disk` now have been assigned default
+values.
 
 ## Fine-tune resources with rule-specific settings
 
@@ -525,6 +542,10 @@ snakemake -F -n -s bwa_mem.smk --default-resources mem_mb=2000 \
 
 ## Use snakemake [profiles][profiles] to configure execution
 
+::::: {.columns}
+
+:::: {.column width="50%"}
+
 Profiles are YAML configuration files that apply to specific compute
 environments and analyses. They allow setting default options.
 
@@ -532,6 +553,10 @@ environments and analyses. They allow setting default options.
 #| label: snakemake-local-profile
 #| eval: false
 ```
+
+::::
+
+:::: {.column width="50%"}
 
 ::: {.fragment}
 
@@ -547,21 +572,114 @@ snakemake -s bwa_mem.smk --profile local
 
 :::
 
+::: {.fragment}
+
+which is equivalent to
+
+```{bash }
+#| echo: true
+#| eval: false
+snakemake -s bwa_mem.smk \
+          --rerun-incomplete --keep-going \
+          --use-conda --use-singularity \
+          --use-envmodules \
+          --default-resources runtime=100 \
+          --default-resources mem_mb=6000 \
+          --default-resources disk_mb=1000 \
+          --set-threads bwa_mem_wildcard=4 \
+          --set-resources bwa_mem_wildcard:runtime=1000 \
+          --set-resources bwa_mem_wildcard:mem_mb=6000
+```
+
+:::
+
+::::
+
+:::::
+
 [profiles]: https://snakemake.readthedocs.io/en/stable/executing/cli.html#profiles
 
-## Use [Snakemake plugins][plugins] for cluster jobs
+## Use [Snakemake plugins][plugins]^[Snakemake>=8] for cluster jobs
 
-[plugins]: https://snakemake.github.io/snakemake-plugin-catalog/index.html
+::::: {.columns}
+
+:::: {.column width="50%"}
+
+:::{}
+
+![](https://snakemake.github.io/snakemake-plugin-catalog/_images/snakemake-architecture.svg){width=100%}
+
+:::
+
+Snakemake plugins enable users to extend the core functionality, e.g.,
+for **execution** or storage.
 
 ```{bash}
 #| echo: true
 #| eval: false
-snakemake --executor cluster-generic --default-resources --jobs N
+snakemake --executor cluster-generic \
+          --default-resources --jobs 100
 ```
 
-```{yaml}
-executor: slurm
-default_resources: []
+::: {.fragment}
+
+For SLURM-based clusters, such as `pelle` at UPPMAX, a setup of common
+resources, including GPU, could look like (excerpt from an actual
+setup):
+
+```{bash}
+#| echo: true
+#| eval: false
+snakemake --profile pelle
 ```
+
+:::
+
+::::
+
+:::: {.column width="50%"}
+
+::: {.fragment}
+
+```{yaml, filename="pelle/config.yaml"}
+executor: slurm
+keep-going: true
+latency-wait: 5
+local-cores: 1
+max-jobs-per-timespan: 1000/1m
+max-status-checks-per-second: 10
+rerun-incomplete: true
+
+default-resources:
+  mem_mb: 6000
+  runtime: 240
+  slurm_account: snic_account
+  slurm_partition: pelle
+
+set-threads:
+  beagle_phase: 96
+  relernn_train: 48
+
+set-resources:
+  beagle_phase:
+    slurm_partition: fat
+    runtime: 24h
+    mem_mb: 23000000
+  relernn_train:
+    runtime: 5d
+    mem_mb: 700000
+    slurm_partition: gpu
+    gpu: 1
+    gpu_manufacturer: nvidia
+    gpu_model: l40s
+```
+
+:::
+
+::::
+
+:::::
+
+[plugins]: https://snakemake.github.io/snakemake-plugin-catalog/index.html
 
 # Questions?  {.unnumbered .unlisted}

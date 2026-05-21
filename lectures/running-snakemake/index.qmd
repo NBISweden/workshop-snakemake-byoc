@@ -6,7 +6,6 @@ date: "26 May, 2026"
 format:
   nbis-quarto-revealjs:
     footer: "Running Snakemake"
-    code-block-height: 500px
     theme:
       - default
       - ../custom.scss
@@ -101,11 +100,11 @@ Identify the input, output and the structure of the command:
 
 ::: {.incremental}
 
-output
-: `bam/CHS.HG00512.bam`
-
 input
 : `resources/ref.fa`, `data/CHS.HG00512_1.fastq.gz`, and `data/CHS.HG00512_2.fastq.gz`
+
+output
+: `bam/CHS.HG00512.bam`
 
 command
 : `bwa mem -t 1 {input} | samtools view -b -o {output}`
@@ -288,13 +287,25 @@ using wildcards:
 #| eval: false
 ```
 
+::: {.fragment fragment-index=1}
+
+Now, running Snakemake as before results in an error:
+
+:::
+
+::: {.fragment fragment-index=2}
+
+As the error indicates, we could specify a target (e.g.
+`bam/PUR.HG00731.bam`; note the use of the `--quiet/-q` option to
+suppress information):
+
+:::
+
 ::::
 
 :::: {.column width="60%"}
 
-::: {.fragment}
-
-Now, running Snakemake as before results in an error:
+::: {.fragment fragment-index=1}
 
 ```{bash }
 #| eval: true
@@ -304,14 +315,10 @@ snakemake -s bwa_mem_wildcard.smk -n -p
 
 :::
 
-::: {.fragment}
-
-As the error indicates, we could specify a target (e.g.
-`bam/PUR.HG00731.bam`; note the use of the `--quiet/-q` option to
-suppress information):
+::: {.fragment fragment-index=3}
 
 ``` {bash }
-snakemake -s bwa_mem_wildcard.smk -q -n bam/PUR.HG00731.bam
+snakemake -s bwa_mem_wildcard.smk -q rules -n bam/PUR.HG00731.bam
 ```
 
 :::

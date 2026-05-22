@@ -1,4 +1,6 @@
 project:
+  type: website
+  output-dir: _site
   render:
     - index.qmd
     - bestpractices-detail/index.qmd
@@ -8,6 +10,33 @@ project:
 institute: NBIS
 from: markdown+emoji
 format:
+  nbis-quarto-revealjs:
+    theme:
+      - default
+    footer: Snakemake BYOC
+    date: last-modified
+    date-format: "DD-MMM-YYYY"
+    embed-resources: false
+    code-line-numbers: false
+    center: false
+    toc: true
+    toc-depth: 1
+    slide-level: 2
+    slide-number: true
+    preview-links: true
+    chalkboard: false
+    smaller: true
+    highlight-style: gruvbox
+    fig-height: 12
+    fig-width: 10
+    fig-align: center
+    text-align: left
+    width: 1280
+    height: 720
+    margin: 0.1
+    navigation-mode: vertical
+    reference-location: margin
+    ultitle: true
   nbis-course-revealjs:
     theme:
       - custom.scss
@@ -48,6 +77,7 @@ format:
     height: 700
     margin: 0.05
     navigation-mode: vertical
+
 csl: https://raw.githubusercontent.com/citation-style-language/styles/master/apa.csl
 execute:
   echo: true
@@ -68,4 +98,5 @@ knitr:
       dvisvgm.opts: --font-format=woff
       template: tikzfig.tex
 extensions:
-  path: nbis-course-quarto
+  - nbis-quarto
+  - nbis-course-quarto

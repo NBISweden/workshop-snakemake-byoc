@@ -1,7 +1,20 @@
 ---
 title: "Anatomy of a Snakefile"
 subtitle: "Snakemake BYOC NBIS course"
-date: 2024-05-27
+date: 2026-05-25
+include-in-header:
+  - text: |
+      <style>
+      #title-slide .title {
+        font-size: 4.5em;
+      }
+      #title-slide .subtitle {
+        font-size: 2em;
+      }
+      #title-slide .date {
+        font-size: 1.5em;
+      }
+      </style>
 format:
   revealjs:
     theme:
@@ -16,13 +29,16 @@ format:
     #preview-links: true
     #chalkboard: true
     # Multiple logos not possible; would need to make custom logo combining both logos
-    footer: Snakemake BYOC 2024 - Reproducible Research
+    footer: Snakemake BYOC 2026 - Reproducible Research
     logo: https://nbis.se/nbislogo-green.svg
-    smaller: true
     highlight-style: gruvbox
+    fontsize: 18
 ---
 
 ## Basic structure of a rule
+
+Rules are typically defined with input and/or output file(s) and a command to
+generate the output from the input.
 
 ```{.python}
 rule:
@@ -50,17 +66,17 @@ total        1
 Select jobs to execute...
 Execute 1 jobs...
 
-[Fri May 17 23:47:24 2024]
+[Fri May 17 23:47:24 2026]
 localrule 1:
     output: results/sample1.stats.txt
     jobid: 0
     reason: Missing output files: results/sample1.stats.txt
     resources: tmpdir=/var/folders/wb/jf9h8kw11b734gd98s6174rm0000gp/T
 
-[Fri May 17 23:47:24 2024]
+[Fri May 17 23:47:24 2026]
 Finished job 0.
 1 of 1 steps (100%) done
-Complete log: .snakemake/log/2024-05-17T234724.252920.snakemake.log
+Complete log: .snakemake/log/2026-05-17T234724.252920.snakemake.log
 ```
 
 ## Basic structure of a rule
@@ -69,8 +85,10 @@ More commonly, rules are named and have both input and output:
 
 ```{.python}
 rule generate_stats:
-    output: "results/sample1.stats.txt"
-    input: "results/sample1.bam"
+    input:
+        "results/sample1.bam",
+    output:
+        "results/sample1.stats.txt",
     shell:
         """
         samtools flagstat {input} > {output}
@@ -83,31 +101,42 @@ Rules are linked by their input and output files:
 
 ```{.python}
 rule a:
-    output: "a.txt"
+    output:
+        "a.txt",
     shell:
         "echo 'a' > a.txt"
+
+
 rule b:
-    input: "a.txt"
-    output: "b.txt"
+    input:
+        "a.txt",
+    output:
+        "b.txt",
     shell:
         "cat a.txt > b.txt"
+
 ```
 
 ## Basic structure of a rule
 
 You can also link rules explicitly:
 
-```{.python code-line-numbers="2,7"}
+```{.python code-line-numbers="3,10"}
 rule a:
-    output: "a.txt"
+    output:
+        "a.txt",
     shell:
         "echo 'a' > a.txt"
 
+
 rule b:
-    input: rules.a.output
-    output: "b.txt"
+    input:
+        rules.a.output,
+    output:
+        "b.txt",
     shell:
         "cat {input} > {output}"
+
 ```
 
 but then the rule that supplies the file must be define before the rule that uses it.
@@ -120,12 +149,17 @@ Instead of writing 100 rules...
 
 ```{.python code-line-numbers="false"}
 rule generate_stats_sample1:
-    output: "results/sample1.stats.txt"
-    input: "results/sample1.bam"
+    input:
+        "results/sample1.bam",
+    output:
+        "results/sample1.stats.txt",
 ...
 rule generate_stats_sample100:
-    output: "results/sample100.stats.txt"
-    input: "results/sample100.bam"
+    input:
+        "results/sample100.bam",
+    output:
+        "results/sample100.stats.txt",
+
 ```
 
 ## Wildcards {auto-animate=true}
@@ -137,12 +171,15 @@ wildcard `sample`:
 
 ```python
 rule generate_stats:
-    output: "results/{sample}.stats.txt"
-    input: "results/{sample}.bam"
+    input:
+        "results/{sample}.bam",
+    output:
+        "results/{sample}.stats.txt",
     shell:
         """
         samtools flagstat {input} > {output}
         """
+
 ```
 
 ## Wildcards
@@ -151,12 +188,15 @@ Rules can have multiple wildcards...
 
 ```{.python}
 rule generate_stats:
-    output: "results/{sample}_{lane}.stats.txt"
-    input: "results/{sample}_{lane}.bam"
+    input:
+        "results/{sample}_{lane}.bam",
+    output:
+        "results/{sample}_{lane}.stats.txt",
     shell:
-      """
-      samtools flagstats {input} > {output}
-      """
+        """
+        samtools flagstats {input} > {output}
+        """
+
 ```
 
 ## Wildcards
@@ -167,8 +207,11 @@ rule generate_stats:
 **Will work:**
 ```{.python}
 rule generate_stats:
-    output: "results/{sample}_{lane}.stats.txt"
-    input: "results/{sample}.bam"
+    input:
+        "results/{sample}.bam",
+    output:
+        "results/{sample}_{lane}.stats.txt",
+
 ```
 :::
 
@@ -176,8 +219,11 @@ rule generate_stats:
 <span style="color:red">Won't work</span>.
 ```{.python}
 rule generate_stats:
-    output: "results/{sample}.stats.txt"
-    input: "results/{sample}_{lane}.bam"
+    input:
+        "results/{sample}_{lane}.bam",
+    output:
+        "results/{sample}.stats.txt",
+
 ```
 
 ```{.bash code-line-numbers="false"}
@@ -185,33 +231,73 @@ Wildcards in input files cannot be determined from output files: 'lane'
 ```
 :::
 
+
+## Aggregation {auto-animate=true}
+
+Strings or a list of strings can be passed as input.
+
+```{.python}
+SAMPLES=["sample1","sample2"]
+
+rule generate_stats:
+    input:
+        [f"results/{sample}.bam" for sample in SAMPLES]
+    output:
+        "results/aggregated.stats.txt",
+```
+
+Here the input is defined by a python list comprehension.
+
+## Aggregation {auto-animate=true}
+
+Strings or a list of strings can be passed as input.
+
+```{.python}
+SAMPLES=["sample1","sample2"]
+
+rule generate_stats:
+    input:
+        expand("results/{sample}.bam", sample=SAMPLES)
+    output:
+        "results/aggregated.stats.txt",
+```
+
+Snakemake also provides the `expand` helper function.
+
 ## Rule ambiguities {auto-animate=true}
 
 Ambiguities can arise when two rules produce the same output:
 
-```{.python}
+```{.python code-line-numbers="4-5,15-16"}
 rule generate_stats:
-    output: "results/{sample}.stats.txt"
-    input: "results/{sample}.bam"
+    input:
+        "results/{sample}.bam",
+    output:
+        "results/{sample}.stats.txt",
     shell:
         """
         samtools flagstat {input} > {output}
         """
 
+
 rule print_stats:
-    output: "results/{sample}.stats.txt"
-    input: "results/{sample}.log"
+    input:
+        "results/{sample}.log",
+    output:
+        "results/{sample}.stats.txt",
     shell:
         """
         grep "% alignment" {input} > {output}
         """
-      
-rule make_report:
-    output: "results/{sample}.report.pdf"
-    input: "results/{sample}.stats.txt"
-```
 
-## Rule ambiguities {auto-animate=true}
+
+rule make_report:
+    input:
+        "results/{sample}.stats.txt",
+    output:
+        "results/{sample}.report.pdf",
+
+```
 
 ```{.bash code-line-numbers="false"}
 $ snakemake -c 1 -n results/sample1.report.pdf
@@ -251,16 +337,20 @@ Logfiles and messages add descriptions and help with debugging:
 
 ```{.python}
 rule generate_stats:
-    output: "results/{sample}.stats.txt"
-    input: "results/{sample}.bam"
-    log: "results/{sample}.flagstat.log"
-    message: "Generating stats for sample {wildcards.sample}"
+    input:
+        "results/{sample}.bam",
+    output:
+        "results/{sample}.stats.txt",
+    log:
+        "results/{sample}.flagstat.log",
+    message:
+        "Generating stats for sample {wildcards.sample}"
     shell:
         """
         samtools flagstat {input} > {output} 2>{log}
         """
 ```
-:::{.callout-tip}
+:::{.callout-note}
 
 Log files are not deleted by snakemake if there's an error.
 
@@ -272,13 +362,17 @@ Compute resources can be set with **threads** and **resources**:
 
 ```{.python}
 rule generate_stats:
-    output: "results/{sample}.stats.txt"
-    input: "results/{sample}.bam"
-    log: "results/{sample}.flagstat.log"
-    message: "Generating stats for sample {wildcards.sample}"
+    input:
+        "results/{sample}.bam",
+    output:
+        "results/{sample}.stats.txt",
+    log:
+        "results/{sample}.flagstat.log",
     threads: 4
     resources:
-        mem_mb=100
+        mem_mb=100,
+    message:
+        "Generating stats for sample {wildcards.sample}"
     shell:
         """
         samtools flagstat --threads {threads} {input} > {output} 2>{log}
@@ -289,15 +383,19 @@ rule generate_stats:
 
 It's also possible to set threads based on the cores given to snakemake (_e.g._ `--cores 8` or `-c 8`).
 
-```{.python code-line-numbers="6"}
+```{.python code-line-numbers="8"}
 rule generate_stats:
-    output: "results/{sample}.stats.txt"
-    input: "results/{sample}.bam"
-    log: "results/{sample}.flagstat.log"
-    message: "Generating stats for sample {wildcards.sample}"
-    threads: workflow.cores * 0.5 
+    input:
+        "results/{sample}.bam",
+    output:
+        "results/{sample}.stats.txt",
+    log:
+        "results/{sample}.flagstat.log",
+    threads: workflow.cores * 0.5
     resources:
-        mem_mb=100
+        mem_mb=100,
+    message:
+        "Generating stats for sample {wildcards.sample}"
     shell:
         """
         samtools flagstat --threads {threads} {input} > {output} 2>{log}
@@ -308,15 +406,19 @@ rule generate_stats:
 
 Resources can also be callables, allowing them to be set dynamically:
 
-```{.python code-line-numbers="8"}
+```{.python code-line-numbers="10"}
 rule generate_stats:
-    output: "results/{sample}.stats.txt"
-    input: "results/{sample}.bam"
-    log: "results/{sample}.flagstat.log"
-    message: "Generating stats for sample {wildcards.sample}"
-    threads: workflow.cores * 0.5 
+    input:
+        "results/{sample}.bam",
+    output:
+        "results/{sample}.stats.txt",
+    log:
+        "results/{sample}.flagstat.log",
+    threads: workflow.cores * 0.5
     resources:
-        mem_mb=lambda wildcards: 1000 if wildcards.sample == "sample1-large" else 100
+        mem_mb=lambda wildcards: 1000 if wildcards.sample == "sample1-large" else 100,
+    message:
+        "Generating stats for sample {wildcards.sample}"
     shell:
         """
         samtools flagstat --threads {threads} {input} > {output} 2>{log}
@@ -327,21 +429,25 @@ rule generate_stats:
 
 Non-file rule parameters can be set with the **params** directive:
 
-```{.python}
+```{.python code-line-numbers="11,12,17"}
 rule generate_stats:
-    output: "results/{sample}.stats.txt"
-    input: "results/{sample}.bam"
-    log: "results/{sample}.flagstat.log"
-    message: "Generating stats for sample {wildcards.sample}"
+    input:
+        "results/{sample}.bam",
+    output:
+        "results/{sample}.stats.txt",
+    log:
+        "results/{sample}.flagstat.log",
     threads: workflow.cores * 0.5
     resources:
-        mem_mb=100
+        mem_mb=100,
     params:
-        verbosity = 2
+        verbosity=2,
+    message:
+        "Generating stats for sample {wildcards.sample}"
     shell:
         """
         samtools flagstat --verbosity {params.verbosity} \
-          --threads {threads} {input} > {output} 2>{log}
+            --threads {threads} {input} > {output} 2>{log}
         """
 ```
 
@@ -350,22 +456,27 @@ rule generate_stats:
 Software environments can be set for each rule using the `conda:` directive:
 
 ::: {data-id="code1"}
-```{.python code-line-numbers="11"}
+```{.python code-line-numbers="8,9"}
 rule generate_stats:
-    output: "results/{sample}.stats.txt"
-    input: "results/{sample}.bam"
-    log: "results/{sample}.flagstat.log"
-    message: "Generating stats for sample {wildcards.sample}"
+    input:
+        "results/{sample}.bam",
+    output:
+        "results/{sample}.stats.txt",
+    log:
+        "results/{sample}.flagstat.log",
+    conda:
+        "envs/samtools.yml"
     threads: workflow.cores * 0.5
     resources:
-        mem_mb=100
+        mem_mb=100,
     params:
-        verbosity = 2
-    conda: "envs/samtools.yml"
+        verbosity=2,
+    message:
+        "Generating stats for sample {wildcards.sample}"
     shell:
         """
         samtools flagstat --verbosity {params.verbosity} \
-          --threads {threads} {input} > {output} 2>{log}
+            --threads {threads} {input} > {output} 2>{log}
         """
 ```
 :::
@@ -373,10 +484,11 @@ rule generate_stats:
 ## Software environments {auto-animate=true auto-animate-easing=None}
 
 ::: {data-id="code1"}
-```{.python code-line-numbers="3"}
+```{.python code-line-numbers="3,4"}
 rule generate_stats:
     ...
-    conda: "envs/samtools.yml"
+    conda: 
+        "envs/samtools.yml"
     ...
 ```
 :::
@@ -391,34 +503,38 @@ dependencies:
   - samtools=1.15.1
 ```
 
-:::{.fragment}
-To make Snakemake use the conda environment, specify `--software-deployment-method conda` (or `--sdm conda`) on the command line. For Snakemake versions before 8.0, use `--use-conda`.
-:::
+* To make Snakemake use the conda environment, specify `--sdm conda` (short for `--software-deployment-method conda`) on the command line. 
+* For Snakemake versions before 8.0, use `--use-conda`.
 
 ## Software environments {auto-animate=true auto-animate-restart=true}
 
 On compute clusters, you can also specify packages to load with `envmodules:`
 
 ::: {data-id="code2"}
-```{.python code-line-numbers="12-14"}
+```{.python code-line-numbers="10-12"}
 rule generate_stats:
-    output: "results/{sample}.stats.txt"
-    input: "results/{sample}.bam"
-    log: "results/{sample}.flagstat.log"
-    message: "Generating stats for sample {wildcards.sample}"
+    input:
+        "results/{sample}.bam",
+    output:
+        "results/{sample}.stats.txt",
+    log:
+        "results/{sample}.flagstat.log",
+    conda:
+        "envs/samtools.yml"
+    envmodules:
+        "bioinfo-tools",
+        "samtools",
     threads: workflow.cores * 0.5
     resources:
-        mem_mb=100
+        mem_mb=100,
     params:
-        verbosity = 2
-    conda: "envs/samtools.yml"
-    envmodules: 
-        "bioinfo-tools",
-        "samtools"
+        verbosity=2,
+    message:
+        "Generating stats for sample {wildcards.sample}"
     shell:
         """
         samtools flagstat --verbosity {params.verbosity} \
-          --threads {threads} {input} > {output} 2>{log}
+            --threads {threads} {input} > {output} 2>{log}
         """
 ```
 :::
@@ -438,7 +554,7 @@ rule generate_stats:
 ```
 :::
 
-To make Snakemake use envmodules, specify `--use-envmodules` on the command line.
+* To make Snakemake use the conda environment, specify `--sdm env-modules`
 
 ## Config files
 
@@ -491,29 +607,35 @@ configfile: "config.yml""
 
 The config parameters are available as a dictionary inside your snakefiles and can be accessed from within rules:
 
-```{.python code-line-numbers="3,14"}
+```{.python code-line-numbers="3,21-22"}
 rule all:
     input:
-        expand("results/{sample}.stats.txt", sample = config["samples"])
+        expand("results/{sample}.stats.txt", sample=config["samples"]),
+
 
 rule generate_stats:
-    output: "results/{sample}.stats.txt"
-    input: "results/{sample}.bam"
-    log: "results/{sample}.flagstat.log"
-    message: "Generating stats for sample {wildcards.sample}"
+    input:
+        "results/{sample}.bam",
+    output:
+        "results/{sample}.stats.txt",
+    log:
+        "results/{sample}.flagstat.log",
+    conda:
+        "envs/samtools.yml"
+    envmodules:
+        "bioinfo-tools",
+        "samtools",
     threads: workflow.cores * 0.5
     resources:
-        mem_mb=100
+        mem_mb=100,
     params:
-        verbosity = config["verbosity"]
-    conda: "envs/samtools.yml"
-    envmodules: 
-        "bioinfo-tools",
-        "samtools"
+        verbosity=config["verbosity"],
+    message:
+        "Generating stats for sample {wildcards.sample}"
     shell:
         """
         samtools flagstat --verbosity {params.verbosity} \
-          --threads {threads} {input} > {output} 2>{log}
+            --threads {threads} {input} > {output} 2>{log}
         """
 ```
 

@@ -61,11 +61,11 @@ Verena Kutschera
 
 | Time          | Topic                                         |
 |---------------|-----------------------------------------------|
-| 09.00 - 09.30 | Welcome and introduction                      |
-| 09.30 - 10.20 | **Lectures**                                  |
+| 09.00 - 09.20 | Welcome and introduction                      |
+| 09.20 - 10.00 | **Lectures**                                  |
 |               |   - Anatomy of a Snakefile                    |
 |               |   - Example workflow                          |
-| 10.20 - 12.50 | **Breakout rooms** (incl. coffee break)       |
+| 10.00 - 12.50 | **Breakout rooms** (incl. coffee break)       |
 |               |   - Ice-breaker session                       |
 |               |   - Feedback session                          |
 |               |   - Coding session                            |
@@ -180,7 +180,6 @@ into your room:
 | **Breakout room 2: Marcel** |
 |-----------------------------|
 | Javier                      |
-| Yan                         |
 | Mai                         |
 | Sreeram                     |
 :::

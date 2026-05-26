@@ -599,7 +599,7 @@ snakemake --configfile config.yml -j 1
 :::{.fragment}
 or directly in a snakefile, _e.g._:
 ```{.python code-line-numbers="false"}
-configfile: "config.yml""
+configfile: "config.yml"
 ```
 :::
 

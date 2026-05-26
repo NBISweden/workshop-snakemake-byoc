@@ -317,14 +317,14 @@ modified from: [best practice example](https://github.com/NBISweden/snakemake_be
 
 ## Containers
 
-### Docker vs Singularity
+### Docker vs Apptainer
 
 ::: {.incremental}
 
 * On high-performance clusters (HPC), Docker is often not installed due to security concerns.
-  **Singularity** is often available as an alternative.
-* Docker images can be converted into Singularity images
-* → Singularity can be used to run Docker containers
+  **Apptainer** is often available as an alternative. (Formerly: Singularity)
+* Docker images can be converted into Apptainer images
+* → Apptainer can be used to run Docker containers
 
 :::
 
@@ -333,8 +333,8 @@ modified from: [best practice example](https://github.com/NBISweden/snakemake_be
 
 ::: {.incremental}
 
-* Ensure your system has Singularity installed
-* Find a Docker or Singularity image with the tool to run (<https://biocontainers.pro/> or [DockerHub](https://hub.docker.com/))
+* Ensure your system has Apptainer installed
+* Find a Docker or Apptainer image with the tool to run (<https://biocontainers.pro/> or [DockerHub](https://hub.docker.com/))
 
 * Add the `container:` directive to your rule:
 
@@ -345,10 +345,10 @@ modified from: [best practice example](https://github.com/NBISweden/snakemake_be
           "minimap2 --version"
   ```
 
-* Start your workflow on the command line with `--use-singularity`
+* Start your workflow on the command line with `--sdm apptainer`
 
   ```bash
-  $ snakemake --use-singularity -j 1
+  $ snakemake --sdm apptainer -c 1
   ...
   Pulling singularity image docker://quay.io/biocontainers/minimap2:2.24--h5bf99c6_0.
   ...
@@ -370,9 +370,9 @@ modified from: [best practice example](https://github.com/NBISweden/snakemake_be
 * You can package your entire workflow into a Docker image by writing a **Dockerfile**.
   [See this example](https://github.com/NBISweden/workshop-reproducible-research/blob/0ee1eca78ccefbd06fbeb2c0aba37030230df90d/tutorials/containers/Dockerfile)
   - Snakemake runs *inside* the container.
-  - To run the workflow, only Docker or Singularity is needed
+  - To run the workflow, only Docker or Apptainer is needed
 
-* [Conda and containers can be combined]([Snakemake documentation](https://snakemake.readthedocs.io/en/stable/snakefiles/deployment.html#ad-hoc-combination-of-conda-package-management-with-containers)): Specify a global container, run with `--use-conda --use-singularity`, and Snakemake creates the Conda environment within the container.
+* [Conda and containers can be combined]([Snakemake documentation](https://snakemake.readthedocs.io/en/stable/snakefiles/deployment.html#ad-hoc-combination-of-conda-package-management-with-containers)): Specify a global container, run with `--sdm conda --sdm apptainer`, and Snakemake creates the Conda environment within the container.
 
 * [Snakemake can automatically generate a Dockerfile](https://snakemake.readthedocs.io/en/stable/snakefiles/deployment.html#containerization-of-conda-based-workflows)
   that contains all Conda environments used by the rules of the workflow using the flag
@@ -388,7 +388,7 @@ There are many ways to use other **tools for reproducible research** together wi
 
 * Use **Git** for version control, backup and share your code
 * Run rules or your entire workflow in **Conda** environments
-* Run your rules in isolated Docker/Singularity **containers**
+* Run your rules in isolated Docker/Apptainer **containers**
 * Package your entire workflow in a **Docker container**
 
 :::

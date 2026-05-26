@@ -23,6 +23,7 @@ format:
         fig-height: 3
         fig-width: 3
         code-line-numbers: false
+        embed-resources: true
 execute:
     echo: true
     #warning: false

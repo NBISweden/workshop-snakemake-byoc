@@ -17,3 +17,4 @@
 lectures/welcome/*.html
 lectures/reproducibility-tools/*.html
 lectures/example-workflow/*.html
+lectures/.quarto/project-cache/*

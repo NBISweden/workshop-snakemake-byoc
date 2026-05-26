@@ -1,13 +1,14 @@
 ---
 title: Running Snakemake
-subtitle: Running Snakemake locally and on the cluster, finetuning performance and setting resource usage
+subtitle: Running Snakemake locally and on the cluster
 author: Per Unneberg
-date: "29 May, 2024"
+date: "26 May, 2026"
 format:
-  nbis-course-revealjs:
-    footer: Snakemake BYOC - Running Snakemake
-  nbis-course-logo-revealjs:
-    footer: Snakemake BYOC - Running Snakemake
+  nbis-quarto-revealjs:
+    footer: "Running Snakemake"
+    theme:
+      - default
+      - ../custom.scss
 ---
 
 ## Setup  {.unnumbered .unlisted}
@@ -16,37 +17,47 @@ format:
 #| echo: false
 #| eval: true
 #| cache: false
-# For some reason this is not applied to print statements
-## knitr::knit_hooks$set(inline = function(x) {
-##                       prettyNum(x, big.mark=",")
-##                   })
 library(ggplot2)
 library(viridis)
 bw <- theme_bw(base_size=24) %+replace%
   theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))
 theme_set(bw)
-## knitr::knit_engines$set(snakemake = function(options) {
-##                         reticulate::eng_python(options)
-##                     })
+knitr::opts_knit$set(root.dir = "examples")
 snakemake_version <- system("snakemake --version", intern=TRUE)
 ```
+
+::::: {.columns}
+
+:::: {.column width="70%"}
 
 <!-- markdownlint-disable MD013 -->
 
 - Examples with Snakefiles and code to run in
-  [examples](https://download-directory.github.io?url=https://github.com/NBISweden/workshop-snakemake-byoc/tree/main/lectures/running_snakemake/examples)
-  subdirectory (click to download)
-- Snakefiles are named `ex#.smk`
+  [examples](https://github.com/NBISweden/workshop-snakemake-byoc/tree/main/lectures/running-snakemake/examples)
+  subdirectory
+- Snakefiles have file suffix `.smk`
 - Code has been run with Snakemake version `r snakemake_version`
 - Rules run `bwa mem` to map two samples to a reference
 
 <!-- markdownlint-enable MD013 -->
 
-:::: {.columns}
-
-::: {.column width="50%"}
-
 ::: {.fragment}
+
+An example command we may want to run is
+
+```{bash }
+#| label: bwa-command-example
+#| echo: true
+#| eval: false
+bwa mem -t 1 resources/ref.fa data/CHS.HG00512_1.fastq.gz \
+    data/CHS.HG00512_2.fastq.gz | samtools view -b -o bam/CHS.HG00512.bam
+```
+
+:::
+
+::::
+
+:::: {.column width="30%"}
 
 Input data:
 
@@ -56,31 +67,19 @@ Input data:
 tree -L 3 data resources
 ```
 
-:::
-
-:::
-
-::: {.column width="50%"}
-
-::: {.fragment}
-
 Snakefiles:
 
 ```{bash }
 #| label:  list-snakefiles
 #| echo: false
-ls -1 *.smk
+ls bwa*.smk
 ```
-
-:::
-
-:::
 
 ::::
 
-# Basic execution
+:::::
 
-## Example 1 - ex1.smk
+## Writing a `bwa mem` alignment Snakefile
 
 Let's start by writing a Snakefile that runs an alignment with `bwa`.
 The command we want to run is
@@ -93,93 +92,132 @@ bwa mem -t 1 resources/ref.fa data/CHS.HG00512_1.fastq.gz \
     data/CHS.HG00512_2.fastq.gz | samtools view -b -o bam/CHS.HG00512.bam
 ```
 
-where we have
+::: {.fragment}
+
+Identify the input, output and the structure of the command:
+
+:::
 
 ::: {.incremental}
+
+input
+: `resources/ref.fa`, `data/CHS.HG00512_1.fastq.gz`, and `data/CHS.HG00512_2.fastq.gz`
 
 output
 : `bam/CHS.HG00512.bam`
 
-inputs
-: `resources/ref.fa`, `data/CHS.HG00512_1.fastq.gz`, and `data/CHS.HG00512_2.fastq.gz`
-
 command
-: `bwa mem -t 1 {inputs} | samtools view -b -o {output}`
+: `bwa mem -t 1 {input} | samtools view -b -o {output}`
 
 :::
 
 ::: {.fragment}
 
-Putting these in a Snakefile yields:
+Putting these in a Snakefile `bwa_mem_CHS_HG00512.smk` yields:
 
-``` {python code=readLines("ex1.smk") }
+``` {python code=readLines("bwa_mem_CHS_HG00512.smk"), filename="bwa_mem_CHS_HG00512.smk"}
 #| eval: false
 #| label: bwa_mem_CHS_HG00512-1
 ```
 
 :::
 
-## Example 1 - ex1.smk
+## Start with a dry run
 
-We first perform a dry run (option `--dry-run`, short option `-n`) to
-print (`--printshellcmds/-p`) the default rule in the Snakefile
-`ex1.smk` which we point to using option `--snakefile/-s`:
+::::: {.columns}
+
+:::: {.column width="50%"}
+
+- It is good practice to first perform a dry run (option `--dry-run`,
+  short option `-n`) that tests the workflow without actually
+  executing any commands
+- We also print the shell commands for clarity (`--printshellcmds/-p`)
+- By default the first rule in the Snakefile is run
+- You can specify the Snakefile to run with option `--snakefile/-s`
 
 ::: {.fragment}
 
 ```{bash  }
 #| label: snakemake-bwa_mem_CHS_HG00512_f1-1
 #| eval: false
-snakemake --snakefile ex1.smk --dry-run --printshellcmds
+snakemake --snakefile bwa_mem_CHS_HG00512.smk \
+          --dry-run --printshellcmds
 ```
 
 :::
 
-## Example 1 - ex1.smk
+::::
 
-We first perform a dry run (option `--dry-run`, short option `-n`) to
-print (`--printshellcmds/-p`) the default rule in the Snakefile
-`ex1.smk` which we point to using option `--snakefile/-s`:
+:::: {.column width="50%"}
+
+::::
+
+:::::
+
+## Start with a dry run
+
+::::: {.columns}
+
+:::: {.column width="50%"}
+
+- It is good practice to first perform a dry run (option `--dry-run`,
+  short option `-n`) that tests the workflow without actually
+  executing any commands
+- We also print the shell commands for clarity (`--printshellcmds/-p`)
+- By default the first rule in the Snakefile is run
+- You can specify the Snakefile to run with option `--snakefile/-s`
 
 ```{bash  }
 #| label: snakemake-bwa_mem_CHS_HG00512_f1-2
 #| eval: false
-snakemake -s ex1.smk -n -p
+snakemake -s bwa_mem_CHS_HG00512.smk -n -p
 ```
 
-::: {.fragment}
+::::
 
-```{bash }
-#| label: snakemake-bwa_mem_CHS_HG00512_f2
-#| echo: false
-rm -f bam/CHS.HG00512.bam
-snakemake -s ex1.smk -n -p
-```
+:::: {.column width="50%"}
 
-:::
+::::
 
-## Example 1 - ex1.smk
+:::::
 
-We first perform a dry run (option `--dry-run`, short option `-n`) to
-print (`--printshellcmds/-p`) the default rule in the Snakefile
-`ex1.smk` which we point to using option `--snakefile/-s`:
+## Start with a dry run
+
+::::: {.columns}
+
+:::: {.column width="50%"}
+
+- It is good practice to first perform a dry run (option `--dry-run`,
+  short option `-n`) that tests the workflow without actually
+  executing any commands
+- We also print the shell commands for clarity (`--printshellcmds/-p`)
+- By default the first rule in the Snakefile is run
+- You can specify the Snakefile to run with option `--snakefile/-s`
 
 ```{bash  }
 #| label: snakemake-bwa_mem_CHS_HG00512_f1-3
 #| eval: false
-snakemake -s ex1.smk -n -p
+snakemake -s bwa_mem_CHS_HG00512.smk -n -p
 ```
 
-```{bash }
-#| label: snakemake-bwa_mem_CHS_HG00512_f3
+Note the reason the rule was run[^reason1]
+
+::::
+
+:::: {.column width="50%"}
+
+```{bash}
+#| label: snakemake-bwa_mem_CHS_HG00512_f2
 #| echo: false
 rm -f bam/CHS.HG00512.bam
-snakemake -s ex1.smk -n -p
+snakemake -s bwa_mem_CHS_HG00512.smk -n -p
 ```
 
-Note the reason the rule was run[^reason]
+::::
 
-[^reason]: for Snakemake <7.12 use the `--reason/-r` option
+:::::
+
+[^reason1]: for Snakemake <7.12 use the `--reason/-r` option
 
 ::: {.notes}
 
@@ -187,148 +225,167 @@ Mention the reason the rule was rerun
 
 :::
 
-## Example 1 - ex1.smk
+## Run the workflow
 
-To actually run the workflow, we simply drop the `-p` and `-n` flags
-and add the number of cores (`--cores/-c`)[^cores] we want to utilize:
+::::: {.columns}
 
-```{bash }
-#| label: snakemake-rerun-workflow
-#| cache: true
+:::: {.column width="50%"}
+
+- It is good practice to first perform a dry run (option `--dry-run`,
+  short option `-n`) that tests the workflow without actually
+  executing any commands
+- We also print the shell commands for clarity (`--printshellcmds/-p`)
+- By default the first rule in the Snakefile is run
+- You can specify the Snakefile to run with option `--snakefile/-s`
+
+```{bash}
+#| label: snakemake-bwa_mem_CHS_HG00512-run
 #| eval: false
-snakemake -s ex1.smk -c 1
+snakemake -s bwa_mem_CHS_HG00512.smk -c 1
 ```
 
-```{bash }
-#| label: snakemake-rerun-workflow-rm
-#| cache: true
-#| eval: true
+Note the reason the rule was run[^reason2]
+
+- Remove `-n` to run, also specifying the number of cores to use with
+`-c`.
+
+::::
+
+:::: {.column width="50%"}
+
+```{bash}
+#| label: snakemake-bwa_mem_CHS_HG00512-run-output
 #| echo: false
-rm -f bam/*.bam
-snakemake -s ex1.smk -c 1
+rm -f bam/CHS.HG00512.bam
+snakemake -s bwa_mem_CHS_HG00512.smk -c 1
 ```
 
-[^cores]: Required for Snakemake >= 5.11.0
+::::
 
-## Example 2 - ex2.smk  {style="font-size: .8em;"}
+:::::
+
+[^reason2]: for Snakemake <7.12 use the `--reason/-r` option
+
+::: {.notes}
+
+Mention the reason the rule was rerun
+
+:::
+
+## Use wildcards to generalize workflow
+
+::::: {.columns}
+
+:::: {.column width="40%"}
 
 The current Snakefile consists only of one rule that also is specific
 to the `CHS.HG00512` sample. First, let's generalize the bwa rule
 using wildcards:
 
-``` {python code=readLines("ex2.smk") }
+``` {python code=readLines("bwa_mem_wildcard.smk"), filename="bwa_mem_wildcard.smk"}
 #| label: bwa_mem_wildcard
 #| eval: false
 ```
 
-::: {.fragment}
+::: {.fragment fragment-index=1}
 
 Now, running Snakemake as before results in an error:
 
 :::
 
-::: {.fragment}
-
-```{bash }
-#| eval: true
-#| echo: true
-snakemake -s ex2.smk -n -p
-```
-
-:::
-
-::: {.fragment}
+::: {.fragment fragment-index=2}
 
 As the error indicates, we could specify a target (e.g.
 `bam/PUR.HG00731.bam`; note the use of the `--quiet/-q` option to
 suppress information):
 
+:::
+
+::::
+
+:::: {.column width="60%"}
+
+::: {.fragment fragment-index=1}
+
+```{bash }
+#| eval: true
+#| echo: true
+snakemake -s bwa_mem_wildcard.smk -n -p
+```
+
+:::
+
+::: {.fragment fragment-index=3}
+
 ``` {bash }
-snakemake -s ex2.smk -q -n bam/PUR.HG00731.bam
+snakemake -s bwa_mem_wildcard.smk -q rules -n bam/PUR.HG00731.bam
 ```
 
 :::
 
-::: {.fragment}
+::::
 
-Alternatively - and better - add a *pseudo-rule* (typically called
-`all`) at the *top* of the Snakefile, since if no target is provided
-at the command line, Snakemake will use the first rule it encounters.
+:::::
 
-:::
+## Use pseudo-rules for default build targets
 
-## Example 3 - ex3.smk {style="font-size: .7em;"}
+::::: {.columns}
 
-With the previous in mind, the new Snakefile becomes
+:::: {.column width="50%"}
 
-``` {python code=readLines("ex3.smk") }
-#| label: bwa_mem_wildcard_all
+Better solution: use a *pseudo-rule* (typically called `all`) at the
+*top* of the Snakefile, since if no target is provided at the command
+line, Snakemake will use the first rule it encounters.
+
+``` {python code=readLines("bwa_mem.smk"), filename="bwa_mem.smk"}
 #| eval: false
-#| code-line-numbers: "|1-2"
+#| label: bwa_mem_pseudo
 ```
+
+::::
+
+:::: {.column width="50%"}
 
 ::: {.fragment}
 
 Running the default target (implicitly `all`) gives:
 
 ```{bash }
-#| class-output: "scroll-200"
-#| eval: true
-snakemake -s ex3.smk -n -p
+#| echo: false
+rm -f bam/*.bam
+```
+
+```{bash}
+snakemake -s bwa_mem.smk -n
 ```
 
 :::
 
-::: {.fragment}
+::::
 
-Note that since sample `CHS.HG00512` had been processed previously,
-only one job is run.
+:::::
 
-:::
+## Some useful options
 
-## Example 3 - ex3.smk: forcing reruns
+::::: {.columns}
 
-::: {.fragment}
+:::: {.column width="50%"}
+
+<h5>Forcing reruns</h5>
 
 One can force regeneration of a single target with the `--force
-(-f)` option:
+(-f)` option, or all targets with `--forceall/-F`:
 
 ```{bash }
-#| label: snakemake-force-rerun-target
-#| output-location: fragment
-#| class-output: "scroll-200"
-snakemake -s ex3.smk -f -c 1 -p -n bam/CHS.HG00512.bam
+#| eval: false
+snakemake -s bwa_mem.smk -f -c 1 -n bam/CHS.HG00512.bam
 ```
 
-:::
+<div style="height: 1em;"></div>
 
 ::: {.fragment}
 
-To rerun the entire workflow use `--forceall/-F`:
-
-``` {bash }
-#| label: snakemake-force-rerun-all
-#| output-location: fragment
-#| class-output: "scroll-200"
-snakemake -s ex3.smk -F -c 1 -q -n
-```
-
-:::
-
-::: {.fragment}
-
-::: {.callout-tip}
-
-Always first use the `--dry-run` together with `--forceall` so as not
-to inadvertently rerun everything from scratch.
-
-:::
-
-:::
-
-## Example 3 - ex3.smk: other handy options {style="font-size: .7em;"}
-
-##### Rerun-incomplete and keep-going
+<h5>Rerun-incomplete and keep-going</h5>
 
 When resuming a workflow it can be handy to add the
 `--rerun-incomplete (--ri)` and `--keep-going (-k)` options:
@@ -336,797 +393,300 @@ When resuming a workflow it can be handy to add the
 ```{bash }
 #| label: snakemake-rerun-incomplete-workflow
 #| eval: false
-snakemake -s ex3.smk -c 2 --ri -k
+snakemake -s bwa_mem.smk -c 2 --ri -k
 ```
 
 `--rerun-incomplete` takes care of unfinished jobs, e.g. Slurm
 timeouts. If a job fails, `--keep-going` will try to finish as many
 jobs as possible before terminating the workflow.
 
-::: {.fragment}
-
-##### Printing the workflow dag and rulegraph
-
 :::
 
-:::: {.columns}
-
-::: {.column width="30%"}
-
 ::: {.fragment}
 
-`--rulegraph` is a convenient way of getting an overview of the
-workflow
+<h5>Printing the workflow dag and rulegraph</h5>
+
+You can print the workflow DAG with `--rulegraph`, `--dag` or
+`--filegraph` options:
 
 ``` {bash }
 #| eval: false
-snakemake -s ex3.smk --rulegraph | dot | display
+snakemake -s bwa_mem.smk --rulegraph|--dag|--filegraph \
+    | dot | display
 ```
-
-``` {bash }
-#| fig-format: svg
-#| output: asis
-#| echo: false
-snakemake -s ex3.smk --rulegraph | dot -T svg | grep -v "<!DOCTYPE" | grep -v "dtd"
-```
-
-:::
-
-:::
-
-::: {.column width="40%"}
-
-::: {.fragment}
-
-whereas `--dag` prints the entire workflow directed acyclical graph of jobs
-
-``` {bash }
-#| eval: false
-snakemake -s ex3.smk --dag | dot | display
-```
-
-``` {bash }
-#| fig-format: svg
-#| output: asis
-#| echo: false
-snakemake -s ex3.smk --dag | dot -T svg | grep -v "<!DOCTYPE" | grep -v "dtd"
-```
-
-:::
-
-:::
-
-::: {.column width="25%"}
-
-::: {.fragment}
-
-Finally, `--filegraph` is an intermediate of the previous two.
-
-``` {bash }
-#| eval: false
-snakemake -s ex3.smk --filegraph | dot | display
-```
-
-``` {bash }
-#| fig-format: svg
-#| output: asis
-#| echo: false
-snakemake -s ex3.smk --filegraph | dot -T svg | grep -v "<!DOCTYPE" | \
-    grep -v "dtd" | \
-    sed -e "s/width=\"217pt\" height=\"304pt\"/width=\"150pt\" height=\"200pt\"/g"
-```
-
-:::
 
 :::
 
 ::::
 
-## Distribution and reproducibility - ex4.smk {style="font-size: .8em;"}
-
-##### Isolated software environments
-
-Use the `conda` keyword to define an isolated software
-environment
-
-``` {python code=readLines("ex4.smk") }
-#| label: conda-environment
-#| eval: false
-#| code-line-numbers: 11-12
-```
-
-and use option `--use-conda` to automate generation of
-said software environment. First update the
-
-```{bash }
-#| label: conda
-#| cache: true
-#| class-output: scroll-200
-snakemake -F -s ex4.smk -j 2 --use-conda
-```
-
-## Distribution and reproducibility - ex5.smk {style="font-size: .8em;"}
-
-##### Running in containers
-
-Use the `singularity` keyword to define a docker container to use
-
-``` {python code=readLines("ex5.smk") }
-#| label: singularity-keyword
-#| eval: false
-#| code-line-numbers: 13-14
-```
-
-which is activated with the `--use-singularity` option:
-
-```{bash }
-#| label: singularity
-#| eval: true
-#| class-output: scroll-200
-snakemake -F -s ex5.smk -j 2 --use-singularity
-```
-
-## Distribution and reproducibility - ex6.smk {style="font-size: .8em;"}
-
-##### Environment modules
-
-Use the `envmodules` keyword to define environment modules available
-at your local HPC (e.g. UPPMAX)
-
-``` {python code=readLines("ex6.smk") }
-#| label: conda-environment-1
-#| eval: false
-#| code-line-numbers: 15-18
-```
-
-and activate with `--use-envmodules`:
-
-```{bash envmodules }
-#| label: envmodules
-#| eval: false
-snakemake -F -s ex6.smk -j 2 --use-envmodules
-```
-
-More on this later as we discuss UPPMAX and SLURM.
-
-NB: this is most likely **not** portable to other systems.
-
-## Snakemake has many more options
-
-``` {bash}
-#| class-output: scroll-1000
-snakemake -h
-```
-
-# Resources
-
-## About resources {style="font-size: .8em;"}
-
-Rules can define arbitrary resources with the resources keyword.
-However, instead of adding it to the rule, we will see how resources
-can be added via the command line. Revisit the output of a dry run:
+:::: {.column width="50%"}
 
 ::: {.fragment}
 
 ``` {bash }
-#| class-output: scroll-300
-snakemake -s ex6.smk bam/CHS.HG00512.bam -n
+#| fig-format: svg
+#| output: asis
+#| echo: false
+#| html-table-processing: none
+echo '```{=html}'
+snakemake -s bwa_mem.smk --rulegraph 2>/dev/null | dot -T svg | \
+    grep -v "<!DOCTYPE" | grep -v "dtd"
+echo '```'
+```
+
+``` {bash }
+#| fig-format: svg
+#| output: asis
+#| echo: false
+#| html-table-processing: none
+echo '```{=html}'
+snakemake -s bwa_mem.smk --dag 2>/dev/null | dot -T svg | \
+    grep -v "<!DOCTYPE" | grep -v "dtd"
+echo '```'
+```
+
+``` {bash }
+#| fig-format: svg
+#| output: asis
+#| echo: false
+#| html-table-processing: none
+echo '```{=html}'
+snakemake -s bwa_mem.smk --filegraph 2>/dev/null | dot -T svg | \
+    grep -v "<!DOCTYPE" | grep -v "dtd" | \
+    sed -e "s/width=\"217pt\" height=\"304pt\"/width=\"150pt\" height=\"200pt\"/g"
+echo '```'
+```
+
+:::
+
+::::
+
+:::::
+
+## Resources can be specified for rules
+
+Rules can define arbitrary resources with the resources keyword. They
+can be specified in the rule or via the command line. Revisit the
+output of a dry run:
+
+::: {.fragment}
+
+``` {bash}
+snakemake -s bwa_mem.smk bam/CHS.HG00512.bam -n -f --quiet progress
 ```
 
 :::
 
 ::: {.fragment}
 
-Note the `tmpdir` resources in the output. This is one of four
-*standard resources*, the other three being `mem_mb`, `disk_mb`, and
-`runtime`. The resources names are names to the Snakemake scheduler,
-and are used by the scheduler to determine which jobs can be executed
-at the same time. This allows us to fine-tune resource requirements,
-in particularly useful on a HPC cluster.
+Note the `tmpdir` resources in the output. This is one of several
+*standard resources*, which in addition include `mem`, `disk`,
+`runtime` and `gpu`. The resources names are names to the Snakemake
+scheduler, and are used by the scheduler to determine which jobs can
+be executed at the same time. This allows us to fine-tune resource
+requirements, in particularly useful on a HPC cluster.
 
 :::
 
-::: {.fragment}
-
-::: {.callout-important}
-
-Resources are defined per job, not thread. IOW, on UPPMAX you may need
-to adjust `mem_mb` to `threads * 6000` for regular compute nodes and
-so on.
-
-:::
-
-:::
-
-## Default resources
+## Default resources can be given default values
 
 The standard resources can be given default values and be explicitely
 listed (and set with arguments) with the `--default-resources` option:
 
 ```{bash }
-#| label: snakemake-default-resources
-#| class-output: scroll-400
-snakemake -f -n -p -s ex6.smk --default-resources mem_mb=2000
+snakemake -f -n -s bwa_mem.smk bam/CHS.HG00512.bam --default-resources --quiet progress
 ```
 
 ::: {.fragment}
 
-The resources `mem_mb` and `disk_mb` now have been assigned default
+Resources related to `mem` and `disk` now have been assigned default
 values.
 
 :::
-
-<!-- ::: {.fragment} -->
-
-<!-- ::: {.callout-note} -->
-<!-- Jobs can now fail if they exceed the specified resources. -->
-<!-- ::: -->
-
-<!-- ::: -->
 
 ::: {.notes}
 
 Point out that this can cause jobs to fail if they exceed the
 specified resources
 
+mb = megabyte = 1,000,000 bytes or 8,000,000 bits; decimal prefix
+
+mib = mebibyte = 2^20 bytes (1,048,576 bytes or 8,388,608 bits;
+binary prefix, for memory specifications, data transfer rates
+
 :::
 
-## Adding threads and resources to workflow - ex7.smk {style="font-size: .7em;"}
+## Default resources can be given default values
 
-Now that we will be fine-tuning resources and threads per rule we add
-another rule `samtools_merge_bam` that will merge our bam files, the
-keyword `threads` and set resources for one of the rules:
-
-``` {python code=readLines("ex7.smk") }
-#| label: workflow-adding-threads
-#| echo: true
-#| eval: false
-#| code-line-numbers: "|12,24|13,25|1,2|21-23|26,27"
-```
-
-::: {.fragment}
+The standard resources can be given default values and be explicitely
+listed (and set with arguments) with the `--default-resources` option:
 
 ```{bash }
-#| label: ex7-run
-#| echo: true
-#| eval: true
-snakemake -s ex7.smk -n -q -F -c 10
+snakemake -f -n -s bwa_mem.smk bam/CHS.HG00512.bam \
+          --default-resources mem_mb=2000 --quiet progress
 ```
 
-:::
+Resources related to `mem` and `disk` now have been assigned default
+values.
 
-::: {.fragment}
+## Fine-tune resources with rule-specific settings
 
-Note that we changed the final pseudo-target name since the final
-workflow output now is a merged bam file!
-
-:::
-
-<!-- ## Setting resources ## -->
-
-<!-- ##### Resources ##### -->
-
-<!-- ```{bash } -->
-<!-- #| label: setting-resources -->
-<!-- #| echo: true -->
-<!-- #| eval: true -->
-<!-- #| class-output: scroll-200 -->
-<!-- snakemake -s ex7.smk --resources mem_mb=2000 -n -->
-<!-- ``` -->
-<!-- sets resources on rules with defined resources. -->
-
-<!-- ::: {.fragment} -->
-
-<!-- ##### Default resources ##### -->
-
-<!-- ```{bash } -->
-<!-- #| label: setting-default-resources -->
-<!-- #| echo: true -->
-<!-- #| eval: true -->
-<!-- #| class-output: scroll-200 -->
-<!-- snakemake -s ex7.smk --default-resources mem_mb=2000 -n  -->
-<!-- ``` -->
-
-<!-- sets default resources for each job. Note that `samtools_merge_bam` -->
-<!-- resources take precedence. -->
-
-<!-- ::: -->
-
-## Setting rule-specific resources {style="font-size: .8em;"}
-
-Default resources are one-size-fits-all settings that would apply to
-all rules. However, in many workflows, there are certain rules that
-require more specific resource tuning.
-
-Resource tuning can be achieved with the `--set-resources` option.
-Similarly `--set-threads` allows setting rule-specific thread values:
+Default resources apply to all rules, but you can set resources on a
+rule by rule basis. This can be achieved with the `--set-resources`
+option (syntax `RULE_NAME:RESOURCE=VALUE`). Similarly `--set-threads`
+allows setting rule-specific thread values (syntax `RULE_NAME=VALUE`):
 
 ::: {.fragment}
 
 ```{bash }
 #| label:  snakemake-set-resources
-snakemake -F -n -s ex7.smk --default-resources mem_mb=2000 \
-        --set-resources bwa_mem_wildcard:runtime=1000 \
-        bwa_mem_wildcard:mem_mb=6000 --set-threads bwa_mem_wildcard=4 -c 8
+snakemake -F -n -s bwa_mem.smk --default-resources mem_mb=2000 \
+          --set-resources bwa_mem_wildcard:runtime=1000 bwa_mem_wildcard:mem_mb=6000 \
+          --set-threads bwa_mem_wildcard=4 -c 8 --quiet progress
 ```
 
 :::
 
-<!-- ## GPU resources ## -->
+## Use snakemake [profiles][profiles] to configure execution
 
-<!-- Snakemake provides support for GPUs via the Google Life Sciences API -->
+::::: {.columns}
 
-## Putting it all together - on the limits of the command line
+:::: {.column width="50%"}
 
-Putting everything together, we could now have a command line that
-looks something like this:
-
-::: {.fragment}
-
-```{bash }
-#| label: snakemake-long-command-line
-#| eval: false
-snakemake -s ex7.smk -F --ri -k \
-          --use-conda --use-singularity --use-envmodules \
-          --default-resources mem_mb=2000 --set-resources bwa_mem_wildcard:runtime=1000 \
-          bwa_mem_wildcard:mem_mb=6000 samtools_merge_bam:runtime=100 \
-          --set-threads bwa_mem_wildcard=4 -c 8
-```
-
-:::
-
-::: {.fragment}
-
-This is getting illegible and it is tedious to write. What to do?
-
-:::
-
-::: {.fragment}
-
-Snakemake profiles to the rescue!
-
-:::
-
-# Snakemake profiles
-
-## About
-
-Profiles are configuration files that apply to specific compute
+Profiles are YAML configuration files that apply to specific compute
 environments and analyses. They allow setting default options.
 
-::: {.fragment}
-
-At its simplest, a profile is simply a directory with a `config.yaml`
-file that sets program options. Let's put our previous example in a
-directory called `local` to represent a local profile. The minimum
-content of that directory is then a file `config.yaml` with (in this
-case) the following contents:
-
-```{yaml code=readLines("local/config.yaml") }
+```{yaml code=readLines("local/config.yaml"), filename="local/config.yaml" }
 #| label: snakemake-local-profile
 #| eval: false
 ```
 
-:::
+::::
 
-## Running the profile
-
-Run with `--profile` (NB: profile argument can also be absolute or
-relative path):
-
-```{bash }
-#| label: snakemake-local-profile-run
-snakemake -s ex7.smk --profile local -n -p -F -c 8
-```
-
-# Cluster execution
-
-## Working on UPPMAX
-
-Sofar we have looked at local jobs. What if we want to submit jobs at
-a HPC? Here we focus on SLURM.
+:::: {.column width="50%"}
 
 ::: {.fragment}
 
-##### sbatch solution
-
-Wrap workflow in sbatch script (e.g. workflow.sh):
+A profile can be called in different ways, for instance by setting the
+option `--profile` to the name of the directory that holds the profile
+YAML file:
 
 ```{bash }
-#| label: sbatch-script
+#| echo: true
 #| eval: false
-#!/bin/bash -l
-#SBATCH -A account
-#SBATCH -p core
-#SBATCH -c 20
-#... other SBATCH arguments ...
-
-module load snakemake
-snakemake -j 20 --use-conda --use-envmodules all
+snakemake -s bwa_mem.smk --profile local
 ```
 
-and submit with
+:::
+
+::: {.fragment}
+
+which is equivalent to
 
 ```{bash }
-#| label: sbatch-submit
+#| echo: true
 #| eval: false
-sbatch workflow.sh
+snakemake -s bwa_mem.smk \
+          --rerun-incomplete --keep-going \
+          --use-conda --use-singularity \
+          --use-envmodules \
+          --default-resources runtime=100 \
+          --default-resources mem_mb=6000 \
+          --default-resources disk_mb=1000 \
+          --set-threads bwa_mem_wildcard=4 \
+          --set-resources bwa_mem_wildcard:runtime=1000 \
+          --set-resources bwa_mem_wildcard:mem_mb=6000
 ```
-
-:::
-
-::: {.fragment}
-
-Downside: can only make use of one node at a time.
-
-:::
-
-## The Snakemake job scheduler
-
-When running jobs locally using limited number of threads, Snakemake
-needs to decide what job to run when. These decisions are made by an
-internal *job scheduler*. As we will see, the internal scheduler still
-has this role when submitting jobs to a cluster scheduler.
-
-::: {.fragment}
-
-##### Background sessions
-
-A workflow can take a long time to run. A workflow submitted in a
-login shell will terminate once we logout. Therefore, it is advised to
-submit a workflow in a *background session*, using a so-called *terminal
-multiplexer* such as either
-[screen](https://www.gnu.org/software/screen/manual/screen.html) or
-[tmux](https://tmuxguide.readthedocs.io/en/latest/tmux/tmux.html).
-
-A named `tmux` session can be initiated as
-
-```{bash }
-#| label: tmux
-#| eval: false
-tmux new -s mysession
-```
-
-Inside the session, use a prefix (default `Ctrl-b`; many change to
-`Ctrl-a` which is default in `screen`) with key to launch `tmux`
-commands. For instance, `Ctrl-b d` will detach (exit) from the
-session. See the [tmux
-documentation](https://tmuxguide.readthedocs.io/en/latest/tmux/tmux.html)
-for further info.
-
-:::
-
-## Generic execution
-
-The `--cluster` option can be used to submit jobs to the cluster
-scheduler:
-
-```{bash }
-#| label: snakemake-cluster-generic
-#| eval: false
-snakemake --cluster "sbatch -A account -p core -n 20 -t {resources.runtime}" \
-          --use-conda --use-envmodules --ri -k --default-resources runtime=100 -j 100
-```
-
-Note the use of the format string "{resources.runtime}" to set running
-times individually.
-
-One drawback with this approach is that failed jobs or timeouts go
-undetected, which means you have to monitor the outputs regularly. You
-don't want to do that.
-
-::: {.fragment}
-
-##### Custom cluster commands
-
-The argument to `--cluster` is a command (sbatch in example above), so
-could be any wrapper script that submits jobs to a cluster scheduler.
-
-:::
-
-::: {.fragment}
-
-Furthermore, option `--cluster-status` takes as argument a command
-(i.e. custom script) that checks jobs for their status.
-
-:::
-
-::: {.fragment}
-
-Also, option `--jobscript` takes as argument a script that submits
-jobs to the cluster.
-
-:::
-
-::: {.fragment}
-
-We could write custom scripts for each of these options to fine-tune
-job submission. If only there were such scripts already available!
-
-:::
-
-## Snakemake profiles (Snakemake version <8) {style="font-size: .7em;"}
-
-[Snakemake Profiles](https://github.com/Snakemake-Profiles/doc) are
-collections of reusable configuration profiles for various computing
-environments. The [Slurm Snakemake
-profile](https://github.com/Snakemake-Profiles/slurm) provides the
-scripts we requested on the previous slide.
-
-::: {.fragment}
-
-##### Installation
-
-The profiles are [cookiecutter
-templates](https://cookiecutter.readthedocs.io/en/1.7.2/) and can be
-installed as follows:
-
-:::
-
-:::: {.columns}
-
-::: {.column width="50%"}
-
-::: {.fragment}
-
-<!-- markdownlint-disable MD013 -->
-
-```{bash }
-#| label: cookiecutter-profile-install
-#| eval: false
-$ cookiecutter https://github.com/Snakemake-Profiles/slurm.git
-profile_name [slurm]: myprofile
-Select use_singularity:
-1 - False
-2 - True
-Choose from 1, 2 [1]:
-Select use_conda:
-1 - False
-2 - True
-Choose from 1, 2 [1]:
-jobs [500]:
-restart_times [0]:
-max_status_checks_per_second [10]:
-max_jobs_per_second [10]:
-latency_wait [5]:
-Select print_shell_commands:
-1 - False
-2 - True
-Choose from 1, 2 [1]:
-sbatch_defaults []: --account=account
-cluster_sidecar_help [Use cluster sidecar. NB! Requires Snakemake >= 7.0! Enter
-to continue...]:
-Select cluster_sidecar:
-1 - yes
-2 - no
-Choose from 1, 2 [1]:
-cluster_name []:
-cluster_jobname [%r_%w]:
-cluster_logpath [logs/slurm/%r/%j-%w]:
-cluster_config_help [The use of cluster-config is discouraged. Rather, set snakemake CLI options in the profile configuration file (see snakemake documentation
-on best practices). Enter to continue...]:
-cluster_config []:
-```
-
-<!-- markdownlint-enable MD013 -->
-
-:::
-
-:::
-
-::: {.column width="50%"}
-
-::: {.fragment}
-
-###### Profile directory contents
-
-```{bash }
-#| label: slurm-profile-tree
-#| echo: false
-tree myprofile | head -n -2
-```
-
-:::
 
 :::
 
 ::::
 
-## Snakemake Slurm profile {style="font-size: .6em;"}
+:::::
 
-:::: {.columns}
+[profiles]: https://snakemake.readthedocs.io/en/stable/executing/cli.html#profiles
 
-::: {.column width="50%"}
+## Use [Snakemake plugins][plugins]^[Snakemake>=8] for cluster jobs
 
-<!-- markdownlint-disable MD013 -->
+::::: {.columns}
 
-```{python code=readLines("myprofile/settings.json"), filename="myprofile/settings.json" }
-#| label: slurm-settings
-#| eval: false
-#| echo: true
-#| cache: false
-```
+:::: {.column width="50%"}
 
-<!-- markdownlint-enable MD013 -->
+:::{}
 
-```{yaml code=readLines("myprofile/config.yaml"), filename="myprofile/config.yaml" }
-#| label: slurm-config
-#| eval: false
-#| echo: true
-```
+![](https://snakemake.github.io/snakemake-plugin-catalog/_images/snakemake-architecture.svg){width=100%}
 
 :::
 
-::: {.column width="50%"}
+Snakemake plugins enable users to extend the core functionality, e.g.,
+for **execution** or storage.
 
-<!-- markdownlint-disable MD013 -->
-
-```{python code=readLines("myprofile/CookieCutter.py")[4:39], filename="myprofile/CookieCutter.py"}
-#| label: slurm-cookiecutter-class
-#| eval: false
+```{bash}
 #| echo: true
+#| eval: false
+snakemake --executor cluster-generic \
+          --default-resources --jobs 100
 ```
 
-<!-- markdownlint-enable MD013 -->
+::: {.fragment}
+
+For SLURM-based clusters, such as `pelle` at UPPMAX, a setup of common
+resources, including GPU, could look like (excerpt from an actual
+setup):
+
+```{bash}
+#| echo: true
+#| eval: false
+snakemake --profile pelle
+```
 
 :::
 
 ::::
 
-::: {.fragment}
-
-##### Job submission
-
-Submit jobs with
-
-```{bash }
-#| label: slurm-profile-submit
-#| eval: false
-snakemake -s ex7.smk --profile myprofile -j 10 --ri -k -F
-```
-
-:::
-
-## New features - time formatting and sbatch parameters {style="font-size: .8em;"}
-
-Previously could set e.g. `partition` in rule:
-
-```{python }
-#| label: set-partition-in-rule
-#| echo: true
-#| eval: false
-rule bwa_mem:
-    resources:
-        time = "00:10:00",
-        mem = 12000,
-        partition = "devel"
-```
+:::: {.column width="50%"}
 
 ::: {.fragment}
 
-However, in many cases you would like to *constrain* on features
-defined on the HPC with the SLURM `--constraint` option. For example,
-UPPMAX defines the following features:
+```{yaml, filename="pelle/config.yaml"}
+executor: slurm
+keep-going: true
+latency-wait: 5
+local-cores: 1
+max-jobs-per-timespan: 1000/1m
+max-status-checks-per-second: 10
+rerun-incomplete: true
 
-```{bash }
-#| label: uppmax-sinfo-features
-#| echo: true
-#| eval: false
-sinfo -e -o "%P %m %c %.5a %f" | grep "ibsw2,\|ibsw16\|PARTITION" | grep "PARTITION\|node"
-```
-
-```{bash }
-#| label: uppmax-sinfo-features-results
-#| echo: true
-#| eval: false
-PARTITION MEMORY CPUS AVAIL AVAIL_FEATURES
-node 256000 20    up fat,mem256GB,ibsw2,usage_mail
-node 128000 20    up thin,mem128GB,ibsw2,usage_mail
-node 1000000 20    up fat,mem1TB,mem256GB,mem512GB,ibsw16,usage_mail
-node 128000 20    up thin,mem128GB,ibsw16,usage_mail
-```
-
-:::
-
-::: {.fragment}
-
-With the latest version of the Slurm profile, you can do the
-following:
-
-```{python }
-#| label: set-constraint-in-rule
-#| echo: true
-#| eval: false
-rule gpu_stuff:
-    resources:
-        time="12h30m",
-        partition="node",
-        slurm="constraint=fat qos=gpuqos gres=gpu:2 gpus=4"
-```
-
-:::
-
-# Snakemake version 8
-
-## Snakemake version 8 updates
-
-#### Workflow changes
-
-- `dynamic` deprecated $\rightarrow$ `checkpoint` directive
-- `version` deprecated $\rightarrow$ `conda`, `container` integration
-- `subworkflow` removed $\rightarrow$ `module` directive
-
-##### Remote providers
-
-<!-- markdownlint-disable MD013 -->
-
-Remote providers have been removed in favor of [storage
-plugins](https://snakemake.readthedocs.io/en/stable/snakefiles/storage.html#storage-support)
-
-<!-- markdownlint-enable MD013 -->
-
-#### CLI changes
-
-##### Software deployment
-
-`--use-conda`, `--use-singularity` deprecated $\rightarrow$ use
-`--software-deployment-method conda`, `--software-deployment-method
-apptainer`, or `--software-deployment-method conda apptainer` for both
-
-##### Execution backends
-
-<!-- markdownlint-disable MD013 -->
-
-Execution backends have been moved to [execution
-plugins](https://snakemake.github.io/snakemake-plugin-catalog/index.html).
-For instance, the `slurm` plugin would be called as `--executor
-slurm`.
-
-<!-- markdownlint-enable MD013 -->
-
-## Snakemake and Slurm {style="font-size: .8em;"}
-
-#### Setup
-
-```{bash }
-#| label: snakemake-v8-plugin-install
-#| echo: true
-#| eval: false
-pip install snakemake-executor-plugin-cluster-generic
-pip install snakemake-executor-plugin-slurm
-```
-
-#### Configuration
-
-```{yaml }
-#| label: snakemake-executor-plugin-config
-#| echo: true
-#| eval: false
 default-resources:
-    slurm_partition: "<your default partition>"
-    slurm_account:   "<your account>
+  mem_mb: 6000
+  runtime: 240
+  slurm_account: snic_account
+  slurm_partition: pelle
+
+set-threads:
+  beagle_phase: 96
+  relernn_train: 48
 
 set-resources:
-    <rulename>:
-        slurm_partition: "<other partition>" # deviating partition for this rule
-        runtime: 60 # 1 hour
-        slurm_extra: "'--nice=150'"
-        mem_mb_per_cpu: 1800
-        cpus_per_task: 40
+  beagle_phase:
+    slurm_partition: fat
+    runtime: 24h
+    mem_mb: 23000000
+  relernn_train:
+    runtime: 5d
+    mem_mb: 700000
+    slurm_partition: gpu
+    gpu: 1
+    gpu_manufacturer: nvidia
+    gpu_model: l40s
 ```
 
-#### Command
+:::
 
-```{bash }
-#| label: snakemake-executor-slurm-command
-#| echo: true
-#| eval: false
-snakemake --workflow-profile <path> \
-        -j unlimited \ # assuming an unlimited number of jobs
-        --default-resources slurm_account=<account> \
-        slurm_partition=<default partition> \
-        --configfile config/config.yaml \
-        --directory <path> # assuming a data path not relative to the workflow
-```
+::::
+
+:::::
+
+[plugins]: https://snakemake.github.io/snakemake-plugin-catalog/index.html
 
 # Questions?  {.unnumbered .unlisted}

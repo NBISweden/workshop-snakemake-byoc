@@ -531,7 +531,7 @@ Run manually on single files:
 pre-commit run --files filename
 ```
 
-If the results are not to your liking, you can just checkout the old
+If the results are not to your liking, you can just check out the old
 version with `git checkout filename`.
 
 Or run on all staged files with `pre-commit run` (or just

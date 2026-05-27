@@ -1,6 +1,5 @@
 ---
-title: Best practices in detail
-subtitle: An overview of best practices, wrappers, schemas, report, config files, and more
+title: Snakemake best practices
 author: Per Unneberg
 date: "27 May, 2026"
 format:
@@ -319,6 +318,16 @@ snakemake --lint text -s linting2.smk
 #| code-line-numbers: "9-10"
 ```
 
+```{yaml, filename="envs/variant_calling.yaml"}
+#| eval: false
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - gatk=4.6.2.0
+  - samtools
+```
+
 :::
 
 ::::
@@ -492,5 +501,11 @@ rule qc_fastqc:
 ::::
 
 :::::
+
+## pre-commit
+
+## GitHub actions
+
+## Recommendation
 
 # Questions?  {.unnumbered .unlisted}

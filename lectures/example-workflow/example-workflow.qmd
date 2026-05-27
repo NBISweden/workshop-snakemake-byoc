@@ -1,37 +1,17 @@
 ---
 title: An Example Snakemake Workflow
-footer: Snakemake BYOC workshop
 author: Verena Kutschera
 date: "25 May, 2026"
 format:
-    revealjs:
-        theme:
-            - white
-            - ../custom.scss
-        self-contained: false
-        toc: false
-        toc-depth: 1
-        slide-level: 2
-        slide-number: true
-        #preview-links: true
-        #chalkboard: true
-        # Multiple logos not possible; would need to make custom logo combining both logos
-        footer: Snakemake BYOC 2026 - Example Workflow
-        logo: https://nbis.se/nbislogo-green-orange.svg
-        smaller: true
-        highlight-style: gruvbox
-        fig-height: 3
-        fig-width: 3
-        code-line-numbers: false
-        embed-resources: true
+  nbis-quarto-revealjs:
+    footer: "Snakemake BYOC workshop"
+    theme:
+      - default
+      - ../custom.scss
+    embed-resources: true
 execute:
-    echo: true
-    #warning: false
-    #cache: false
-    #include: true
-    #autodep: true
-    eval: false
-    #error: true
+  echo: true
+  eval: false
 ---
 
 ## The GenErode pipeline

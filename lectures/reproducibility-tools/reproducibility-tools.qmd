@@ -7,7 +7,7 @@ format:
     theme:
       - white
       - ../custom.scss
-    self-contained: false
+    embed-resources: true
     toc: false
     toc-depth: 1
     slide-level: 2

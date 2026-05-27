@@ -36,7 +36,7 @@ format:
     embed-resources: true
 ```
 
-- Move into the lecture's folder and run:
+- Move into `lectures` and run:
 
 ```
 quarto render <qmd-file>

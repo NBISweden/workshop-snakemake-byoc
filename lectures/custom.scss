@@ -11,7 +11,7 @@ $code-block-bg: white;
 .reveal div.cell-output-stdout pre,
 .reveal pre code {
     max-height: 500px !important;
-    border: 2px solid #a7c947 !important;
+    border: 2px solid $lime25 !important;
     border-radius: 4px !important;
 }
 

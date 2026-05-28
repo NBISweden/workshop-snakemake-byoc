@@ -1,29 +1,18 @@
 ---
 title: Snakemake 'bring-your-own-code' workshop
-footer: Welcome lecture
 author: Verena Kutschera
 institute: NBIS
 date: "25 May, 2026"
 format:
-    revealjs:
-        theme:
-            - white
-            - ../custom.scss
-        self-contained: false
-        toc: false
-        toc-depth: 1
-        slide-level: 2
-        slide-number: true
-        #preview-links: true
-        #chalkboard: true
-        # Multiple logos not possible; would need to make custom logo combining both logos
-        footer: Snakemake BYOC 2026 - Welcome lecture
-        logo: https://nbis.se/nbislogo-green-orange.svg
-        smaller: true
-        highlight-style: gruvbox
-        fig-height: 3
-        fig-width: 3
-        code-line-numbers: false
+  nbis-quarto-revealjs:
+    footer: "Welcome lecture"
+    theme:
+      - default
+      - ../custom.scss
+    embed-resources: true
+execute:
+  echo: true
+  eval: false
 ---
 
 ## Your teachers

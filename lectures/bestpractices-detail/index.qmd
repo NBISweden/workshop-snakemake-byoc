@@ -1,11 +1,13 @@
 ---
-title: Best practices in detail
-subtitle: An overview of best practices, wrappers, schemas, report, config files, and more
+title: Snakemake best practices
 author: Per Unneberg
 date: "27 May, 2026"
 format:
   nbis-quarto-revealjs:
     footer: "Best practices"
+    theme:
+      - default
+      - ../custom.scss
 ---
 
 ## Setup  {visibility="hidden" .unnumbered .unlisted}
@@ -319,6 +321,16 @@ snakemake --lint text -s linting2.smk
 #| code-line-numbers: "9-10"
 ```
 
+```{yaml, filename="envs/variant_calling.yaml"}
+#| eval: false
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - gatk=4.6.2.0
+  - samtools
+```
+
 :::
 
 ::::
@@ -488,6 +500,180 @@ rule qc_fastqc:
     wrapper:
         "0.78.0/bio/fastqc"
 ```
+
+::::
+
+:::::
+
+## Pre-commit - for the git power user {.smallest}
+
+::::: {.columns}
+
+:::: {.column width="50%"}
+
+[Pre-commit](https://pre-commit.com) is a "framework for managing and
+maintaining multi-language pre-commit hooks".
+
+##### 1. Write a config file
+
+:::{style="height: 1em;"}
+
+:::
+
+##### 2. Run manually
+
+Run manually on single files:
+
+```{bash }
+#| label: pre-commit-run-manual
+#| echo: true
+#| eval: false
+pre-commit run --files filename
+```
+
+If the results are not to your liking, you can just check out the old
+version with `git checkout filename`.
+
+Or run on all staged files with `pre-commit run` (or just
+`pre-commit`).
+
+::: {.fragment}
+
+With [Git hooks](https://git-scm.com/docs/githooks) you can automate
+the process of identifying simple issues before submission to code
+review.
+
+##### 3. Install git hooks
+
+```{bash }
+#| label: pre-commit
+#| eval: false
+pre-commit install
+```
+
+This will run pre-commit everytime you commit code.
+
+:::
+
+::::
+
+:::: {.column width="50%"}
+
+```{python, filename=".pre-commit-config.yaml" }
+#| label: pre-commit-config
+#| eval: false
+#| echo: true
+#| highlight: false
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-yaml
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+  - repo: https://github.com/psf/black
+    rev: 26.5.1
+    hooks:
+      - id: black
+  - repo: https://github.com/snakemake/snakefmt
+    rev: v2.0.0
+    hooks:
+      - id: snakefmt
+  - repo: local
+    hooks:
+      - id: lint
+        name: Snakemake lint
+        entry: snakemake --lint text
+        language: system
+        files: ''
+```
+
+::::
+
+:::::
+
+## Github actions for continuous integration
+
+::::: {.columns}
+
+:::: {.column width="50%"}
+
+[Snakemake github
+action](https://github.com/snakemake/snakemake-github-action) allows
+running the test suite **on GitHub** to make sure commits and pull
+requests don't break the workflow.
+
+#### Activation and configuration
+
+- to activate actions, add a GitHub actions configuration file to the
+  directory `.github/workflows`
+- the `on` directive configures when the actions should be run
+- `jobs` defines `steps` that run (e.g, linting, testing)
+- on GitHub, navigate to `Actions` to view the results of a run
+
+#### Example configuration file
+
+The example configuration defines two separate jobs:
+
+1. `Linting`: lints the workflow with `snakemake --lint`
+2. `Testing`: runs the workflow on test data in `.test` and tests
+   report generation
+
+::::
+
+:::: {.column width="50%"}
+
+<!-- markdownlint-disable MD013 -->
+
+```{python, filename=".github/workflows/main.yaml" }
+#| label: github-actions
+#| eval: false
+#| echo: true
+#| highlight: false
+name: Tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches_ignore: []
+
+jobs:
+  Linting:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v6
+    - name: Lint workflow
+      uses: snakemake/snakemake-github-action@v2
+      with:
+        directory: .
+        snakefile: workflow/Snakefile
+        args: "--lint"
+
+  Testing:
+    runs-on: ubuntu-latest
+    needs: Linting
+    steps:
+    - name: Checkout code (and submodules if necessary)
+      uses: actions/checkout@v6
+      with:
+        submodules: recursive
+    - name: Test workflow (local test data)
+      uses: snakemake/snakemake-github-action@v2
+      with:
+        directory: .test
+        snakefile: workflow/Snakefile
+        args: "--use-conda --show-failed-logs -j 10 --conda-cleanup-pkgs"
+    - name: Test report
+      uses: snakemake/snakemake-github-action@v2
+      with:
+        directory: .test
+        snakefile: workflow/Snakefile
+        args: "--report report.zip"
+```
+
+<!-- markdownlint-enable MD013 -->
 
 ::::
 
